@@ -1,9 +1,5 @@
 lexer grammar LexerRules;
 
-TYPE : UCASE (LETTER|DIGIT|UNDERSCORE)*;
-ID : LCASE (LETTER|DIGIT|UNDERSCORE)*;
-
-
 INT : I N T;
 BOOL : B O O L;
 VOID : V O I D;
@@ -20,9 +16,13 @@ XOR : X O R;
 NOT : N O T;
 RETURN : R E T U R N;
 BREAK : B R E A K;
+DEF : D E F;
 
 UNDERSCORE : '_';
 DOT : '.';
+COMMA : ',';
+SEMI : ';';
+EXCLAMATION : '!';
 LBRACE : '(';
 RBRACE : ')';
 LCURL : '{';
@@ -44,11 +44,20 @@ EQ : '=';
 ARROW : MINUS GT;
 GE : EQ GT;
 LE : EQ LT;
+NE : EXCLAMATION EQ;
+
+
+TYPE : UCASE (LETTER|DIGIT|UNDERSCORE)*;
+ID : LCASE (LETTER|DIGIT|UNDERSCORE)*;
+NUMBER : NONZERO DIGIT* | ZERO;
+
 
 fragment LCASE: [a-z];
 fragment UCASE: [A-Z];
 fragment LETTER: LCASE | UCASE;
-fragment DIGIT: [0-9];
+fragment ZERO : '0';
+fragment NONZERO : [1-9];
+fragment DIGIT : ZERO | NONZERO;
 
 fragment A: [aA];
 fragment B: [bB];
@@ -77,4 +86,4 @@ fragment X: [xX];
 fragment Y: [yY];
 fragment Z: [zZ];
 
-WS : [ \t\r\n] -> skip;
+WS :  [ \r\n\t] -> skip;
