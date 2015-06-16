@@ -22,8 +22,34 @@ public enum Type {
 	/**
 	 * The <code>void</code> pseudo-type.
 	 */
-	VOID;
+	VOID,
+	/**
+	 * Type used when an acutal type can not be derived.
+	 */
+	ERR_TYPE("<err>");
 
+	private String name;
+
+	private Type() {
+		this.name = this.name().toLowerCase();
+	}
+
+	private Type(String name) {
+		this.name = name;
+	}
+
+	public static Type forName(String name) {
+		for (Type t : values())
+			if (t.name.equalsIgnoreCase(name))
+				return t;
+		throw new IllegalArgumentException("Type '" + name
+				+ "' does not exist!");
+	}
+
+	public String toString() {
+		return name;
+	}
+	
 	/**
 	 * The definition of a function.
 	 * 
@@ -100,18 +126,24 @@ public enum Type {
 
 		/**
 		 * Getter for the argument list.
+		 * 
 		 * @return The arguments.
 		 */
-		List<Type> getArgs() {
+		public List<Type> getArgs() {
 			return args;
 		}
 
 		/**
 		 * Getter for the return type.
+		 * 
 		 * @return The return type.
 		 */
-		Type getRet() {
+		public Type getReturnType() {
 			return ret;
+		}
+		
+		public String getName() {
+			return name;
 		}
 	}
 }

@@ -113,6 +113,18 @@ public class BaseGrammarBaseListener implements BaseGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterProgram(@NotNull BaseGrammarParser.ProgramContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitProgram(@NotNull BaseGrammarParser.ProgramContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterType(@NotNull BaseGrammarParser.TypeContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -149,6 +161,18 @@ public class BaseGrammarBaseListener implements BaseGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterReturnStat(@NotNull BaseGrammarParser.ReturnStatContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitReturnStat(@NotNull BaseGrammarParser.ReturnStatContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterBlock(@NotNull BaseGrammarParser.BlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -168,6 +192,18 @@ public class BaseGrammarBaseListener implements BaseGrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDivExpr(@NotNull BaseGrammarParser.DivExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCallExpr(@NotNull BaseGrammarParser.CallExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCallExpr(@NotNull BaseGrammarParser.CallExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -245,18 +281,6 @@ public class BaseGrammarBaseListener implements BaseGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFuncExpr(@NotNull BaseGrammarParser.FuncExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitFuncExpr(@NotNull BaseGrammarParser.FuncExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterBoolOpExpr(@NotNull BaseGrammarParser.BoolOpExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -264,6 +288,18 @@ public class BaseGrammarBaseListener implements BaseGrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitBoolOpExpr(@NotNull BaseGrammarParser.BoolOpExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCallStat(@NotNull BaseGrammarParser.CallStatContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCallStat(@NotNull BaseGrammarParser.CallStatContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -348,18 +384,6 @@ public class BaseGrammarBaseListener implements BaseGrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitFunc(@NotNull BaseGrammarParser.FuncContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterFuncStat(@NotNull BaseGrammarParser.FuncStatContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitFuncStat(@NotNull BaseGrammarParser.FuncStatContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -2,6 +2,8 @@ grammar BaseGrammar;
 
 import LexerRules;
 
+program : decl* func (decl|func)*;
+
 block : LCURL stat* RCURL;
 
 func : DEF type ID typedparams block;
@@ -20,7 +22,7 @@ expr
 	| expr boolOp expr		# boolOpExpr
 	| expr comp expr 		# compExpr
 	| LBRACE expr RBRACE	# parExpr
-	| call					# funcExpr
+	| call					# callExpr
 	| ID					# idExpr
 	| NUMBER				# numExpr
 	| TRUE					# trueExpr
@@ -29,12 +31,13 @@ expr
 
 stat
 	: decl SEMI													# declStat
-	| assign SEMI											# assignStat
+	| assign SEMI												# assignStat
 	| IF expr block (ELSE IF expr block)* (ELSE block)?			# ifStat
 	| WHILE expr block											# whileStat
-	| call														# funcStat
+	| call														# callStat
 	| block														# blockStat
-	| FOR LBRACE decl SEMI expr SEMI assign	RBRACE block		# forStat						
+	| FOR LBRACE decl SEMI expr SEMI assign	RBRACE block		# forStat
+	| RETURN expr												# returnStat						
 	;
 
 decl : type ID EQ expr;
