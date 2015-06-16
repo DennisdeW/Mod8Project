@@ -37,7 +37,7 @@ stat
 	| call														# callStat
 	| block														# blockStat
 	| FOR LBRACE decl SEMI expr SEMI assign	RBRACE block		# forStat
-	| RETURN expr												# returnStat						
+	| RETURN expr? SEMI											# returnStat						
 	;
 
 decl : type ID EQ expr;
