@@ -1,0 +1,41 @@
+def int main() {
+	int i = 0;
+	int j = 2;
+	return i * j;
+}
+
+def int main2() {
+	int i = 1;
+	int j = 4;
+	return i * j;
+}
+
+def int main3() {
+	int i = 1;
+	int j = 4;
+	int z = i * j;
+	return z;
+}
+
+def int main4() {
+	int i = 0;
+	int j = 2;
+	int z = i * j;
+	return z;
+}
+
+def int main5() {
+	int i = main1();
+	int j = main2();
+	int k = main3();
+	int l = main4();
+	int z = i * j * k * l;
+}
+
+def int main9() {
+	return main10(5);
+}
+
+def int main10(int i) {
+	return i;
+}
