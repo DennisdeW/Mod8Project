@@ -96,11 +96,14 @@ public enum Type {
 			this.args = Arrays.asList(args);
 		}
 
+		
+
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + ((args == null) ? 0 : args.hashCode());
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
 			result = prime * result + ((ret == null) ? 0 : ret.hashCode());
 			return result;
 		}
@@ -119,9 +122,20 @@ public enum Type {
 					return false;
 			} else if (!args.equals(other.args))
 				return false;
+			if (name == null) {
+				if (other.name != null)
+					return false;
+			} else if (!name.equals(other.name))
+				return false;
 			if (ret != other.ret)
 				return false;
 			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "Func [name=" + name + ", args=" + args + ", ret=" + ret
+					+ "]";
 		}
 
 		/**

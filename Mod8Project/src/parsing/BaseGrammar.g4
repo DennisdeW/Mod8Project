@@ -9,7 +9,7 @@ block : LCURL stat* RCURL;
 func : DEF type ID typedparams block;
 
 typedparams : LBRACE (type ID (COMMA type ID)*)? RBRACE;
-params : LBRACE (ID (COMMA ID)*)? RBRACE;
+params : LBRACE (val (COMMA val)*)? RBRACE;
 call : ID params;
 
 expr
@@ -34,7 +34,7 @@ stat
 	| assign SEMI												# assignStat
 	| IF expr block (ELSE IF expr block)* (ELSE block)?			# ifStat
 	| WHILE expr block											# whileStat
-	| call														# callStat
+	| call SEMI													# callStat
 	| block														# blockStat
 	| FOR LBRACE decl SEMI expr SEMI assign	RBRACE block		# forStat
 	| RETURN expr? SEMI											# returnStat						
@@ -43,8 +43,8 @@ stat
 decl : type ID EQ expr;
 assign : ID EQ expr;
 
-type : INT | BOOL | TYPE;
+type : INT | BOOL | VOID | TYPE;
 val : NUMBER | ID | TRUE | FALSE;
-comp : LT | GT | EQ | LE | GE | NE;
+comp : LT | GT | EQ EQ | LE | GE | NE;
 boolOp : AND | OR | XOR;
 prefix : MINUS | NOT;

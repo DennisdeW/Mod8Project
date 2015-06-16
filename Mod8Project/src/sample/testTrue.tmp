@@ -64,7 +64,7 @@ def void loops() {
 				i = i - 1;
 			}
 		} else if (i == 0) {
-			i = i - 1
+			i = i - 1;
 		} else {
 			b = false;
 		}

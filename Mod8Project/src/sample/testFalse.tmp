@@ -19,11 +19,6 @@ def void main3() {
 	return main5(true);
 }
 
-def void if() {
-	int return = 5;
-	bool false = false;
-}
-
 def void loops() {
 	int i = 3;
 	bool b = true;

@@ -2,12 +2,21 @@ package parsing;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.antlr.v4.runtime.ANTLRErrorListener;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.atn.ATNConfigSet;
+import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -15,7 +24,8 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import parsing.Type.Func;
 import parsing.BaseGrammarParser.*;
 
-public class Checker extends BaseGrammarBaseVisitor<Void> {
+public class Checker extends BaseGrammarBaseVisitor<Void> implements
+		ANTLRErrorListener {
 
 	private static final List<String> INVALID_NAMES = Arrays.asList("int",
 			"bool", "void", "if", "else", "while", "for", "return", "and",
@@ -26,6 +36,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> {
 	private Map<FuncContext, Func> functions;
 	private ParseTreeProperty<Type> types;
 	private Func currentFunc;
+	private boolean dirty;
 
 	public Checker() {
 		scope = new Scope();
@@ -33,6 +44,28 @@ public class Checker extends BaseGrammarBaseVisitor<Void> {
 		functions = new HashMap<>();
 		types = new ParseTreeProperty<>();
 		currentFunc = null;
+	}
+
+	public void check(ANTLRInputStream stream) {
+		dirty = false;
+		BaseGrammarLexer lexer = new BaseGrammarLexer(stream);
+		lexer.addErrorListener(this);
+		BaseGrammarParser parser = new BaseGrammarParser(new CommonTokenStream(
+				lexer));
+		parser.addErrorListener(this);
+		ProgramContext prog = parser.program();
+		if (dirty) {
+			throw new RuntimeException("ANTLR Reported errors, see console.");
+		}
+		visit(prog);
+	}
+
+	public boolean hasErrors() {
+		return errors.size() != 0;
+	}
+
+	public List<String> getErrors() {
+		return new ArrayList<>(errors);
 	}
 
 	public Void visitProgram(ProgramContext ctx) {
@@ -59,8 +92,23 @@ public class Checker extends BaseGrammarBaseVisitor<Void> {
 		List<Type> argTypes = ctx.typedparams().type().stream()
 				.map(t -> typeForName(ctx, t.getText()))
 				.collect(Collectors.toList());
+		visit(ctx.typedparams());
 		Func func = new Func(name, retType, argTypes);
 		scope.declare(func);
+		functions.put(ctx, func);
+		return null;
+	}
+
+	public Void visitTypedparams(TypedparamsContext ctx) {
+		for (int i = 0; i < ctx.type().size(); i++) {
+			String name = ctx.ID(i).getText();
+			Type type = typeForName(ctx, ctx.type(i).getText());
+			if (scope.isDeclaredLocally(name)) {
+				error(ctx, "Duplicate parameter '%s'.", name);
+			} else {
+				scope.declare(name, type);
+			}
+		}
 		return null;
 	}
 
@@ -75,7 +123,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> {
 		String varId = ctx.ID().getText();
 		if (!checkName(ctx, varId))
 			return null;
-		
+
 		Type type = typeForName(ctx, ctx.type().getText());
 		if (scope.isDeclaredLocally(varId)) {
 			error(ctx, "Duplicate declaration of variable '%s'", varId);
@@ -101,7 +149,10 @@ public class Checker extends BaseGrammarBaseVisitor<Void> {
 		if (ctx.expr() != null) {
 			visit(ctx.expr());
 			Type exprType = getType(ctx.expr());
-			if (exprType != expected) {
+			if (exprType == Type.ERR_TYPE)
+				error(ctx,
+						"<Unable to check function return type because the expression cannot be evaluated>");
+			else if (exprType != expected) {
 				error(ctx,
 						"Return expression is of type '%s', but function '%s' should return '%s'.",
 						exprType, currentFunc.getName(), expected);
@@ -138,7 +189,8 @@ public class Checker extends BaseGrammarBaseVisitor<Void> {
 	}
 
 	public Void visitForStat(ForStatContext ctx) {
-		if (!checkType(ctx, Type.INT, ctx.decl().type().getText())) {
+		if (!checkType(ctx, Type.INT,
+				typeForName(ctx, ctx.decl().type().getText()))) {
 			return null;
 		}
 		visit(ctx.decl());
@@ -216,7 +268,8 @@ public class Checker extends BaseGrammarBaseVisitor<Void> {
 
 	public Void visitCallExpr(CallExprContext ctx) {
 		Func function = call(ctx.call(), null);
-		types.put(ctx, function.getReturnType());
+		types.put(ctx, function != null ? function.getReturnType()
+				: Type.ERR_TYPE);
 		return null;
 	}
 
@@ -240,9 +293,22 @@ public class Checker extends BaseGrammarBaseVisitor<Void> {
 		return null;
 	}
 
+	public Void visitVal(ValContext ctx) {
+		if (ctx.TRUE() != null || ctx.FALSE() != null)
+			types.put(ctx, Type.BOOL);
+		else if (ctx.NUMBER() != null)
+			types.put(ctx, Type.INT);
+		else
+			types.put(ctx, getType(ctx, ctx.ID().getText()));
+		return null;
+	}
+
 	private Func call(CallContext ctx, Type expectedReturn) {
-		List<Type> args = ctx.params().ID().stream()
-				.map(t -> getType(t, t.getText())).collect(Collectors.toList());
+		List<Type> args = new ArrayList<>();
+		ctx.params().val().stream().forEachOrdered(val -> {
+			visit(val);
+			args.add(getType(val));
+		});
 		if (args.stream().anyMatch(type -> type == Type.ERR_TYPE))
 			return null;
 		Func func;
@@ -261,7 +327,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> {
 				if (scope.isDeclared(func)) {
 					if (res != null) {
 						error(ctx,
-								"Ambiguous function call: both '%s' and '%'s match.",
+								"Ambiguous function call: both '%s' and '%s' match.",
 								func, res);
 						return null;
 					}
@@ -352,5 +418,33 @@ public class Checker extends BaseGrammarBaseVisitor<Void> {
 		}
 		res += " - " + String.format(format, args);
 		errors.add(res);
+	}
+
+	@Override
+	public void reportAmbiguity(Parser arg0, DFA arg1, int arg2, int arg3,
+			boolean arg4, BitSet arg5, ATNConfigSet arg6) {
+		dirty = true;
+
+	}
+
+	@Override
+	public void reportAttemptingFullContext(Parser arg0, DFA arg1, int arg2,
+			int arg3, BitSet arg4, ATNConfigSet arg5) {
+		dirty = true;
+
+	}
+
+	@Override
+	public void reportContextSensitivity(Parser arg0, DFA arg1, int arg2,
+			int arg3, int arg4, ATNConfigSet arg5) {
+		dirty = true;
+
+	}
+
+	@Override
+	public void syntaxError(Recognizer<?, ?> arg0, Object arg1, int arg2,
+			int arg3, String arg4, RecognitionException arg5) {
+		dirty = true;
+
 	}
 }
