@@ -52,7 +52,7 @@ public class CheckerTest {
 	@Test
 	public void testCorrect() {
 		try {
-			checker.check(new ANTLRInputStream(testCorrect));
+			System.out.println(checker.check(new ANTLRInputStream(testCorrect)));
 			if (checker.hasErrors()) {
 				System.out.println(checker.getErrors().stream().collect(Collectors.joining("\n")));
 				fail();

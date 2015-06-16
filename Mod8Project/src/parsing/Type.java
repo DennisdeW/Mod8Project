@@ -22,20 +22,33 @@ public enum Type {
 	/**
 	 * The <code>void</code> pseudo-type.
 	 */
-	VOID,
+	VOID(0),
 	/**
 	 * Type used when an acutal type can not be derived.
 	 */
-	ERR_TYPE("<err>");
+	ERR_TYPE("<err>", 0);
 
 	private String name;
+	private int size;
 
 	private Type() {
 		this.name = this.name().toLowerCase();
+		this.size = 4;
 	}
 
 	private Type(String name) {
 		this.name = name;
+		this.size = 4;
+	}
+	
+	private Type(int size) {
+		this.name = this.name().toLowerCase();
+		this.size = size;
+	}
+	
+	private Type(String name, int size) {
+		this.name = name;
+		this.size = size;
 	}
 
 	public static Type forName(String name) {
@@ -44,6 +57,10 @@ public enum Type {
 				return t;
 		throw new IllegalArgumentException("Type '" + name
 				+ "' does not exist!");
+	}
+	
+	public int getSize() {
+		return size;
 	}
 
 	public String toString() {

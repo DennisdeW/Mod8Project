@@ -15,8 +15,8 @@ import parsing.Type.Func;
  */
 public class Scope {
 
-	private Set<Func> functions;
-	private Level current;
+	private Set<Func>	functions;
+	private Level		current;
 
 	/**
 	 * Construct a new, empty scope
@@ -139,6 +139,19 @@ public class Scope {
 	}
 
 	/**
+	 * Gets the offset of the variable with the given name.
+	 * 
+	 * @param id
+	 *            The name of the variable to get the type of.
+	 * @return The offset of the variable.
+	 * @throws IllegalArgumentException
+	 *             If no variable with this name has been declared.
+	 */
+	public int getOffset(String id) {
+		return current.getOffset(id);
+	}
+	
+	/**
 	 * Gets all declared functions.
 	 * 
 	 * @return The set of declared functions.
@@ -163,12 +176,18 @@ public class Scope {
 	 *
 	 */
 	private class Level {
-		private Map<String, Type> vars;
-		private Level enclosing;
+		private Map<String, Type>		vars;
+		private Map<String, Integer>	offsets;
+		private final int				baseOffset;
+		private final Level				enclosing;
+		private int nextOffset;
 
 		Level(Level enclosing) {
-			vars = new HashMap<>();
+			this.vars = new HashMap<>();
+			this.offsets = new HashMap<>();
 			this.enclosing = enclosing;
+			this.baseOffset = enclosing == null ? 0 : enclosing.getOffset();
+			this.nextOffset = this.baseOffset;
 		}
 
 		Level() {
@@ -185,6 +204,11 @@ public class Scope {
 			return enclosing;
 		}
 
+		private int getOffset() {
+			return baseOffset
+					+ vars.values().stream().mapToInt(t -> t.getSize()).sum();
+		}
+
 		boolean isGlobal() {
 			return enclosing == null;
 		}
@@ -193,6 +217,8 @@ public class Scope {
 			if (isDeclaredLocally(id))
 				return false;
 			this.vars.put(id, type);
+			this.offsets.put(id, nextOffset);
+			nextOffset += type.getSize();
 			return true;
 		}
 
@@ -214,6 +240,16 @@ public class Scope {
 				return vars.get(id);
 			else if (!isGlobal())
 				return enclosing.getType(id);
+			else
+				throw new IllegalArgumentException("Var '" + id
+						+ "' was not declared.");
+		}
+		
+		int getOffset(String id) {
+			if (isDeclaredLocally(id))
+				return offsets.get(id);
+			else if (!isGlobal())
+				return enclosing.getOffset(id);
 			else
 				throw new IllegalArgumentException("Var '" + id
 						+ "' was not declared.");

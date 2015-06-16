@@ -21,32 +21,39 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import parsing.BaseGrammarParser.FuncContext;
 import parsing.Type.Func;
 import parsing.BaseGrammarParser.*;
 
 public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		ANTLRErrorListener {
 
-	private static final List<String> INVALID_NAMES = Arrays.asList("int",
-			"bool", "void", "if", "else", "while", "for", "return", "and",
-			"or", "xor", "true", "false", "def", "break", "not", "string");
+	private static final List<String>	INVALID_NAMES	= Arrays.asList("int",
+																"bool", "void",
+																"if", "else",
+																"while", "for",
+																"return",
+																"and", "or",
+																"xor", "true",
+																"false", "def",
+																"break", "not",
+																"string");
 
-	private Scope scope;
-	private List<String> errors;
-	private Map<FuncContext, Func> functions;
-	private ParseTreeProperty<Type> types;
-	private Func currentFunc;
-	private boolean dirty;
+	private Scope						scope;
+	private List<String>				errors;
+	private Map<FuncContext, Func>		functions;
+	private ParseTreeProperty<Type>		types;
+	private Func						currentFunc;
+	private CheckResult					result;
+	private boolean						dirty;
 
-	public Checker() {
+	public CheckResult check(ANTLRInputStream stream) {
 		scope = new Scope();
 		errors = new ArrayList<>();
 		functions = new HashMap<>();
 		types = new ParseTreeProperty<>();
+		result = new CheckResult();
 		currentFunc = null;
-	}
-
-	public void check(ANTLRInputStream stream) {
 		dirty = false;
 		BaseGrammarLexer lexer = new BaseGrammarLexer(stream);
 		lexer.addErrorListener(this);
@@ -58,6 +65,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			throw new RuntimeException("ANTLR Reported errors, see console.");
 		}
 		visit(prog);
+		return result;
 	}
 
 	public boolean hasErrors() {
@@ -96,6 +104,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		Func func = new Func(name, retType, argTypes);
 		scope.declare(func);
 		functions.put(ctx, func);
+		result.getTypes().put(ctx, retType);
 		return null;
 	}
 
@@ -107,6 +116,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 				error(ctx, "Duplicate parameter '%s'.", name);
 			} else {
 				scope.declare(name, type);
+				//Will be placed on stack
 			}
 		}
 		return null;
@@ -130,6 +140,8 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			return null;
 		}
 		scope.declare(varId, type);
+		result.getTypes().put(ctx, type);
+		result.getOffsets().put(ctx, scope.getOffset(varId));
 		return null;
 	}
 
@@ -372,10 +384,6 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return true;
 	}
 
-	private boolean checkType(ParseTree tree, Type expected, String varId) {
-		return checkType(tree, expected, scope.getType(varId));
-	}
-
 	private boolean checkType(ParseTree tree, Type expected,
 			ParserRuleContext ctx) {
 		return checkType(tree, expected, getType(ctx));
@@ -445,6 +453,112 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	public void syntaxError(Recognizer<?, ?> arg0, Object arg1, int arg2,
 			int arg3, String arg4, RecognitionException arg5) {
 		dirty = true;
+	}
 
+	static class CheckResult {
+		private ParseTreeProperty<Type>		types;
+		private ParseTreeProperty<Integer>	offsets;
+		private Map<FuncContext, Integer>		funcAddrs;
+		private List<String>			errors;
+		
+		CheckResult(ParseTreeProperty<Type> types,
+				ParseTreeProperty<Integer> offsets,
+				Map<FuncContext, Integer> funcAddrs, List<String> errors) {
+			this.types = types;
+			this.offsets = offsets;
+			this.funcAddrs = funcAddrs;
+			this.errors = errors;
+		}
+
+		CheckResult() {
+			this.types = new ParseTreeProperty<>();
+			this.offsets = new ParseTreeProperty<>();
+			this.funcAddrs = new HashMap<>();
+			this.errors = new ArrayList<>();
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((errors == null) ? 0 : errors.hashCode());
+			result = prime * result
+					+ ((funcAddrs == null) ? 0 : funcAddrs.hashCode());
+			result = prime * result
+					+ ((offsets == null) ? 0 : offsets.hashCode());
+			result = prime * result + ((types == null) ? 0 : types.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			CheckResult other = (CheckResult) obj;
+			if (errors == null) {
+				if (other.errors != null)
+					return false;
+			} else if (!errors.equals(other.errors))
+				return false;
+			if (funcAddrs == null) {
+				if (other.funcAddrs != null)
+					return false;
+			} else if (!funcAddrs.equals(other.funcAddrs))
+				return false;
+			if (offsets == null) {
+				if (other.offsets != null)
+					return false;
+			} else if (!offsets.equals(other.offsets))
+				return false;
+			if (types == null) {
+				if (other.types != null)
+					return false;
+			} else if (!types.equals(other.types))
+				return false;
+			return true;
+		}
+		
+		ParseTreeProperty<Type> getTypes() {
+			return types;
+		}
+
+		void setTypes(ParseTreeProperty<Type> types) {
+			this.types = types;
+		}
+
+		ParseTreeProperty<Integer> getOffsets() {
+			return offsets;
+		}
+
+		void setOffsets(ParseTreeProperty<Integer> offsets) {
+			this.offsets = offsets;
+		}
+
+		Map<FuncContext, Integer> getFuncAddrs() {
+			return funcAddrs;
+		}
+
+		void setFuncAddrs(Map<FuncContext, Integer> funcAddrs) {
+			this.funcAddrs = funcAddrs;
+		}
+
+		List<String> getErrors() {
+			return errors;
+		}
+
+		void setErrors(List<String> errors) {
+			this.errors = errors;
+		}
+
+		@Override
+		public String toString() {
+			return "CheckResult [types=" + types + ", offsets=" + offsets
+					+ ", funcAddrs=" + funcAddrs + ", errors=" + errors + "]";
+		}
 	}
 }
