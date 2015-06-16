@@ -73,6 +73,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> {
 
 	public Void visitDecl(DeclContext ctx) {
 		String varId = ctx.ID().getText();
+		if (!checkName(ctx, varId))
+			return null;
+		
 		Type type = typeForName(ctx, ctx.type().getText());
 		if (scope.isDeclaredLocally(varId)) {
 			error(ctx, "Duplicate declaration of variable '%s'", varId);
@@ -94,19 +97,54 @@ public class Checker extends BaseGrammarBaseVisitor<Void> {
 	}
 
 	public Void visitReturnStat(ReturnStatContext ctx) {
-		visit(ctx.expr());
-		Type exprType = getType(ctx.expr());
 		Type expected = currentFunc.getReturnType();
-		if (exprType != expected) {
-			error(ctx,
-					"Return expression is of type '%s', but function '%s' should return '%s'.",
-					exprType, currentFunc.getName(), expected);
+		if (ctx.expr() != null) {
+			visit(ctx.expr());
+			Type exprType = getType(ctx.expr());
+			if (exprType != expected) {
+				error(ctx,
+						"Return expression is of type '%s', but function '%s' should return '%s'.",
+						exprType, currentFunc.getName(), expected);
+			}
+		} else {
+			if (expected != Type.VOID) {
+				error(ctx,
+						"Returning void in function '%s' with non-void return type '%s'.",
+						currentFunc.getName(), expected);
+			}
 		}
 		return null;
 	}
-	
+
 	public Void visitCallStat(CallStatContext ctx) {
 		call(ctx.call(), null);
+		return null;
+	}
+
+	public Void visitIfStat(IfStatContext ctx) {
+		for (int i = 0; i < ctx.expr().size(); i++) {
+			visit(ctx.expr(i));
+			checkType(ctx, Type.BOOL, getType(ctx.expr(i)));
+		}
+		ctx.block().forEach(block -> visit(block));
+		return null;
+	}
+
+	public Void visitWhileStat(WhileStatContext ctx) {
+		visit(ctx.expr());
+		checkType(ctx, Type.BOOL, getType(ctx.expr()));
+		visit(ctx.block());
+		return null;
+	}
+
+	public Void visitForStat(ForStatContext ctx) {
+		if (!checkType(ctx, Type.INT, ctx.decl().type().getText())) {
+			return null;
+		}
+		visit(ctx.decl());
+		visit(ctx.expr());
+		visit(ctx.assign());
+		visit(ctx.block());
 		return null;
 	}
 
@@ -181,8 +219,24 @@ public class Checker extends BaseGrammarBaseVisitor<Void> {
 		types.put(ctx, function.getReturnType());
 		return null;
 	}
-	
+
 	public Void visitIdExpr(IdExprContext ctx) {
+		types.put(ctx, getType(ctx, ctx.ID().getText()));
+		return null;
+	}
+
+	public Void visitNumExpr(NumExprContext ctx) {
+		types.put(ctx, Type.INT);
+		return null;
+	}
+
+	public Void visitTrueExpr(TrueExprContext ctx) {
+		types.put(ctx, Type.BOOL);
+		return null;
+	}
+
+	public Void visitFalseExpr(FalseExprContext ctx) {
+		types.put(ctx, Type.BOOL);
 		return null;
 	}
 
@@ -206,7 +260,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> {
 				func = new Func(ctx.ID().getText(), type, args);
 				if (scope.isDeclared(func)) {
 					if (res != null) {
-						error(ctx, "Ambiguous function call: both '%s' and '%'s match.", func, res);
+						error(ctx,
+								"Ambiguous function call: both '%s' and '%'s match.",
+								func, res);
 						return null;
 					}
 					res = func;
