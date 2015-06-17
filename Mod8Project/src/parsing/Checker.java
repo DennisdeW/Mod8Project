@@ -455,7 +455,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		dirty = true;
 	}
 
-	static class CheckResult {
+	public static class CheckResult {
 		private ParseTreeProperty<Type>		types;
 		private ParseTreeProperty<Integer>	offsets;
 		private Map<FuncContext, Integer>		funcAddrs;

@@ -9,17 +9,13 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import parsing.BaseGrammarLexer;
-import parsing.BaseGrammarParser;
-import parsing.BaseGrammarParser.ProgramContext;
 import parsing.Checker;
+import parsing.Checker.CheckResult;
 
 public class CheckerTest {
 	private FileInputStream testCorrect;
@@ -52,7 +48,8 @@ public class CheckerTest {
 	@Test
 	public void testCorrect() {
 		try {
-			System.out.println(checker.check(new ANTLRInputStream(testCorrect)));
+			
+			CheckResult res = (checker.check(new ANTLRInputStream(testCorrect)));
 			if (checker.hasErrors()) {
 				System.out.println(checker.getErrors().stream().collect(Collectors.joining("\n")));
 				fail();

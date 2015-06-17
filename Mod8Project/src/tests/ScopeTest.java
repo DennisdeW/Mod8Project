@@ -20,6 +20,8 @@ public class ScopeTest {
 		assertTrue(scope.isDeclaredLocally("b"));
 		assertTrue(scope.isDeclared("a", Type.INT));
 		assertFalse(scope.isDeclared("b", Type.VOID));
+		assertEquals(0, scope.getOffset("a"));
+		assertEquals(4, scope.getOffset("b"));
 		assertEquals(Type.INT, scope.getType("a"));
 	}
 	
@@ -34,7 +36,9 @@ public class ScopeTest {
 		scope.declare("a", Type.BOOL);
 		assertTrue(scope.isDeclaredLocally("a"));
 		assertEquals(Type.BOOL, scope.getType("a"));
+		assertEquals(4, scope.getOffset("a"));
 		scope.closeScope();
+		assertEquals(0, scope.getOffset("a"));
 		assertEquals(Type.INT, scope.getType("a"));
 		scope.closeScope();
 		assertTrue(scope.isDeclaredLocally("a"));

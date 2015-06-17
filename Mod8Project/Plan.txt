@@ -1,0 +1,106 @@
+AR Format:
+
+0: Heap Offset
+4: Return Address
+8..28: Arguments
+28..48: Register Save Area (5 regs)
+_________________________
+
+Store bool as int: 0 = false, -1 = true
+
+NegNum:
+	Compute Sub Zero RegX RegX
+NegBool:
+	Push RegY
+	Const -1 RegY
+	Compute Xor RegY RegX RegX 			(0 XOR -1 = -1, -1 XOR -1 = 0)
+	Pop RegY
+(Mult/Div/Plus/Min/Comp/BinOp)Expr:
+	Compute <op> RegX RegY RegZ
+NumExpr:
+	Const <num> RegX
+True/FalseExpr:
+	Const -1/0 RegX
+
+Decl:
+	Pop RegE //Heap Offset
+	Push RegD
+	Const 4 RegD
+	Compute Add RegD RegE RegE
+	Push RegD
+	Push RegE //Heap Offset + 4	
+	Const <val> RegX
+	
+Assign:
+	Push RegX
+	Push RegY
+	<Target Addr -> RegX>
+	<expr -> RegY>
+	Compute Add Zero RegY RegX
+	Pop RegY
+	Pop RegX
+If:
+	Push RegX
+	<expr -> RegX>
+	Branch RegX #Then
+	<else if -> RegX>
+	Branch RegX #ElseIfX
+	#Else:
+		...
+		Jump #After
+	#ElseIf1:
+		...
+		Jump #After
+	#ElseIf2:
+		...
+		Jump #After
+	#Then:
+		...
+	#After:
+		Pop RegX
+		
+While:
+		Push RegX
+	#Cond:
+		<expr -> RegX>
+		Branch RegX #After
+		...
+		Jump #Cond
+	#After:
+		Pop RegX
+		
+For:
+		Push RegX
+		Push RegY
+		Const <num> RegX	(decl)
+	#Cond:
+		<expr -> RegY>		(cond)
+		Branch RegY #After
+		...
+		<expr>				(expr)
+		Jump #Cond
+	#After:
+		Pop RegY
+		Pop RegX
+
+Call:
+	(Assume #Args <= 5)
+	Push RegA
+	Push RegB
+	Push RegC
+	Push RegD
+	Push RegE
+	Const 48 RegA
+	Compute Sub SP RegA RegA
+	Compute Add Zero PC RegB
+	(Per Argument:)
+		<expr -> RegC>
+		Push RegC
+	Const 4 RegC
+	Compute Add RegB RegC RegB
+	Push RegB
+	Push RegA
+	Jump (Abs <addr>)
+
+Return:
+		
