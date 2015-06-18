@@ -2,6 +2,7 @@ package translation;
 
 /**
  * A jump target. It may be absolute, relative or indirect (using a register).
+ * 
  * @author Dennis
  *
  */
@@ -23,8 +24,11 @@ public class Target implements Operand {
 	}
 
 	/**
-	 * Make a Target using a Register. The PC will be set to the value stored in the register.
-	 * @param reg The register which will store the address.
+	 * Make a Target using a Register. The PC will be set to the value stored in
+	 * the register.
+	 * 
+	 * @param reg
+	 *            The register which will store the address.
 	 * @return A Target pointing to <code>reg</code>
 	 */
 	public static Target indirect(Register reg) {
@@ -33,7 +37,9 @@ public class Target implements Operand {
 
 	/**
 	 * Make an absolute Target. The PC will be set to the given value.
-	 * @param addr The address to jump to.
+	 * 
+	 * @param addr
+	 *            The address to jump to.
 	 * @return A Target pointing to <code>addr</code>
 	 */
 	public static Target absolute(int addr) {
@@ -41,8 +47,11 @@ public class Target implements Operand {
 	}
 
 	/**
-	 * Make a relative Target. The PC will be set to the current value plus the given value.
-	 * @param offset The address offset to use.
+	 * Make a relative Target. The PC will be set to the current value plus the
+	 * given value.
+	 * 
+	 * @param offset
+	 *            The address offset to use.
 	 * @return A relative Target jumping the given amount.
 	 */
 	public static Target relative(int offset) {
@@ -51,7 +60,8 @@ public class Target implements Operand {
 
 	@Override
 	public String toCode() {
-		return isReg ? "(Ind " + reg.toCode() + ")" : (isAbs ? "(Abs " : "(Rel ") + addr + ")";
+		return isReg ? "(Ind " + reg.toCode() + ")" : (isAbs ? "(Abs "
+				: "(Rel ") + (addr >= 0 ? addr : "(0-" + -addr + ")") + ")";
 	}
 
 	@Override

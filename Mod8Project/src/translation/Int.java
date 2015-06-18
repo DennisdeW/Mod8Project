@@ -29,7 +29,7 @@ public class Int implements Operand {
 
 	@Override
 	public String toCode() {
-		return value + "";
+		return value >= 0 ? value + "" : "(0-" + -value + ")";
 	}
 
 	@Override

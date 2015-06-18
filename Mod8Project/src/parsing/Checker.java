@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ANTLRErrorListener;
@@ -28,32 +31,19 @@ import parsing.BaseGrammarParser.*;
 public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		ANTLRErrorListener {
 
-	private static final List<String>	INVALID_NAMES	= Arrays.asList("int",
-																"bool", "void",
-																"if", "else",
-																"while", "for",
-																"return",
-																"and", "or",
-																"xor", "true",
-																"false", "def",
-																"break", "not",
-																"string");
+	private static final List<String> INVALID_NAMES = Arrays.asList("int",
+			"bool", "void", "if", "else", "while", "for", "return", "and",
+			"or", "xor", "true", "false", "def", "break", "not", "string");
 
-	private Scope						scope;
-	private List<String>				errors;
-	private Map<FuncContext, Func>		functions;
-	private ParseTreeProperty<Type>		types;
-	private Func						currentFunc;
-	private CheckResult					result;
-	private boolean						dirty;
+	private Scope scope;
+	private List<String> errors;
+	private Map<FuncContext, Func> functions;
+	private ParseTreeProperty<Type> types;
+	private Func currentFunc;
+	private CheckResult result;
+	private boolean dirty;
 
 	public CheckResult check(ANTLRInputStream stream) {
-		scope = new Scope();
-		errors = new ArrayList<>();
-		functions = new HashMap<>();
-		types = new ParseTreeProperty<>();
-		result = new CheckResult();
-		currentFunc = null;
 		dirty = false;
 		BaseGrammarLexer lexer = new BaseGrammarLexer(stream);
 		lexer.addErrorListener(this);
@@ -64,10 +54,20 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		if (dirty) {
 			throw new RuntimeException("ANTLR Reported errors, see console.");
 		}
+		return check(prog);
+	}
+
+	public CheckResult check(ProgramContext prog) {
+		scope = new Scope();
+		errors = new ArrayList<>();
+		functions = new HashMap<>();
+		types = new ParseTreeProperty<>();
+		result = new CheckResult();
+		currentFunc = null;
 		visit(prog);
 		return result;
 	}
-
+	
 	public boolean hasErrors() {
 		return errors.size() != 0;
 	}
@@ -116,7 +116,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 				error(ctx, "Duplicate parameter '%s'.", name);
 			} else {
 				scope.declare(name, type);
-				//Will be placed on stack
+				result.getOffsets().put(ctx.ID(i), scope.getOffset(name));
 			}
 		}
 		return null;
@@ -141,7 +141,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		}
 		scope.declare(varId, type);
 		result.getTypes().put(ctx, type);
-		result.getOffsets().put(ctx, scope.getOffset(varId));
+		result.getOffsets().put(ctx.ID(), scope.getOffset(varId));
 		return null;
 	}
 
@@ -153,6 +153,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		visit(ctx.expr());
 		Type sourceType = getType(ctx.expr());
 		checkType(ctx, targetType, sourceType);
+		result.getOffsets().put(ctx.ID(), scope.getOffset(target));
 		return null;
 	}
 
@@ -287,6 +288,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 	public Void visitIdExpr(IdExprContext ctx) {
 		types.put(ctx, getType(ctx, ctx.ID().getText()));
+		result.getOffsets().put(ctx.ID(), scope.getOffset(ctx.ID().getText()));
 		return null;
 	}
 
@@ -456,24 +458,24 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	public static class CheckResult {
-		private ParseTreeProperty<Type>		types;
-		private ParseTreeProperty<Integer>	offsets;
-		private Map<FuncContext, Integer>		funcAddrs;
-		private List<String>			errors;
-		
+		private ParseTreeProperty<Type> types;
+		private Map<ParseTree, Integer> offsets;
+		private Set<FuncContext> functions;
+		private List<String> errors;
+
 		CheckResult(ParseTreeProperty<Type> types,
-				ParseTreeProperty<Integer> offsets,
-				Map<FuncContext, Integer> funcAddrs, List<String> errors) {
+				Map<ParseTree, Integer> offsets,
+				Set<FuncContext> funcAddrs, List<String> errors) {
 			this.types = types;
 			this.offsets = offsets;
-			this.funcAddrs = funcAddrs;
+			this.functions = funcAddrs;
 			this.errors = errors;
 		}
 
 		CheckResult() {
 			this.types = new ParseTreeProperty<>();
-			this.offsets = new ParseTreeProperty<>();
-			this.funcAddrs = new HashMap<>();
+			this.offsets = new HashMap<>();
+			this.functions = new HashSet<>();
 			this.errors = new ArrayList<>();
 		}
 
@@ -484,7 +486,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			result = prime * result
 					+ ((errors == null) ? 0 : errors.hashCode());
 			result = prime * result
-					+ ((funcAddrs == null) ? 0 : funcAddrs.hashCode());
+					+ ((functions == null) ? 0 : functions.hashCode());
 			result = prime * result
 					+ ((offsets == null) ? 0 : offsets.hashCode());
 			result = prime * result + ((types == null) ? 0 : types.hashCode());
@@ -505,10 +507,10 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 					return false;
 			} else if (!errors.equals(other.errors))
 				return false;
-			if (funcAddrs == null) {
-				if (other.funcAddrs != null)
+			if (functions == null) {
+				if (other.functions != null)
 					return false;
-			} else if (!funcAddrs.equals(other.funcAddrs))
+			} else if (!functions.equals(other.functions))
 				return false;
 			if (offsets == null) {
 				if (other.offsets != null)
@@ -522,7 +524,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 				return false;
 			return true;
 		}
-		
+
 		ParseTreeProperty<Type> getTypes() {
 			return types;
 		}
@@ -531,20 +533,20 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			this.types = types;
 		}
 
-		ParseTreeProperty<Integer> getOffsets() {
+		Map<ParseTree, Integer> getOffsets() {
 			return offsets;
 		}
 
-		void setOffsets(ParseTreeProperty<Integer> offsets) {
+		void setOffsets(Map<ParseTree, Integer> offsets) {
 			this.offsets = offsets;
 		}
 
-		Map<FuncContext, Integer> getFuncAddrs() {
-			return funcAddrs;
+		Set<FuncContext> getFuncAddrs() {
+			return functions;
 		}
 
-		void setFuncAddrs(Map<FuncContext, Integer> funcAddrs) {
-			this.funcAddrs = funcAddrs;
+		void setFuncAddrs(Set<FuncContext> funcAddrs) {
+			this.functions = funcAddrs;
 		}
 
 		List<String> getErrors() {
@@ -555,10 +557,22 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			this.errors = errors;
 		}
 
+		int maxOffset() {
+			return this.offsets.values().stream().mapToInt(i -> i).max().orElse(0);
+		}
+		
+		int funcCount() {
+			return this.functions.size();
+		}
+
+		int staticMemSize() {
+			return maxOffset() + funcCount() * 4;
+		}
+		
 		@Override
 		public String toString() {
 			return "CheckResult [types=" + types + ", offsets=" + offsets
-					+ ", funcAddrs=" + funcAddrs + ", errors=" + errors + "]";
+					+ ", funcAddrs=" + functions + ", errors=" + errors + "]";
 		}
 	}
 }

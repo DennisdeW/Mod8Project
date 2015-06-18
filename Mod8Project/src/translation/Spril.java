@@ -41,6 +41,14 @@ public class Spril {
 						"Operand %d: Expected type %s, but got %s.", i,
 						opcode.getOperands()[i], this.operands[i].getType()));
 	}
+	
+	public OpCode getOpCode() {
+		return opcode;
+	}
+	
+	public Operand[] getOperands() {
+		return operands;
+	}
 
 	@Override
 	public String toString() {
@@ -50,6 +58,31 @@ public class Spril {
 						.map(op -> op == null ? "" : op.toCode())
 						.collect(Collectors.joining(" ")).trim();
 		return res;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((opcode == null) ? 0 : opcode.hashCode());
+		result = prime * result + Arrays.hashCode(operands);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Spril other = (Spril) obj;
+		if (opcode != other.opcode)
+			return false;
+		if (!Arrays.equals(operands, other.operands))
+			return false;
+		return true;
 	}
 	
 	

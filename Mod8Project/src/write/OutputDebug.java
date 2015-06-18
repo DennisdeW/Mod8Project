@@ -42,9 +42,10 @@ public class OutputDebug {
 		writer.println("		, EndProg");
 		writer.println("       ]\n");
 		writer.println("debug :: SystemState -> String");
-		writer.println("debug SysState{..} | halted $ sprs!!0 = show val");
+		writer.println("debug SysState{..} | halted $ sprs!!0 = (show val) ++ \"\\n\" ++ (show mem)");
 		writer.println("					where");
 		writer.println("						(RegFile val) = regbank $ sprs!!0");
+		writer.println("						(Memory mem) = localMem $ sprs!!0");
 		writer.println("debug _ = \"\"");
 		writer.println("main = runDebug debug 3 prog");
 		writer.flush();
@@ -71,7 +72,7 @@ public class OutputDebug {
 		prog.addInstruction(new Spril(OpCode.CONST, new Int(1), Register.A));
 		prog.addInstruction(new Spril(OpCode.CONST, new Int(n), Register.B));
 		prog.addInstruction(new Spril(OpCode.CONST, new Int(1), Register.C));
-		prog.addInstruction(new Spril(OpCode.COMPUTE, Operator.EQUAL, Register.B,
+		prog.addInstruction(new Spril(OpCode.COMPUTE, Operator.EQ, Register.B,
 				Register.C, Register.C));
 		prog.addInstruction(new Spril(OpCode.BRANCH, Register.C, Target
 				.relative(5)));

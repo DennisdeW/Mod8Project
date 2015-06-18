@@ -42,8 +42,8 @@ GT : '>';
 LT : '<';
 EQ : '=';
 ARROW : MINUS GT;
-GE : EQ GT;
-LE : EQ LT;
+GE : GT EQ;
+LE : LT EQ;
 NE : EXCLAMATION EQ;
 
 

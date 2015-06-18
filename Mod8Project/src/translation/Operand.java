@@ -17,4 +17,10 @@ public interface Operand {
 	 * @return The type of this operand.
 	 */
 	OpType getType();
+	
+	@Override
+	boolean equals(Object obj);
+	
+	@Override
+	int hashCode();
 }

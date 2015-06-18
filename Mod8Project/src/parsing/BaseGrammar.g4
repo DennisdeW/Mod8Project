@@ -2,7 +2,7 @@ grammar BaseGrammar;
 
 import LexerRules;
 
-program : decl* func (decl|func)*;
+program : (decl SEMI)* func ((decl SEMI)|func)*;
 
 block : LCURL stat* RCURL;
 

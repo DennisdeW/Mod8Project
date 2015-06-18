@@ -33,12 +33,12 @@ public enum Type {
 
 	private Type() {
 		this.name = this.name().toLowerCase();
-		this.size = 4;
+		this.size = 1;
 	}
 
 	private Type(String name) {
 		this.name = name;
-		this.size = 4;
+		this.size = 1;
 	}
 	
 	private Type(int size) {
