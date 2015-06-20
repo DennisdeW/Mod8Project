@@ -15,6 +15,7 @@ public class Output {
 		} catch (FileNotFoundException e) {
 		} catch (UnsupportedEncodingException e) {
 		}
+		writer.println("{-# LANGUAGE RecordWildCards #-}");
 		writer.println("import System");
 		writer.println("import Sprockell");
 		writer.println("import TypesEtc\n");

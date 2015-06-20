@@ -30,7 +30,8 @@ expr
 	;
 
 stat
-	: decl SEMI													# declStat
+	: LOCK stat UNLOCK											# lockStat
+	| decl SEMI													# declStat
 	| assign SEMI												# assignStat
 	| IF expr block (ELSE IF expr block)* (ELSE block)?			# ifStat
 	| WHILE expr block											# whileStat

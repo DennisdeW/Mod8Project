@@ -29,6 +29,18 @@ public class BaseGrammarBaseListener implements BaseGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	//@Override public void exitLockStat(@NotNull BaseGrammarParser.LockStatContext ctx) { }
+	///**
+	// * {@inheritDoc}
+	// *
+	// * <p>The default implementation does nothing.</p>
+	// */
+	//@Override public void enterLockStat(@NotNull BaseGrammarParser.LockStatContext ctx) { }
+	///**
+	// * {@inheritDoc}
+	// *
+	// * <p>The default implementation does nothing.</p>
+	// */
 	@Override public void enterMinExpr(@NotNull BaseGrammarParser.MinExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
