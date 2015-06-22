@@ -75,5 +75,24 @@ public enum Operator implements Operand {
 			throw new Error("Impossible Comparator");
 		}
 	}
+	
+	public Operator invert() {
+		switch(this) {
+		case EQ:
+			return EQ;
+		case GT:
+			return LTE;
+		case GTE:
+			return LT;
+		case LT:
+			return GTE;
+		case LTE:
+			return GT;
+		case NEQ:
+			return EQ;
+		default:
+			throw new RuntimeException("Can only invert comparators.");		
+		}
+	}
 
 }

@@ -173,6 +173,10 @@ public enum Type {
 			return ret;
 		}
 		
+		public String getReturnName() {
+			return String.format("<<retval_%s(%s):%s>>", name, args, ret);
+		}
+				
 		public String getName() {
 			return name;
 		}

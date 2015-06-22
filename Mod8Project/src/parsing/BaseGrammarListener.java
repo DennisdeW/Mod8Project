@@ -33,6 +33,18 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitMinExpr(@NotNull BaseGrammarParser.MinExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code modExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterModExpr(@NotNull BaseGrammarParser.ModExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code modExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitModExpr(@NotNull BaseGrammarParser.ModExprContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BaseGrammarParser#decl}.
 	 * @param ctx the parse tree
 	 */
@@ -200,6 +212,16 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFalseExpr(@NotNull BaseGrammarParser.FalseExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BaseGrammarParser#topLevelBlock}.
+	 * @param ctx the parse tree
+	 */
+	void enterTopLevelBlock(@NotNull BaseGrammarParser.TopLevelBlockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BaseGrammarParser#topLevelBlock}.
+	 * @param ctx the parse tree
+	 */
+	void exitTopLevelBlock(@NotNull BaseGrammarParser.TopLevelBlockContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code whileStat}
 	 * labeled alternative in {@link BaseGrammarParser#stat}.

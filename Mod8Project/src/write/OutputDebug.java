@@ -43,6 +43,8 @@ public class OutputDebug {
 		writer.println("       ]\n");
 		writer.println("debug :: SystemState -> String");
 		writer.println("debug SysState{..} | halted $ sprs!!0 = (show val) ++ \"\\n\" ++ (show mem)");
+		writer.println("				 	| cycleCount `mod` 1 == 0 = \"Cycle \" ++ (show cycleCount) ++ \": \""
+				+ " ++ (show val) ++ \"\\n\" ++ (show mem) ++ \"\\n\"");
 		writer.println("					where");
 		writer.println("						(RegFile val) = regbank $ sprs!!0");
 		writer.println("						(Memory mem) = localMem $ sprs!!0");
@@ -58,16 +60,9 @@ public class OutputDebug {
 		/*
 		 * Calculate (n-1)!
 		 * 
-		 * Const 1 RegA 
-		 * Const n RegB 
-		 * Const 1 RegC
-		 * Compute Eq RegB RegC RegC 
-		 * Branch (Rel 5) RegC 
-		 * Const 1 RegC 
-		 * Compute Sub RegB RegC RegB 
-		 * Compute Mul RegA RegB RegA 
-		 * Jump (Abs 2) 
-		 * EndProg
+		 * Const 1 RegA Const n RegB Const 1 RegC Compute Eq RegB RegC RegC
+		 * Branch (Rel 5) RegC Const 1 RegC Compute Sub RegB RegC RegB Compute
+		 * Mul RegA RegB RegA Jump (Abs 2) EndProg
 		 */
 		prog.addInstruction(new Spril(OpCode.CONST, new Int(1), Register.A));
 		prog.addInstruction(new Spril(OpCode.CONST, new Int(n), Register.B));

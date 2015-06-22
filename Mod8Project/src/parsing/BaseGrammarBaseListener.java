@@ -41,6 +41,18 @@ public class BaseGrammarBaseListener implements BaseGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterModExpr(@NotNull BaseGrammarParser.ModExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitModExpr(@NotNull BaseGrammarParser.ModExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterDecl(@NotNull BaseGrammarParser.DeclContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -216,6 +228,18 @@ public class BaseGrammarBaseListener implements BaseGrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitFalseExpr(@NotNull BaseGrammarParser.FalseExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTopLevelBlock(@NotNull BaseGrammarParser.TopLevelBlockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTopLevelBlock(@NotNull BaseGrammarParser.TopLevelBlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

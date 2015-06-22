@@ -26,6 +26,13 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMinExpr(@NotNull BaseGrammarParser.MinExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code modExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitModExpr(@NotNull BaseGrammarParser.ModExprContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link BaseGrammarParser#decl}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -124,6 +131,12 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitFalseExpr(@NotNull BaseGrammarParser.FalseExprContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link BaseGrammarParser#topLevelBlock}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTopLevelBlock(@NotNull BaseGrammarParser.TopLevelBlockContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code whileStat}
 	 * labeled alternative in {@link BaseGrammarParser#stat}.

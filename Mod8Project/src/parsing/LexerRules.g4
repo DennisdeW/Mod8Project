@@ -33,6 +33,7 @@ PLUS : '+';
 MINUS : '-';
 TIMES : '*';
 DIV : '/';
+MOD : '%';
 SQUOT : '\'';
 DQUOT : '"';
 BACKSLASH : '\\';

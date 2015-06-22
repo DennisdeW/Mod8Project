@@ -6,7 +6,9 @@ program : (decl SEMI)* func ((decl SEMI)|func)*;
 
 block : LCURL stat* RCURL;
 
-func : DEF type ID typedparams block;
+topLevelBlock : block;
+
+func : DEF type ID typedparams topLevelBlock;
 
 typedparams : LBRACE (type ID (COMMA type ID)*)? RBRACE;
 params : LBRACE (val (COMMA val)*)? RBRACE;
@@ -19,6 +21,7 @@ expr
 	| expr DIV expr 		# divExpr
 	| expr MINUS expr		# minExpr
 	| expr PLUS expr 		# plusExpr
+	| expr MOD expr 		# modExpr
 	| expr boolOp expr		# boolOpExpr
 	| expr comp expr 		# compExpr
 	| LBRACE expr RBRACE	# parExpr

@@ -40,8 +40,10 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	private Map<FuncContext, Func> functions;
 	private ParseTreeProperty<Type> types;
 	private Func currentFunc;
+	private Map<Func, TypedparamsContext> params;
 	private CheckResult result;
 	private boolean dirty;
+	private int callCount;
 
 	public CheckResult check(ANTLRInputStream stream) {
 		dirty = false;
@@ -61,13 +63,16 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		scope = new Scope();
 		errors = new ArrayList<>();
 		functions = new HashMap<>();
+		params = new HashMap<>();
 		types = new ParseTreeProperty<>();
 		result = new CheckResult();
 		currentFunc = null;
+		callCount = 0;
 		visit(prog);
+		result.setTypes(types);
 		return result;
 	}
-	
+
 	public boolean hasErrors() {
 		return errors.size() != 0;
 	}
@@ -85,7 +90,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 	private void processFunction(FuncContext ctx, Func func) {
 		currentFunc = func;
-		visit(ctx.block());
+		visit(ctx.topLevelBlock());
 		currentFunc = null;
 	}
 
@@ -100,10 +105,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		List<Type> argTypes = ctx.typedparams().type().stream()
 				.map(t -> typeForName(ctx, t.getText()))
 				.collect(Collectors.toList());
-		visit(ctx.typedparams());
 		Func func = new Func(name, retType, argTypes);
+		params.put(func, ctx.typedparams());
 		scope.declare(func);
 		functions.put(ctx, func);
+		result.getFunctions().add(ctx);
 		result.getTypes().put(ctx, retType);
 		return null;
 	}
@@ -125,6 +131,14 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	public Void visitBlock(BlockContext ctx) {
 		scope.openScope();
 		ctx.stat().forEach(s -> visit(s));
+		scope.closeScope();
+		return null;
+	}
+	
+	public Void visitTopLevelBlock(TopLevelBlockContext ctx) {
+		scope.openScope();
+		visit(params.get(currentFunc));
+		ctx.block().stat().forEach(s -> visit(s));
 		scope.closeScope();
 		return null;
 	}
@@ -246,6 +260,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	public Void visitModExpr(ModExprContext ctx) {
+		arithmeticExpr(ctx, ctx.expr(0), ctx.expr(1));
+		return null;
+	}
+	
 	public Void visitMinExpr(MinExprContext ctx) {
 		arithmeticExpr(ctx, ctx.expr(0), ctx.expr(1));
 		return null;
@@ -283,6 +302,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		Func function = call(ctx.call(), null);
 		types.put(ctx, function != null ? function.getReturnType()
 				: Type.ERR_TYPE);
+
 		return null;
 	}
 
@@ -312,8 +332,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			types.put(ctx, Type.BOOL);
 		else if (ctx.NUMBER() != null)
 			types.put(ctx, Type.INT);
-		else
+		else {
 			types.put(ctx, getType(ctx, ctx.ID().getText()));
+			result.getOffsets().put(ctx.ID(),
+					scope.getOffset(ctx.ID().getText()));
+		}
 		return null;
 	}
 
@@ -353,6 +376,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 						.ID().getText(), args.toString());
 				return null;
 			}
+			scope.declare(res);
+			scope.declare(res.getReturnName(), res.getReturnType());
+			result.getOffsets().put(ctx, scope.getOffset(res.getReturnName()));
 			return res;
 		}
 	}
@@ -457,15 +483,15 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		dirty = true;
 	}
 
-	public static class CheckResult {
+	public class CheckResult {
 		private ParseTreeProperty<Type> types;
 		private Map<ParseTree, Integer> offsets;
 		private Set<FuncContext> functions;
 		private List<String> errors;
 
 		CheckResult(ParseTreeProperty<Type> types,
-				Map<ParseTree, Integer> offsets,
-				Set<FuncContext> funcAddrs, List<String> errors) {
+				Map<ParseTree, Integer> offsets, Set<FuncContext> funcAddrs,
+				List<String> errors) {
 			this.types = types;
 			this.offsets = offsets;
 			this.functions = funcAddrs;
@@ -541,12 +567,12 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			this.offsets = offsets;
 		}
 
-		Set<FuncContext> getFuncAddrs() {
+		Set<FuncContext> getFunctions() {
 			return functions;
 		}
 
-		void setFuncAddrs(Set<FuncContext> funcAddrs) {
-			this.functions = funcAddrs;
+		void setFunctions(Set<FuncContext> functions) {
+			this.functions = functions;
 		}
 
 		List<String> getErrors() {
@@ -558,17 +584,39 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		}
 
 		int maxOffset() {
-			return this.offsets.values().stream().mapToInt(i -> i).max().orElse(0);
+			return this.offsets.values().stream().mapToInt(i -> i).max()
+					.orElse(0);
 		}
-		
+
 		int funcCount() {
 			return this.functions.size();
 		}
 
 		int staticMemSize() {
-			return maxOffset() + funcCount() * 4;
+			return maxOffset() + funcCount();
 		}
-		
+
+		FuncContext getMatchingFunc(String name, List<Type> types) {
+			return this.functions
+					.stream()
+					.filter(func -> func.typedparams().type().stream()
+							.map(t -> typeForName(func, t.getText()))
+							.collect(Collectors.toList()).equals(types)
+							&& func.ID().getText().equals(name)).findAny()
+					.orElse(null);
+		}
+
+		Type valType(ValContext ctx) {
+			if (ctx.NUMBER() != null)
+				return Type.INT;
+			else if (ctx.TRUE() != null || ctx.FALSE() != null)
+				return Type.BOOL;
+			Type res = types.get(ctx);
+			if (res == null)
+				throw new RuntimeException("Could not get type of " + ctx.ID());
+			return res;
+		}
+
 		@Override
 		public String toString() {
 			return "CheckResult [types=" + types + ", offsets=" + offsets
