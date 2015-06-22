@@ -33,7 +33,7 @@ expr
 	;
 
 stat
-	: LOCK LBRACE ID LBRACE stat UNLOCK							# lockStat
+	: LOCK LBRACE ID RBRACE block UNLOCK						# lockStat
 	| decl SEMI													# declStat
 	| assign SEMI												# assignStat
 	| IF expr block (ELSE IF expr block)* (ELSE block)?			# ifStat

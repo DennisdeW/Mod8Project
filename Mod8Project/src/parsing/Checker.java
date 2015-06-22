@@ -53,6 +53,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	private Scope							scope;
 	private List<String>					errors;
 	private Map<FuncContext, Func>			functions;
+	private Set<String>						locks;
 	private ParseTreeProperty<Type>			types;
 	private ParseTreeProperty<Boolean>		shared;
 	private Func							currentFunc;
@@ -82,10 +83,12 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		types = new ParseTreeProperty<>();
 		shared = new ParseTreeProperty<>();
 		result = new CheckResult();
+		locks = new HashSet<>();
 		currentFunc = null;
 		visit(prog);
 		result.setTypes(types);
 		result.setShared(shared);
+		result.buildLocks(locks);
 		return result;
 	}
 
@@ -159,6 +162,12 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	public Void visitLockStat(LockStatContext ctx) {
+		locks.add(ctx.ID().getText());
+		visit(ctx.block());
+		return null;
+	}
+
 	public Void visitDecl(DeclContext ctx) {
 		String varId = ctx.ID().getText();
 		if (!checkName(ctx, varId))
@@ -173,9 +182,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		types.put(ctx, type);
 		shared.put(ctx.ID(), ctx.SHARED() != null);
 		result.getOffsets().put(ctx.ID(), scope.getOffset(varId));
-		
+
 		visit(ctx.expr());
-		
+
 		return null;
 	}
 
@@ -512,16 +521,19 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		private Set<FuncContext>			functions;
 		private List<String>				errors;
 		private ParseTreeProperty<Boolean>	shared;
+		private Map<String, Integer>		locks;
 
 		public CheckResult(ParseTreeProperty<Type> types,
 				Map<ParseTree, Integer> offsets, Set<FuncContext> functions,
-				List<String> errors, ParseTreeProperty<Boolean> shared) {
+				List<String> errors, ParseTreeProperty<Boolean> shared,
+				Map<String, Integer> locks) {
 			super();
 			this.types = types;
 			this.offsets = offsets;
 			this.functions = functions;
 			this.errors = errors;
 			this.shared = shared;
+			this.locks = locks;
 		}
 
 		public CheckResult() {
@@ -530,6 +542,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			this.functions = new HashSet<>();
 			this.errors = new ArrayList<>();
 			this.shared = new ParseTreeProperty<>();
+			this.locks = new HashMap<>();
 		}
 
 		public ParseTreeProperty<Type> getTypes() {
@@ -571,18 +584,31 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		public void setShared(ParseTreeProperty<Boolean> shared) {
 			this.shared = shared;
 		}
+		
+		public Map<String, Integer> getLocks() {
+			return locks;
+		}
 
-		int maxOffset() {
-			return this.offsets.values().stream().mapToInt(i -> i).max()
-					.orElse(0);
+		public void setLocks(Map<String, Integer> locks) {
+			this.locks = locks;
+		}
+
+		int maxOffset(boolean shared) {
+			return this.offsets.entrySet().stream()
+					.filter(e -> (this.shared == null) != shared || this.shared.get(e.getKey()))
+					.mapToInt(i -> i.getValue()).max().orElse(0);
 		}
 
 		int funcCount() {
 			return this.functions.size();
 		}
 
-		int staticMemSize() {
-			return maxOffset() + funcCount();
+		int localStaticMemSize() {
+			return maxOffset(false) + funcCount();
+		}
+		
+		int sharedStaticMemSize() {
+			return maxOffset(true);
 		}
 
 		FuncContext getMatchingFunc(String name, List<Type> types) {
@@ -604,6 +630,12 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			if (res == null)
 				throw new RuntimeException("Could not get type of " + ctx.ID());
 			return res;
+		}
+		
+		void buildLocks(Set<String> locks) {
+			int addr = sharedStaticMemSize() + 1;
+			for (String lock : locks)
+				this.locks.put(lock, addr++);
 		}
 
 		@Override
