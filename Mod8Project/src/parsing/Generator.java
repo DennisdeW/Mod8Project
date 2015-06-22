@@ -490,7 +490,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 	}
 
 	public static void main(String[] args) {
-		String prog = "def int main() { if (multipleOf(3,9)) { return 5; } else { return 1; }}"
+		String prog = "def int main() { if (multipleOf(3,10)) { return 5; } else { return 1; }}"
 				+ " def bool multipleOf(int x, int y) { shared int base = x; while (x < y) { x = x + base; } return x == y; }";
 		ProgramContext ctx = new BaseGrammarParser(new CommonTokenStream(
 				new BaseGrammarLexer(new ANTLRInputStream(prog)))).program();

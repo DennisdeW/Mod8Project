@@ -173,6 +173,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		types.put(ctx, type);
 		shared.put(ctx.ID(), ctx.SHARED() != null);
 		result.getOffsets().put(ctx.ID(), scope.getOffset(varId));
+		
+		visit(ctx.expr());
+		
 		return null;
 	}
 
@@ -184,7 +187,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		visit(ctx.expr());
 		Type sourceType = getType(ctx.expr());
 		checkType(ctx, targetType, sourceType);
-		shared.put(ctx.ID(), scope.isShared(ctx.ID().getText()));
+		shared.put(ctx.ID(), scope.isShared(target));
 		result.getOffsets().put(ctx.ID(), scope.getOffset(target));
 		return null;
 	}
