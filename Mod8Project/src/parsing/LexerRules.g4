@@ -17,6 +17,8 @@ NOT : N O T;
 RETURN : R E T U R N;
 BREAK : B R E A K;
 DEF : D E F;
+LOCK : L O C K;
+UNLOCK : U N L O C K;
 
 UNDERSCORE : '_';
 DOT : '.';
