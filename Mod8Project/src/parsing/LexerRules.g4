@@ -19,6 +19,7 @@ BREAK : B R E A K;
 DEF : D E F;
 LOCK : L O C K;
 UNLOCK : U N L O C K;
+SHARED : S H A R E D;
 
 UNDERSCORE : '_';
 DOT : '.';

@@ -31,19 +31,34 @@ import parsing.BaseGrammarParser.*;
 public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		ANTLRErrorListener {
 
-	private static final List<String> INVALID_NAMES = Arrays.asList("int",
-			"bool", "void", "if", "else", "while", "for", "return", "and",
-			"or", "xor", "true", "false", "def", "break", "not", "string");
+	private static final List<String>		INVALID_NAMES	= Arrays.asList(
+																	"int",
+																	"bool",
+																	"void",
+																	"if",
+																	"else",
+																	"while",
+																	"for",
+																	"return",
+																	"and",
+																	"or",
+																	"xor",
+																	"true",
+																	"false",
+																	"def",
+																	"break",
+																	"not",
+																	"string");
 
-	private Scope scope;
-	private List<String> errors;
-	private Map<FuncContext, Func> functions;
-	private ParseTreeProperty<Type> types;
-	private Func currentFunc;
-	private Map<Func, TypedparamsContext> params;
-	private CheckResult result;
-	private boolean dirty;
-	private int callCount;
+	private Scope							scope;
+	private List<String>					errors;
+	private Map<FuncContext, Func>			functions;
+	private ParseTreeProperty<Type>			types;
+	private ParseTreeProperty<Boolean>		shared;
+	private Func							currentFunc;
+	private Map<Func, TypedparamsContext>	params;
+	private CheckResult						result;
+	private boolean							dirty;
 
 	public CheckResult check(ANTLRInputStream stream) {
 		dirty = false;
@@ -65,11 +80,12 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		functions = new HashMap<>();
 		params = new HashMap<>();
 		types = new ParseTreeProperty<>();
+		shared = new ParseTreeProperty<>();
 		result = new CheckResult();
 		currentFunc = null;
-		callCount = 0;
 		visit(prog);
 		result.setTypes(types);
+		result.setShared(shared);
 		return result;
 	}
 
@@ -134,7 +150,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		scope.closeScope();
 		return null;
 	}
-	
+
 	public Void visitTopLevelBlock(TopLevelBlockContext ctx) {
 		scope.openScope();
 		visit(params.get(currentFunc));
@@ -153,8 +169,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			error(ctx, "Duplicate declaration of variable '%s'", varId);
 			return null;
 		}
-		scope.declare(varId, type);
-		result.getTypes().put(ctx, type);
+		scope.declare(varId, type, ctx.SHARED() != null);
+		types.put(ctx, type);
+		shared.put(ctx.ID(), ctx.SHARED() != null);
 		result.getOffsets().put(ctx.ID(), scope.getOffset(varId));
 		return null;
 	}
@@ -167,6 +184,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		visit(ctx.expr());
 		Type sourceType = getType(ctx.expr());
 		checkType(ctx, targetType, sourceType);
+		shared.put(ctx.ID(), scope.isShared(ctx.ID().getText()));
 		result.getOffsets().put(ctx.ID(), scope.getOffset(target));
 		return null;
 	}
@@ -264,7 +282,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		arithmeticExpr(ctx, ctx.expr(0), ctx.expr(1));
 		return null;
 	}
-	
+
 	public Void visitMinExpr(MinExprContext ctx) {
 		arithmeticExpr(ctx, ctx.expr(0), ctx.expr(1));
 		return null;
@@ -302,12 +320,12 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		Func function = call(ctx.call(), null);
 		types.put(ctx, function != null ? function.getReturnType()
 				: Type.ERR_TYPE);
-
 		return null;
 	}
 
 	public Void visitIdExpr(IdExprContext ctx) {
 		types.put(ctx, getType(ctx, ctx.ID().getText()));
+		shared.put(ctx.ID(), scope.isShared(ctx.ID().getText()));
 		result.getOffsets().put(ctx.ID(), scope.getOffset(ctx.ID().getText()));
 		return null;
 	}
@@ -336,6 +354,8 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			types.put(ctx, getType(ctx, ctx.ID().getText()));
 			result.getOffsets().put(ctx.ID(),
 					scope.getOffset(ctx.ID().getText()));
+			shared.put(ctx.ID(), scope.isShared(ctx.ID().getText()));
+			return null;
 		}
 		return null;
 	}
@@ -484,103 +504,69 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	public class CheckResult {
-		private ParseTreeProperty<Type> types;
-		private Map<ParseTree, Integer> offsets;
-		private Set<FuncContext> functions;
-		private List<String> errors;
+		private ParseTreeProperty<Type>		types;
+		private Map<ParseTree, Integer>		offsets;
+		private Set<FuncContext>			functions;
+		private List<String>				errors;
+		private ParseTreeProperty<Boolean>	shared;
 
-		CheckResult(ParseTreeProperty<Type> types,
-				Map<ParseTree, Integer> offsets, Set<FuncContext> funcAddrs,
-				List<String> errors) {
+		public CheckResult(ParseTreeProperty<Type> types,
+				Map<ParseTree, Integer> offsets, Set<FuncContext> functions,
+				List<String> errors, ParseTreeProperty<Boolean> shared) {
+			super();
 			this.types = types;
 			this.offsets = offsets;
-			this.functions = funcAddrs;
+			this.functions = functions;
 			this.errors = errors;
+			this.shared = shared;
 		}
 
-		CheckResult() {
+		public CheckResult() {
 			this.types = new ParseTreeProperty<>();
 			this.offsets = new HashMap<>();
 			this.functions = new HashSet<>();
 			this.errors = new ArrayList<>();
+			this.shared = new ParseTreeProperty<>();
 		}
 
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result
-					+ ((errors == null) ? 0 : errors.hashCode());
-			result = prime * result
-					+ ((functions == null) ? 0 : functions.hashCode());
-			result = prime * result
-					+ ((offsets == null) ? 0 : offsets.hashCode());
-			result = prime * result + ((types == null) ? 0 : types.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			CheckResult other = (CheckResult) obj;
-			if (errors == null) {
-				if (other.errors != null)
-					return false;
-			} else if (!errors.equals(other.errors))
-				return false;
-			if (functions == null) {
-				if (other.functions != null)
-					return false;
-			} else if (!functions.equals(other.functions))
-				return false;
-			if (offsets == null) {
-				if (other.offsets != null)
-					return false;
-			} else if (!offsets.equals(other.offsets))
-				return false;
-			if (types == null) {
-				if (other.types != null)
-					return false;
-			} else if (!types.equals(other.types))
-				return false;
-			return true;
-		}
-
-		ParseTreeProperty<Type> getTypes() {
+		public ParseTreeProperty<Type> getTypes() {
 			return types;
 		}
 
-		void setTypes(ParseTreeProperty<Type> types) {
+		public void setTypes(ParseTreeProperty<Type> types) {
 			this.types = types;
 		}
 
-		Map<ParseTree, Integer> getOffsets() {
+		public Map<ParseTree, Integer> getOffsets() {
 			return offsets;
 		}
 
-		void setOffsets(Map<ParseTree, Integer> offsets) {
+		public void setOffsets(Map<ParseTree, Integer> offsets) {
 			this.offsets = offsets;
 		}
 
-		Set<FuncContext> getFunctions() {
+		public Set<FuncContext> getFunctions() {
 			return functions;
 		}
 
-		void setFunctions(Set<FuncContext> functions) {
+		public void setFunctions(Set<FuncContext> functions) {
 			this.functions = functions;
 		}
 
-		List<String> getErrors() {
+		public List<String> getErrors() {
 			return errors;
 		}
 
-		void setErrors(List<String> errors) {
+		public void setErrors(List<String> errors) {
 			this.errors = errors;
+		}
+
+		public ParseTreeProperty<Boolean> getShared() {
+			return shared;
+		}
+
+		public void setShared(ParseTreeProperty<Boolean> shared) {
+			this.shared = shared;
 		}
 
 		int maxOffset() {

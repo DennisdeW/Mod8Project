@@ -49,7 +49,7 @@ public class OutputDebug {
 		writer.println("						(RegFile val) = regbank $ sprs!!0");
 		writer.println("						(Memory mem) = localMem $ sprs!!0");
 		writer.println("debug _ = \"\"");
-		writer.println("main = runDebug debug 3 prog");
+		writer.println("main = runDebug debug 1 prog");
 		writer.flush();
 		writer.close();
 	}

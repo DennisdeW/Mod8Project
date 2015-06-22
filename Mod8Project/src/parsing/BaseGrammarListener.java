@@ -143,6 +143,18 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitParExpr(@NotNull BaseGrammarParser.ParExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code lockStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void enterLockStat(@NotNull BaseGrammarParser.LockStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code lockStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void exitLockStat(@NotNull BaseGrammarParser.LockStatContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code compExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree

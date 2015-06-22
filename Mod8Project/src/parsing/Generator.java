@@ -30,13 +30,14 @@ import write.ProgramRunner;
 
 public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 
-	public static final Func MAIN_FUNC_SIG = new Func("main", Type.INT);
+	public static final Func				MAIN_FUNC_SIG	= new Func("main",
+																	Type.INT);
 
-	private CheckResult cres;
-	private Program prog;
-	private Map<FuncContext, List<Spril>> functions;
-	private Map<FuncContext, Integer> functionAddrs;
-	private Map<FuncContext, List<Spril>> calls;
+	private CheckResult						cres;
+	private Program							prog;
+	private Map<FuncContext, List<Spril>>	functions;
+	private Map<FuncContext, Integer>		functionAddrs;
+	private Map<FuncContext, List<Spril>>	calls;
 
 	private List<Spril> binOp(ExprContext fst, ExprContext snd, Operator op) {
 		// compute subexpressions, push sub1 <op> sub2
@@ -143,7 +144,8 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		}
 
 		Spril jump = new Spril(OpCode.JUMP, "Jump to function "
-				+ func.ID().getText(), Target.absolute(-1)); // invalid, will be replaced
+				+ func.ID().getText(), Target.absolute(-1)); // invalid, will be
+																// replaced
 
 		calls.putIfAbsent(func, new ArrayList<>());
 		calls.get(func).add(jump);
@@ -180,10 +182,11 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 						.direct(offset)));
 			} else {
 				int callerOffset = cres.getOffsets().get(val.ID());
-				result.add(new Spril(OpCode.LOAD, MemAddr.direct(callerOffset),
-						Register.A));
-				result.add(new Spril(OpCode.STORE, Register.A, MemAddr
-						.direct(offset)));
+				boolean resultIsShared = cres.getShared().get(val.ID());
+			//	result.add(new Spril(OpCode.LOAD, MemAddr.direct(callerOffset),
+			//			Register.A));
+			//	result.add(new Spril(OpCode.STORE, Register.A, MemAddr
+			//			.direct(offset)));
 			}
 		}
 
@@ -241,7 +244,13 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 			result.remove(result.size() - 1);
 		else
 			result.add(new Spril(OpCode.POP, Register.A));
-		result.add(new Spril(OpCode.STORE, Register.A, MemAddr.direct(offset)));
+		if (cres.getShared().get(id)) {
+			result.add(new Spril(OpCode.WRITE, Register.A, MemAddr
+					.direct(offset)));
+		} else {
+			result.add(new Spril(OpCode.STORE, Register.A, MemAddr
+					.direct(offset)));
+		}
 		return result;
 	}
 
@@ -334,7 +343,13 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		// get offset from cres, load and push value
 		List<Spril> result = new ArrayList<>();
 		int offset = cres.getOffsets().get(ctx.ID());
-		result.add(new Spril(OpCode.LOAD, MemAddr.direct(offset), Register.A));
+		boolean shared = cres.getShared().get(ctx.ID());
+		if (shared) {
+			result.add(new Spril(OpCode.READ, MemAddr.direct(offset)));
+			result.add(new Spril(OpCode.RECEIVE, Register.A));
+		} else
+			result.add(new Spril(OpCode.LOAD, MemAddr.direct(offset),
+					Register.A));
 		result.add(new Spril(OpCode.PUSH, Register.A));
 		return result;
 	}
@@ -475,15 +490,12 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 	}
 
 	public static void main(String[] args) {
-		String prog = "int start = 3;    def int main() {"
-				+ "   int n = 10; int j = 0; for (int i = 0; i < n; i = i + 1) {    if (i == 6) {    "
-				+ " j = i;     while (j > 0) {      start = start + j;      "
-				+ "j = j - 1;     }    } else {     start = start - square(i);    }   "
-				+ "}  return start; }    def bool isEven(int n) {   return n % 2 == 0;  }    "
-				+ "def int square(int n) {   return n * n;  }";
+		String prog = "def int main() { if (multipleOf(3,9)) { return 5; } else { return 1; }}"
+				+ " def bool multipleOf(int x, int y) { shared int base = x; while (x < y) { x = x + base; } return x == y; }";
 		ProgramContext ctx = new BaseGrammarParser(new CommonTokenStream(
 				new BaseGrammarLexer(new ANTLRInputStream(prog)))).program();
 		CheckResult cres = new Checker().check(ctx);
+		System.out.println(cres.getErrors());
 		Generator gen = new Generator();
 		Program list = gen.compile(ctx, cres);
 		System.out.println(list.getInstructions().stream()

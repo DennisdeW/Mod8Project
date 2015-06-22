@@ -91,6 +91,13 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitParExpr(@NotNull BaseGrammarParser.ParExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code lockStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLockStat(@NotNull BaseGrammarParser.LockStatContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code compExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree

@@ -114,6 +114,10 @@ public class Scope {
 		return current.declare(id, type);
 	}
 
+	public boolean declare(String id, Type type, boolean shared) {
+		return current.declare(id, type, shared);
+	}
+
 	/**
 	 * Declares a function.
 	 * 
@@ -150,7 +154,7 @@ public class Scope {
 	public int getOffset(String id) {
 		return current.getOffset(id);
 	}
-	
+
 	/**
 	 * Gets all declared functions.
 	 * 
@@ -169,6 +173,10 @@ public class Scope {
 		return current.getVars();
 	}
 
+	public boolean isShared(String id) {
+		return current.isShared(id);
+	}
+
 	/**
 	 * The inner workings of {@link Scope}.
 	 * 
@@ -178,16 +186,23 @@ public class Scope {
 	private class Level {
 		private Map<String, Type>		vars;
 		private Map<String, Integer>	offsets;
-		private final int				baseOffset;
+		private Map<String, Boolean>	shared;
+		private Map<String, Integer>	sharedOffsets;
+		private final int				baseOffset, sharedOffset;
 		private final Level				enclosing;
-		private int nextOffset;
+		private int						nextOffset, nextShared;
 
 		Level(Level enclosing) {
 			this.vars = new HashMap<>();
 			this.offsets = new HashMap<>();
+			this.shared = new HashMap<>();
+			this.sharedOffsets = new HashMap<>();
 			this.enclosing = enclosing;
 			this.baseOffset = enclosing == null ? 0 : enclosing.getOffset();
+			this.sharedOffset = enclosing == null ? 0 : enclosing
+					.getSharedOffset();
 			this.nextOffset = this.baseOffset;
+			this.nextShared = this.sharedOffset;
 		}
 
 		Level() {
@@ -206,7 +221,16 @@ public class Scope {
 
 		private int getOffset() {
 			return baseOffset
-					+ vars.values().stream().mapToInt(t -> t.getSize()).sum();
+					+ vars.entrySet().stream()
+							.filter(v -> !isShared(v.getKey()))
+							.mapToInt(t -> t.getValue().getSize()).sum();
+		}
+
+		private int getSharedOffset() {
+			return sharedOffset
+					+ vars.entrySet().stream()
+							.filter(v -> isShared(v.getKey()))
+							.mapToInt(t -> t.getValue().getSize()).sum();
 		}
 
 		boolean isGlobal() {
@@ -214,11 +238,21 @@ public class Scope {
 		}
 
 		boolean declare(String id, Type type) {
+			return declare(id, type, false);
+		}
+
+		boolean declare(String id, Type type, boolean shared) {
 			if (isDeclaredLocally(id))
 				return false;
 			this.vars.put(id, type);
-			this.offsets.put(id, nextOffset);
-			nextOffset += type.getSize();
+			this.shared.put(id, shared);
+			if (shared) {
+				this.sharedOffsets.put(id, nextShared);
+				nextShared += type.getSize();
+			} else {
+				this.offsets.put(id, nextOffset);
+				nextOffset += type.getSize();
+			}
 			return true;
 		}
 
@@ -235,6 +269,17 @@ public class Scope {
 			return isDeclared(id) && getType(id) == type;
 		}
 
+		boolean isShared(String id) {
+			if (!isDeclared(id)) {
+				throw new IllegalArgumentException("Var '" + id
+						+ "' was not declared.");
+			}
+			if (isDeclaredLocally(id))
+				return shared.get(id);
+			else
+				return enclosing.isShared(id);
+		}
+
 		Type getType(String id) {
 			if (isDeclaredLocally(id))
 				return vars.get(id);
@@ -244,10 +289,10 @@ public class Scope {
 				throw new IllegalArgumentException("Var '" + id
 						+ "' was not declared.");
 		}
-		
+
 		int getOffset(String id) {
 			if (isDeclaredLocally(id))
-				return offsets.get(id);
+				return isShared(id) ? sharedOffsets.get(id) : offsets.get(id);
 			else if (!isGlobal())
 				return enclosing.getOffset(id);
 			else
