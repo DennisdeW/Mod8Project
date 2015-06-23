@@ -46,7 +46,7 @@ public class Spril {
 	public Spril(OpCode opcode, String comment, Operand... operands) {
 		this.opcode = opcode;
 		this.operands = new Operand[4];
-		this.setComment(comment);
+		this.comment = comment;
 		System.arraycopy(operands, 0, this.operands, 0, operands.length);
 		for (int i = 0; i < 4; i++)
 			if ((this.operands[i] == null ^ opcode.getOperands()[i] == null))
@@ -78,8 +78,12 @@ public class Spril {
 				+ Arrays.stream(operands)
 						.map(op -> op == null ? "" : op.toCode())
 						.collect(Collectors.joining(" ")).trim();
-		if (!comment.equals(""))
+		if (!comment.equals("")) {
+			int spacing = res.length();
+			while (spacing++ < 30)
+				res += " ";
 			res += "{-" + comment + "-}";
+		}
 		return res;
 	}
 
@@ -112,6 +116,13 @@ public class Spril {
 		return comment;
 	}
 
+	public void addComment(String comment) {
+		if (this.comment.equals(""))
+		this.comment = comment;
+		else
+			this.comment += "; " + comment;
+	}
+	
 	public void setComment(String comment) {
 		this.comment = comment;
 	}

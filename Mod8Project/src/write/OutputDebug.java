@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 
 import translation.Int;
+import translation.MemAddr;
 import translation.OpCode;
 import translation.Operator;
 import translation.Program;
@@ -16,14 +17,14 @@ public class OutputDebug {
 	private static String fileName = "progDebug.hs";
 
 	public static void write(String[] lines) {
-		write(fileName, lines);
+		write(fileName, 1, lines);
 	}
 
-	public static void write(String outputFile, String[] lines) {
+	public static void write(String title, int cores,  String[] lines) {
 		PrintWriter writer = null;
 
 		try {
-			writer = new PrintWriter(outputFile, "UTF-8");
+			writer = new PrintWriter(title, "UTF-8");
 		} catch (FileNotFoundException e) {
 		} catch (UnsupportedEncodingException e) {
 		}
@@ -42,14 +43,15 @@ public class OutputDebug {
 		writer.println("		, EndProg");
 		writer.println("       ]\n");
 		writer.println("debug :: SystemState -> String");
-		writer.println("debug SysState{..} | halted $ sprs!!0 = (show val) ++ \"\\n\" ++ (show mem)");
+		writer.println("debug SysState{..} | all halted sprs = (show val) ++ \"\\n\" ++ (show mem) ++ \"\\n\" ++ (show smem)");
 		writer.println("				 	| cycleCount `mod` 1 == 0 = \"Cycle \" ++ (show cycleCount) ++ \": \""
-				+ " ++ (show val) ++ \"\\n\" ++ (show mem) ++ \"\\n\"");
+				+ " ++ (show val) ++ \"\\n\" ++ (show mem) ++ \"\\n\" ++ (show smem) ++ \"\\n\"");
 		writer.println("					where");
 		writer.println("						(RegFile val) = regbank $ sprs!!0");
 		writer.println("						(Memory mem) = localMem $ sprs!!0");
+		writer.println("						(Memory smem) = sharedMem");
 		writer.println("debug _ = \"\"");
-		writer.println("main = runDebug debug 1 prog");
+		writer.println("main = runDebug debug "+cores+" prog");
 		writer.flush();
 		writer.close();
 	}
@@ -64,20 +66,16 @@ public class OutputDebug {
 		 * Branch (Rel 5) RegC Const 1 RegC Compute Sub RegB RegC RegB Compute
 		 * Mul RegA RegB RegA Jump (Abs 2) EndProg
 		 */
-		prog.addInstruction(new Spril(OpCode.CONST, new Int(1), Register.A));
-		prog.addInstruction(new Spril(OpCode.CONST, new Int(n), Register.B));
-		prog.addInstruction(new Spril(OpCode.CONST, new Int(1), Register.C));
-		prog.addInstruction(new Spril(OpCode.COMPUTE, Operator.EQ, Register.B,
-				Register.C, Register.C));
-		prog.addInstruction(new Spril(OpCode.BRANCH, Register.C, Target
-				.relative(5)));
-		prog.addInstruction(new Spril(OpCode.CONST, new Int(1), Register.C));
-		prog.addInstruction(new Spril(OpCode.COMPUTE, Operator.SUB, Register.B,
-				Register.C, Register.B));
-		prog.addInstruction(new Spril(OpCode.COMPUTE, Operator.MUL, Register.A,
-				Register.B, Register.A));
-		prog.addInstruction(new Spril(OpCode.JUMP, Target.absolute(2)));
+		prog.addInstruction(new Spril(OpCode.CONST, new Int(0), Register.B));
+		prog.addInstruction(new Spril(OpCode.WRITE, Register.B, MemAddr
+				.direct(0)));
+		prog.addInstruction(new Spril(OpCode.TEST_AND_SET, MemAddr.direct(0)));
+		prog.addInstruction(new Spril(OpCode.RECEIVE, Register.A));
+		prog.addInstruction(new Spril(OpCode.BRANCH, Register.A, Target
+				.relative(2)));
+		prog.addInstruction(new Spril(OpCode.JUMP, Target.relative(-3)));
 		prog.addInstruction(new Spril(OpCode.END_PROG));
+
 		ProgramRunner.run(prog);
 	}
 }

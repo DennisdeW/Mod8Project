@@ -289,6 +289,16 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitComp(@NotNull BaseGrammarParser.CompContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BaseGrammarParser#progdef}.
+	 * @param ctx the parse tree
+	 */
+	void enterProgdef(@NotNull BaseGrammarParser.ProgdefContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BaseGrammarParser#progdef}.
+	 * @param ctx the parse tree
+	 */
+	void exitProgdef(@NotNull BaseGrammarParser.ProgdefContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code boolOpExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree

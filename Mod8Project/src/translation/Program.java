@@ -10,6 +10,8 @@ import java.util.List;
  */
 public class Program {
 
+	private String name;
+	private int coreCount;
 	private List<Spril> instructions;
 
 	/**
@@ -19,6 +21,12 @@ public class Program {
 		this.instructions = new ArrayList<>();
 	}
 
+	public Program(String name, int coreCount) {
+		this();
+		this.name = name;
+		this.coreCount = coreCount;
+	}
+	
 	public List<Spril> getInstructions() {
 		return instructions;
 	}
@@ -42,5 +50,21 @@ public class Program {
 	public String[] print() {
 		return this.instructions.stream().map(instr -> instr.toString())
 				.toArray(String[]::new);
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getCoreCount() {
+		return coreCount <= 1 ? 1 : coreCount;
+	}
+
+	public void setCoreCount(int coreCount) {
+		this.coreCount = coreCount;
 	}
 }

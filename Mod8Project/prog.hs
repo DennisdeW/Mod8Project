@@ -4,9 +4,11 @@ import TypesEtc
 
 prog :: [Instruction]
 prog = [
-		  Const 6 RegA
-		, Const 7 RegB
-		, Compute Mul RegA RegB RegC
+		  Write Zero (Addr 0)
+		, TestAndSet (Addr 0)
+		, Receive RegA
+		, Branch RegA (Rel 2)
+		, Jump (Rel (0-3))
 		, EndProg
        ]
 

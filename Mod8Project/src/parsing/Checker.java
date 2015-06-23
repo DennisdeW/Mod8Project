@@ -31,35 +31,20 @@ import parsing.BaseGrammarParser.*;
 public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		ANTLRErrorListener {
 
-	private static final List<String>		INVALID_NAMES	= Arrays.asList(
-																	"int",
-																	"bool",
-																	"void",
-																	"if",
-																	"else",
-																	"while",
-																	"for",
-																	"return",
-																	"and",
-																	"or",
-																	"xor",
-																	"true",
-																	"false",
-																	"def",
-																	"break",
-																	"not",
-																	"string");
+	private static final List<String> INVALID_NAMES = Arrays.asList("int",
+			"bool", "void", "if", "else", "while", "for", "return", "and",
+			"or", "xor", "true", "false", "def", "break", "not", "string");
 
-	private Scope							scope;
-	private List<String>					errors;
-	private Map<FuncContext, Func>			functions;
-	private Set<String>						locks;
-	private ParseTreeProperty<Type>			types;
-	private ParseTreeProperty<Boolean>		shared;
-	private Func							currentFunc;
-	private Map<Func, TypedparamsContext>	params;
-	private CheckResult						result;
-	private boolean							dirty;
+	private Scope scope;
+	private List<String> errors;
+	private Map<FuncContext, Func> functions;
+	private Set<String> locks;
+	private ParseTreeProperty<Type> types;
+	private ParseTreeProperty<Boolean> shared;
+	private Func currentFunc;
+	private Map<Func, TypedparamsContext> params;
+	private CheckResult result;
+	private boolean dirty;
 
 	public CheckResult check(ANTLRInputStream stream) {
 		dirty = false;
@@ -164,6 +149,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 	public Void visitLockStat(LockStatContext ctx) {
 		locks.add(ctx.ID().getText());
+		if (ctx.block().toString().matches("\\breturn\\b")) {
+			error(ctx,
+					"Illegal return statement in locked block %s. (Returns from locks are not allowed)",
+					ctx.ID().getText());
+		}
 		visit(ctx.block());
 		return null;
 	}
@@ -184,6 +174,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		result.getOffsets().put(ctx.ID(), scope.getOffset(varId));
 
 		visit(ctx.expr());
+		checkType(ctx, type, ctx.expr());
 
 		return null;
 	}
@@ -486,6 +477,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		}
 		res += " - " + String.format(format, args);
 		errors.add(res);
+		result.getErrors().add(res);
 	}
 
 	@Override
@@ -516,12 +508,12 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	public class CheckResult {
-		private ParseTreeProperty<Type>		types;
-		private Map<ParseTree, Integer>		offsets;
-		private Set<FuncContext>			functions;
-		private List<String>				errors;
-		private ParseTreeProperty<Boolean>	shared;
-		private Map<String, Integer>		locks;
+		private ParseTreeProperty<Type> types;
+		private Map<ParseTree, Integer> offsets;
+		private Set<FuncContext> functions;
+		private List<String> errors;
+		private ParseTreeProperty<Boolean> shared;
+		private Map<String, Integer> locks;
 
 		public CheckResult(ParseTreeProperty<Type> types,
 				Map<ParseTree, Integer> offsets, Set<FuncContext> functions,
@@ -584,7 +576,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		public void setShared(ParseTreeProperty<Boolean> shared) {
 			this.shared = shared;
 		}
-		
+
 		public Map<String, Integer> getLocks() {
 			return locks;
 		}
@@ -594,8 +586,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		}
 
 		int maxOffset(boolean shared) {
-			return this.offsets.entrySet().stream()
-					.filter(e -> (this.shared == null) != shared || this.shared.get(e.getKey()))
+			return this.offsets
+					.entrySet()
+					.stream()
+					.filter(e -> (this.shared == null) != shared
+							|| this.shared.get(e.getKey()))
 					.mapToInt(i -> i.getValue()).max().orElse(0);
 		}
 
@@ -606,9 +601,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		int localStaticMemSize() {
 			return maxOffset(false) + funcCount();
 		}
-		
+
 		int sharedStaticMemSize() {
-			return maxOffset(true);
+			return maxOffset(true) + locks.size();
 		}
 
 		FuncContext getMatchingFunc(String name, List<Type> types) {
@@ -631,7 +626,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 				throw new RuntimeException("Could not get type of " + ctx.ID());
 			return res;
 		}
-		
+
 		void buildLocks(Set<String> locks) {
 			int addr = sharedStaticMemSize() + 1;
 			for (String lock : locks)

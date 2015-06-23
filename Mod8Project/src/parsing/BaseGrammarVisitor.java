@@ -177,6 +177,12 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitComp(@NotNull BaseGrammarParser.CompContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link BaseGrammarParser#progdef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProgdef(@NotNull BaseGrammarParser.ProgdefContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code boolOpExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree

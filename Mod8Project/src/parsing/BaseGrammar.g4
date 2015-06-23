@@ -2,7 +2,9 @@ grammar BaseGrammar;
 
 import LexerRules;
 
-program : (decl SEMI)* func ((decl SEMI)|func)*;
+program : progdef (decl SEMI)* func ((decl SEMI)|func)*;
+
+progdef : PROGRAM ID (LBRACE NUMBER RBRACE)? SEMI;
 
 block : LCURL stat* RCURL;
 
@@ -33,7 +35,7 @@ expr
 	;
 
 stat
-	: LOCK LBRACE ID RBRACE block UNLOCK						# lockStat
+	: LOCK LBRACE ID RBRACE block								# lockStat
 	| decl SEMI													# declStat
 	| assign SEMI												# assignStat
 	| IF expr block (ELSE IF expr block)* (ELSE block)?			# ifStat

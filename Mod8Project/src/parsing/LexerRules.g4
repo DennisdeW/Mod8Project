@@ -20,6 +20,7 @@ DEF : D E F;
 LOCK : L O C K;
 UNLOCK : U N L O C K;
 SHARED : S H A R E D;
+PROGRAM : P R O G R A M;
 
 UNDERSCORE : '_';
 DOT : '.';
