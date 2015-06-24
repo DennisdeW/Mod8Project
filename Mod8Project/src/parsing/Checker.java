@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ANTLRErrorListener;
@@ -26,18 +25,54 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import parsing.BaseGrammarParser.AssignContext;
+import parsing.BaseGrammarParser.BlockContext;
+import parsing.BaseGrammarParser.BoolOpExprContext;
+import parsing.BaseGrammarParser.CallContext;
+import parsing.BaseGrammarParser.CallExprContext;
+import parsing.BaseGrammarParser.CallStatContext;
+import parsing.BaseGrammarParser.CompExprContext;
+import parsing.BaseGrammarParser.DeclContext;
+import parsing.BaseGrammarParser.DivExprContext;
+import parsing.BaseGrammarParser.ExprContext;
+import parsing.BaseGrammarParser.FalseExprContext;
+import parsing.BaseGrammarParser.ForStatContext;
 import parsing.BaseGrammarParser.FuncContext;
+import parsing.BaseGrammarParser.IdExprContext;
+import parsing.BaseGrammarParser.IfStatContext;
+import parsing.BaseGrammarParser.InStatContext;
+import parsing.BaseGrammarParser.LockStatContext;
+import parsing.BaseGrammarParser.MinExprContext;
+import parsing.BaseGrammarParser.ModExprContext;
+import parsing.BaseGrammarParser.MultExprContext;
+import parsing.BaseGrammarParser.NegBoolExprContext;
+import parsing.BaseGrammarParser.NegNumExprContext;
+import parsing.BaseGrammarParser.NumExprContext;
+import parsing.BaseGrammarParser.OutStatContext;
+import parsing.BaseGrammarParser.ParExprContext;
+import parsing.BaseGrammarParser.PlusExprContext;
+import parsing.BaseGrammarParser.ProgramContext;
+import parsing.BaseGrammarParser.ReturnStatContext;
+import parsing.BaseGrammarParser.TopLevelBlockContext;
+import parsing.BaseGrammarParser.TrueExprContext;
 import parsing.BaseGrammarParser.TypedparamsContext;
+import parsing.BaseGrammarParser.ValContext;
+import parsing.BaseGrammarParser.WhileStatContext;
 import parsing.Type.Func;
-import parsing.BaseGrammarParser.*;
 
+/**
+ * Class Checker is used to parse a program
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
+ */
 public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		ANTLRErrorListener {
 
+	// Instance variable
 	private static final List<String> INVALID_NAMES = Arrays.asList("int",
 			"bool", "void", "if", "else", "while", "for", "return", "and",
 			"or", "xor", "true", "false", "def", "break", "not", "string");
 
+	// Instance variables
 	private Scope scope;
 	private List<String> errors;
 	private Map<FuncContext, Func> functions;
@@ -50,6 +85,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	private CheckResult result;
 	private boolean dirty;
 
+	/**
+	 * Check returns a checked program
+	 * @param stream The stream that needs to be processed
+	 * @return CheckedResult
+	 */
 	public CheckResult check(ANTLRInputStream stream) {
 		dirty = false;
 		BaseGrammarLexer lexer = new BaseGrammarLexer(stream);
@@ -64,6 +104,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return check(prog);
 	}
 
+	/**
+	 * Check returns a check program
+	 * @param prog The program that needs to be processed
+	 * @return CheckedResult
+	 */
 	public CheckResult check(ProgramContext prog) {
 		scope = new Scope();
 		errors = new ArrayList<>();
@@ -82,14 +127,25 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return result;
 	}
 
+	/**
+	 * Returns whether any errors occurred while processing a program
+	 * @return Whether an error has occurred
+	 */
 	public boolean hasErrors() {
 		return errors.size() != 0;
 	}
 
+	/**
+	 * The list with errors that occurred while processing the program
+	 * @return List<String> errors
+	 */
 	public List<String> getErrors() {
 		return new ArrayList<>(errors);
 	}
 
+	/**
+	 * 
+	 */
 	public Void visitProgram(ProgramContext ctx) {
 		ctx.decl().forEach(decl -> visit(decl));
 		ctx.func().forEach(func -> visit(func));
