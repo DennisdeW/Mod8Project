@@ -1,5 +1,6 @@
 package parsing;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -7,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,6 +27,7 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import parsing.BaseGrammarParser.FuncContext;
+import parsing.BaseGrammarParser.TypedparamsContext;
 import parsing.Type.Func;
 import parsing.BaseGrammarParser.*;
 
@@ -43,6 +46,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	private ParseTreeProperty<Boolean> shared;
 	private Func currentFunc;
 	private Map<Func, TypedparamsContext> params;
+	private Map<Func, List<Func>> callTree;
 	private CheckResult result;
 	private boolean dirty;
 
@@ -67,6 +71,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		params = new HashMap<>();
 		types = new ParseTreeProperty<>();
 		shared = new ParseTreeProperty<>();
+		callTree = new HashMap<>();
 		result = new CheckResult();
 		locks = new HashSet<>();
 		currentFunc = null;
@@ -88,7 +93,33 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	public Void visitProgram(ProgramContext ctx) {
 		ctx.decl().forEach(decl -> visit(decl));
 		ctx.func().forEach(func -> visit(func));
-		functions.forEach((fctx, func) -> processFunction(fctx, func));
+		Func main = functions
+				.values()
+				.stream()
+				.filter(f -> f.equals(Generator.MAIN_FUNC_SIG))
+				.findAny()
+				.orElseGet(
+						() -> {
+							error(ctx,
+									"No main function was defined. Please define the main function as %s",
+									Generator.MAIN_FUNC_SIG);
+							return null;
+						});
+		if (main != null) {
+			Queue<Func> funcs = new ArrayDeque<>();
+			funcs.offer(main);
+			while (!funcs.isEmpty()) {
+				Func current = funcs.poll();
+				FuncContext fctx = functions.entrySet().stream()
+						.filter(e -> e.getValue().equals(current)).findAny()
+						.map(e -> e.getKey()).get();
+				processFunction(fctx, current);
+				List<Func> callees;
+				if ((callees = callTree.get(current)) != null)
+					callees.forEach(callee -> funcs.offer(callee));
+			}
+		}
+		// functions.forEach((fctx, func) -> processFunction(fctx, func));
 		return null;
 	}
 
@@ -338,6 +369,16 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	public Void visitOutStat(OutStatContext ctx) {
+		visit(ctx.val());
+		return null;
+	}
+	
+	public Void visitInStat(InStatContext ctx) {
+		visit(ctx.ID());
+		return null;
+	}
+	
 	public Void visitTrueExpr(TrueExprContext ctx) {
 		types.put(ctx, Type.BOOL);
 		return null;
@@ -353,12 +394,14 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			types.put(ctx, Type.BOOL);
 		else if (ctx.NUMBER() != null)
 			types.put(ctx, Type.INT);
-		else {
+		else if (ctx.ID() != null) {
 			types.put(ctx, getType(ctx, ctx.ID().getText()));
 			result.getOffsets().put(ctx.ID(),
 					scope.getOffset(ctx.ID().getText()));
 			shared.put(ctx.ID(), scope.isShared(ctx.ID().getText()));
 			return null;
+		} else {
+			types.put(ctx, Type.INT);
 		}
 		return null;
 	}
@@ -399,6 +442,10 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 						.ID().getText(), args.toString());
 				return null;
 			}
+
+			callTree.putIfAbsent(currentFunc, new ArrayList<>());
+			callTree.get(currentFunc).add(res);
+
 			scope.declare(res);
 			scope.declare(res.getReturnName(), res.getReturnType());
 			result.getOffsets().put(ctx, scope.getOffset(res.getReturnName()));
@@ -617,7 +664,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		}
 
 		Type valType(ValContext ctx) {
-			if (ctx.NUMBER() != null)
+			if (ctx.NUMBER() != null || ctx.SPID() != null)
 				return Type.INT;
 			else if (ctx.TRUE() != null || ctx.FALSE() != null)
 				return Type.BOOL;

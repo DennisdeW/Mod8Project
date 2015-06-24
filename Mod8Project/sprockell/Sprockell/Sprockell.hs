@@ -107,6 +107,10 @@ decode instr = case instr of
     Write r (Deref p)    -> nullcode {ioCode=IOWrite, aguCode=AguDeref, deref=p, inputY=r}
 
     EndProg              -> nullcode {condCode=CTrue, target=TRel, immValue=0}
+    
+    Out r                -> nullcode {ioCode=IOOut, aguCode=AguImm, addrImm=0x1000000, inputY=r}
+    In r                 -> nullcode {ioCode=IORead, aguCode=AguImm, addrImm=0x1000000}
+	
     Debug _              -> nullcode
 
 
@@ -179,3 +183,4 @@ sendOut ioCode address value = case ioCode of
         IORead    -> Just (address, ReadReq)
         IOWrite   -> Just (address, WriteReq value)
         IOTest    -> Just (address, TestReq)
+        IOOut     -> Just (address, WriteReq (value + 48))

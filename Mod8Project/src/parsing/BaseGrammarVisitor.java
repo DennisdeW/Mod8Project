@@ -46,6 +46,13 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTrueExpr(@NotNull BaseGrammarParser.TrueExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code outStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOutStat(@NotNull BaseGrammarParser.OutStatContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link BaseGrammarParser#prefix}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -242,6 +249,13 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitFunc(@NotNull BaseGrammarParser.FuncContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code inStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInStat(@NotNull BaseGrammarParser.InStatContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code assignStat}
 	 * labeled alternative in {@link BaseGrammarParser#stat}.

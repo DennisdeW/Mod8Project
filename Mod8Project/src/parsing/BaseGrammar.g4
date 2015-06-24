@@ -43,6 +43,8 @@ stat
 	| call SEMI													# callStat
 	| block														# blockStat
 	| FOR LBRACE decl SEMI expr SEMI assign	RBRACE block		# forStat
+	| OUT LBRACE val RBRACE SEMI								# outStat
+	| IN LBRACE ID RBRACE SEMI									# inStat
 	| RETURN expr? SEMI											# returnStat						
 	;
 
@@ -50,7 +52,7 @@ decl : SHARED? type ID EQ expr;
 assign : ID EQ expr;
 
 type : INT | BOOL | VOID | TYPE;
-val : NUMBER | ID | TRUE | FALSE;
+val : NUMBER | ID | TRUE | FALSE | SPID;
 comp : LT | GT | EQ EQ | LE | GE | NE;
 boolOp : AND | OR | XOR;
 prefix : MINUS | NOT;

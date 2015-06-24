@@ -12,7 +12,7 @@ public enum OpCode {
 	CONST(INT, REG), COMPUTE(OP, REG, REG, REG), LOAD(MEM, REG), STORE(REG, MEM), BRANCH(
 			REG, TARGET), JUMP(TARGET), PUSH(REG), POP(REG), NOP(), END_PROG(
 			"EndProg"), READ(MEM), RECEIVE(REG), WRITE(REG, MEM), TEST_AND_SET(
-			"TestAndSet", MEM);
+			"TestAndSet", MEM), OUT(REG), IN(REG);
 
 	private OpType[] operands;
 	private String name;

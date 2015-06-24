@@ -86,18 +86,19 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 			System.err.println("WARNING: Main function return type should be "
 					+ MAIN_FUNC_SIG.getReturnType());
 
-		cres.getLocks()
+	/*	cres.getLocks()
 				.entrySet()
 				.forEach(
 						lock -> instrs.add(new Spril(OpCode.WRITE,
 								"Initialisation of lock " + lock.getKey(),
 								Register.ZERO, MemAddr.direct(lock.getValue()))));
+	*/
 
 		Spril jumpToMain = new Spril(OpCode.JUMP, "Jump To Main Function",
 				Target.absolute(-1));
 		instrs.add(jumpToMain);
 
-		int addr = 5 + ctx.decl().size() * 2 + cres.getLocks().size();
+		int addr = 5 + ctx.decl().size() * 2;// + cres.getLocks().size();
 		for (FuncContext func : ctx.func()) {
 			functionAddrs.put(func, addr);
 			if (calls.get(func) != null)
@@ -184,14 +185,24 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 			} else if (val.FALSE() != null) {
 				result.add(new Spril(OpCode.STORE, Register.ZERO, MemAddr
 						.direct(offset)));
-			} else {
+			} else if (val.ID() != null){
 				int callerOffset = cres.getOffsets().get(val.ID());
-				boolean resultIsShared = cres.getShared().get(val.ID());
-				// result.add(new Spril(OpCode.LOAD,
-				// MemAddr.direct(callerOffset),
-				// Register.A));
-				// result.add(new Spril(OpCode.STORE, Register.A, MemAddr
-				// .direct(offset)));
+				int calleeOffset = cres.getOffsets().get(
+						func.typedparams().ID(i));
+				boolean valIsShared = cres.getShared().get(val.ID());
+
+				if (valIsShared) {
+					result.add(new Spril(OpCode.READ, MemAddr
+							.direct(callerOffset)));
+					result.add(new Spril(OpCode.RECEIVE, Register.E));
+				} else {
+					result.add(new Spril(OpCode.LOAD, MemAddr
+							.direct(callerOffset), Register.E));
+				}
+				result.add(new Spril(OpCode.STORE, Register.E, MemAddr
+						.direct(calleeOffset)));
+			} else if (val.SPID() != null) {
+				result.add(new Spril(OpCode.STORE, Register.SPID, MemAddr.direct(offset)));
 			}
 		}
 
@@ -218,6 +229,17 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 				Operator.comparator(ctx.comp().getText()));
 	}
 
+	public List<Spril> visitOutStat(OutStatContext ctx) {
+		List<Spril> result = new ArrayList<>(visit(ctx.val()));
+		if (result.get(result.size() - 1).equals(
+				new Spril(OpCode.PUSH, Register.A)))
+			result.remove(result.size() - 1);
+		else
+			result.add(new Spril(OpCode.POP, Register.A));
+		result.add(new Spril(OpCode.OUT, Register.A));
+		return result;
+	}
+	
 	public List<Spril> visitDecl(DeclContext ctx) {
 		List<Spril> result = assign(ctx.ID(), ctx.expr());
 		result.get(0).addComment(
@@ -232,7 +254,8 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 
 	public List<Spril> visitAssign(AssignContext ctx) {
 		List<Spril> result = assign(ctx.ID(), ctx.expr());
-		result.get(0).addComment(ctx.ID().getText() + " = " + ctx.expr().getText());
+		result.get(0).addComment(
+				ctx.ID().getText() + " = " + ctx.expr().getText());
 		return result;
 	}
 
@@ -395,7 +418,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		result.add(new Spril(OpCode.POP, Register.A));
 		result.add(new Spril(OpCode.COMPUTE, Operator.SUB, Register.ZERO,
 				Register.A, Register.A));
-		result.add(new Spril(OpCode.PUSH));
+		result.add(new Spril(OpCode.PUSH, Register.A));
 		return result;
 	}
 
@@ -521,9 +544,26 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 				Register.ZERO, MemAddr.direct(lockAddr)));
 		return result;
 	}
+	
+	public List<Spril> visitVal(ValContext ctx) {
+		List<Spril> result = new ArrayList<>();
+		if (ctx.TRUE() != null) {
+			result.add(new Spril(OpCode.CONST, new Int(-1), Register.A));
+			result.add(new Spril(OpCode.PUSH, Register.A));
+		} else if (ctx.FALSE() != null) {
+			result.add(new Spril(OpCode.PUSH, Register.ZERO));
+		} else if (ctx.ID() != null) {
+			int offset = cres.getOffsets().get(ctx.ID());
+			result.add(new Spril(OpCode.LOAD, MemAddr.direct(offset), Register.A));
+			result.add(new Spril(OpCode.PUSH, Register.A));
+		} else {
+			result.add(new Spril(OpCode.PUSH, Register.SPID));
+		}
+		return result;
+	}
 
 	public static void main(String[] args) {
-		String prog = "program fortest; int sum = 0; def int main() { for (int i = 1; i < 10; i = i + 1) { sum = add(sum,i); } return dec(sum); } def int add(int x, int y) { return x + y; } def int dec(int x) { return x - 1; }";
+		String prog = "program outtest; def int main() { int i = 5 + 3; out(i); return i; } ";
 		ProgramContext ctx = new BaseGrammarParser(new CommonTokenStream(
 				new BaseGrammarLexer(new ANTLRInputStream(prog)))).program();
 		CheckResult cres = new Checker().check(ctx);

@@ -15,8 +15,8 @@ import parsing.Type.Func;
  */
 public class Scope {
 
-	private Set<Func>	functions;
-	private Level		current;
+	private Set<Func> functions;
+	private Level current;
 
 	/**
 	 * Construct a new, empty scope
@@ -184,13 +184,13 @@ public class Scope {
 	 *
 	 */
 	private class Level {
-		private Map<String, Type>		vars;
-		private Map<String, Integer>	offsets;
-		private Map<String, Boolean>	shared;
-		private Map<String, Integer>	sharedOffsets;
-		private final int				baseOffset, sharedOffset;
-		private final Level				enclosing;
-		private int						nextOffset, nextShared;
+		private Map<String, Type> vars;
+		private Map<String, Integer> offsets;
+		private Map<String, Boolean> shared;
+		private Map<String, Integer> sharedOffsets;
+		private final int baseOffset, sharedOffset;
+		private final Level enclosing;
+		private int nextOffset, nextShared;
 
 		Level(Level enclosing) {
 			this.vars = new HashMap<>();
@@ -220,17 +220,21 @@ public class Scope {
 		}
 
 		private int getOffset() {
-			return baseOffset
+			/*return baseOffset
 					+ vars.entrySet().stream()
 							.filter(v -> !isShared(v.getKey()))
 							.mapToInt(t -> t.getValue().getSize()).sum();
-		}
+			 */
+			return nextOffset;
+			}
 
 		private int getSharedOffset() {
-			return sharedOffset
+			/*return sharedOffset
 					+ vars.entrySet().stream()
 							.filter(v -> isShared(v.getKey()))
 							.mapToInt(t -> t.getValue().getSize()).sum();
+							*/
+			return nextShared;
 		}
 
 		boolean isGlobal() {
@@ -248,12 +252,20 @@ public class Scope {
 			this.shared.put(id, shared);
 			if (shared) {
 				this.sharedOffsets.put(id, nextShared);
-				nextShared += type.getSize();
 			} else {
 				this.offsets.put(id, nextOffset);
-				nextOffset += type.getSize();
 			}
+			bubble(shared, type.getSize());
 			return true;
+		}
+
+		private void bubble(boolean shared, int amount) {
+			if (shared)
+				nextShared += amount;
+			else
+				nextOffset += amount;
+			if (!isGlobal())
+				enclosing.bubble(shared, amount);
 		}
 
 		boolean isDeclared(String id) {

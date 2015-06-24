@@ -34,6 +34,10 @@ data Instruction =
                                              -- this instruction, the simulation will halt.
         | Nop                                -- "No operation".
         | Debug String                       -- No real instruction, for debug purposes.
+		
+		{-ADDITION-}
+		| Out Reg							 -- Write to stdout
+		| In Reg							 -- Read from stdin (use Receive as next instruction)
         deriving (Eq,Show,Read)
 
 data Reg = Zero                              -- Read only zero value
@@ -102,6 +106,7 @@ data IOCode = IONone
             | IORead
             | IOWrite
             | IOTest
+			| IOOut
             deriving (Eq,Show)
 
 data MachCode = MachCode

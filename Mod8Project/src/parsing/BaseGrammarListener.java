@@ -67,6 +67,18 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitTrueExpr(@NotNull BaseGrammarParser.TrueExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code outStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void enterOutStat(@NotNull BaseGrammarParser.OutStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code outStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void exitOutStat(@NotNull BaseGrammarParser.OutStatContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BaseGrammarParser#prefix}.
 	 * @param ctx the parse tree
 	 */
@@ -400,6 +412,18 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFunc(@NotNull BaseGrammarParser.FuncContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code inStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void enterInStat(@NotNull BaseGrammarParser.InStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code inStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void exitInStat(@NotNull BaseGrammarParser.InStatContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code assignStat}
 	 * labeled alternative in {@link BaseGrammarParser#stat}.

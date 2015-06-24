@@ -21,6 +21,9 @@ LOCK : L O C K;
 UNLOCK : U N L O C K;
 SHARED : S H A R E D;
 PROGRAM : P R O G R A M;
+SPID : '$' S P I D;
+OUT : O U T;
+IN : I N;
 
 UNDERSCORE : '_';
 DOT : '.';

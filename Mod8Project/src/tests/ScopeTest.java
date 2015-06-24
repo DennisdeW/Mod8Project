@@ -42,6 +42,8 @@ public class ScopeTest {
 		assertEquals(Type.INT, scope.getType("a"));
 		scope.closeScope();
 		assertTrue(scope.isDeclaredLocally("a"));
+		scope.declare("b", Type.BOOL);
+		assertEquals(2, scope.getOffset("b"));
 		try {
 			scope.closeScope();
 			fail();
