@@ -2,11 +2,10 @@ package translation;
 
 /**
  * A memory address. It can either be a constant address, or a register containing one.
- * @author Dennis
- *
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
  */
 public class MemAddr implements Operand {
-
+	// Instance variables
 	private Register reg;
 	private int addr;
 	private boolean isReg;
@@ -56,5 +55,4 @@ public class MemAddr implements Operand {
 	public OpType getType() {
 		return OpType.MEM;
 	}
-
 }

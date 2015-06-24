@@ -15,12 +15,24 @@ import translation.Program;
  */
 public final class ProgramRunner {
 
+	// Instance variables
 	private static final String BASE_PATH = new File("").getAbsolutePath();
 
+	/**
+	 * Empty Constructor
+	 */
 	private ProgramRunner() {
-
 	}
 
+	/**
+	 * run() compiles a haskell file and runs the .exe it created
+	 * 
+	 * @param prog
+	 *            The program that needs to be compiled
+	 * @param temp
+	 *            Boolean whether the created files should be deleted after
+	 *            execution
+	 */
 	private static void run(Program prog, boolean temp) {
 		String name = prog.getName();
 		if (name == null)

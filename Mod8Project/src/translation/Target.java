@@ -3,20 +3,34 @@ package translation;
 /**
  * A jump target. It may be absolute, relative or indirect (using a register).
  * 
- * @author Dennis
- *
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
  */
 public class Target implements Operand {
 
+	// Instance variables
 	private int addr;
 	private Register reg;
 	private boolean isReg, isAbs;
 
+	/**
+	 * Constructor Target sets certain instance variables
+	 * 
+	 * @param reg
+	 *            the register that needs to be set
+	 */
 	private Target(Register reg) {
 		this.reg = reg;
 		this.isReg = true;
 	}
 
+	/**
+	 * Constructor Target sets certain instance variables
+	 * 
+	 * @param addr
+	 *            the address that needs to be set
+	 * @param isAbs
+	 *            the value for isAbs that needs to be set
+	 */
 	private Target(int addr, boolean isAbs) {
 		this.addr = addr;
 		this.isReg = false;
@@ -68,5 +82,4 @@ public class Target implements Operand {
 	public OpType getType() {
 		return OpType.TARGET;
 	}
-
 }

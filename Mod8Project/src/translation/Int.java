@@ -2,8 +2,7 @@ package translation;
 
 /**
  * A wrapper for an int.
- * @author Dennis
- *
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
  */
 public class Int implements Operand {
 
