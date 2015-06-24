@@ -17,11 +17,20 @@ import org.junit.Test;
 import parsing.Checker;
 import parsing.Checker.CheckResult;
 
+/**
+ * Class CheckerTest is used to test the Checker class
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
+ */
 public class CheckerTest {
+	
+	// Instance Variables
 	private FileInputStream testCorrect;
 	private FileInputStream testIncorrect;
 	private Checker checker;
 
+	/**
+	 * init() initializes the instance variables
+	 */
 	@Before
 	public void init() {
 		try {
@@ -35,6 +44,9 @@ public class CheckerTest {
 		}
 	}
 
+	/**
+	 * tearDown() is used to close the FileInputStreams testCorrect and testIncorrect
+	 */
 	@After
 	public void tearDown() {
 		try {
@@ -45,11 +57,13 @@ public class CheckerTest {
 		}
 	}
 
+	/**
+	 * testCorrect() tries to parse testTrue.tmp and checks whether it is parsed correctly
+	 */
 	@Test
 	public void testCorrect() {
-		try {
-			
-			CheckResult res = (checker.check(new ANTLRInputStream(testCorrect)));
+		try {		
+			checker.check(new ANTLRInputStream(testCorrect));
 			if (checker.hasErrors()) {
 				System.out.println(checker.getErrors().stream().collect(Collectors.joining("\n")));
 				fail();
@@ -58,10 +72,12 @@ public class CheckerTest {
 		} catch (RecognitionException | IOException e) {
 			e.printStackTrace();
 			fail();
-
 		}
 	}
 
+	/**
+	 * testIncorrect() tries to parse testFalse.tmp and checks whether it is parsed correctly
+	 */
 	@Test
 	public void testInCorrect() {
 		try {
@@ -74,7 +90,6 @@ public class CheckerTest {
 		} catch (RecognitionException | IOException e) {
 			e.printStackTrace();
 			fail();
-
 		}
 	}
 }

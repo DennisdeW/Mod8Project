@@ -6,11 +6,11 @@ import java.util.stream.Collectors;
 /**
  * An instruction in the Spril language.
  * 
- * @author Dennis
- *
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
  */
 public class Spril {
 
+	// Instance variables
 	private Operand[] operands;
 	private OpCode opcode;
 	private String comment;
@@ -63,10 +63,20 @@ public class Spril {
 						opcode.getOperands()[i], this.operands[i].getType()));
 	}
 
+	/**
+	 * getOpCode() returns opcode, the opcode corresponding with this Spril
+	 * 
+	 * @return opCode
+	 */
 	public OpCode getOpCode() {
 		return opcode;
 	}
 
+	/**
+	 * getOperands() returns the array containing operands
+	 * 
+	 * @return operands
+	 */
 	public Operand[] getOperands() {
 		return operands;
 	}
@@ -112,19 +122,35 @@ public class Spril {
 		return true;
 	}
 
+	/**
+	 * getComment() returns the comment of this spril
+	 * 
+	 * @return comment
+	 */
 	public String getComment() {
 		return comment;
 	}
 
+	/**
+	 * addComment() adds a comment
+	 * 
+	 * @param comment
+	 */
 	public void addComment(String comment) {
-		if (this.comment.equals(""))
-		this.comment = comment;
-		else
+		if (this.comment.equals("")) {
+			this.comment = comment;
+		} else {
 			this.comment += "; " + comment;
+		}
 	}
-	
+
+	/**
+	 * setComment() sets the comment of this Spril
+	 * 
+	 * @param comment
+	 *            , the value that needs to be set
+	 */
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-
 }

@@ -2,28 +2,26 @@ package translation;
 
 /**
  * A representation of Spril operators.
- * 
- * @author Dennis
- *
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
  */
 public enum Operator implements Operand {
 	ADD, SUB, MUL, DIV, MOD, EQ("Equal"), NEQ("NEq"), GT, GTE("GtE"), LT, LTE("LtE"), AND, OR, XOR, LSHIFT(
 			"LShift"), RSHIFT("RShift");
 
+	// Instance variables
 	private String name;
 
 	/**
-	 * Use default name: First character capitalized, the rest lower case.
+	 * Use default name: First character capitalized, the rest lower case
 	 */
 	private Operator() {
 		this.name = name().charAt(0) + name().substring(1).toLowerCase();
 	}
 
 	/**
-	 * Use custom name.
-	 * 
+	 * Use custom name
 	 * @param name
-	 *            The name to use.
+	 *            The name to use
 	 */
 	private Operator(String name) {
 		this.name = name;
@@ -44,6 +42,11 @@ public enum Operator implements Operand {
 		return OpType.OP;
 	}
 
+	/**
+	 * boolOp is used to parse a certain boolean operator
+	 * @param text
+	 * @return Operator
+	 */
 	public static Operator boolOp(String text) {
 		switch (text) {
 		case "AND":
@@ -57,6 +60,11 @@ public enum Operator implements Operand {
 		}
 	}
 
+	/**
+	 * comparator is used to parse a certain compare statement
+	 * @param text
+	 * @return Operator
+	 */
 	public static Operator comparator(String text) {
 		switch (text) {
 		case "==":
@@ -76,10 +84,14 @@ public enum Operator implements Operand {
 		}
 	}
 	
+	/**
+	 * invert() is used invert a certain comparator
+	 * @return Operator
+	 */
 	public Operator invert() {
 		switch(this) {
 		case EQ:
-			return EQ;
+			return NEQ;
 		case GT:
 			return LTE;
 		case GTE:
@@ -94,5 +106,4 @@ public enum Operator implements Operand {
 			throw new RuntimeException("Can only invert comparators.");		
 		}
 	}
-
 }

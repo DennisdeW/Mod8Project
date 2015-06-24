@@ -2,12 +2,9 @@ package translation;
 
 /**
  * Operands for use in Spril instructions
- * 
- * @author Dennis
- *
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
  */
 public interface Operand {
-
 	/**
 	 * @return The Haskell statement corresponding to the operand
 	 */

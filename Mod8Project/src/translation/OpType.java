@@ -2,9 +2,7 @@ package translation;
 
 /**
  * The different types of operands.
- * 
- * @author Dennis
- *
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
  */
 public enum OpType {
 	/**

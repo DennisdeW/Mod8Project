@@ -12,8 +12,15 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+/**
+ * Class SprilTest is used to test whether the program can correctly make instructions
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
+ */
 public class SprilTest {
 
+	/**
+	 * doTest() tries to make instructions and checks whether they are correct
+	 */
 	@Test
 	public void doTest() {
 		Spril cnst = new Spril(OpCode.CONST, new Int(5), Register.A);
@@ -44,12 +51,14 @@ public class SprilTest {
 			fail(err.toString());
 		} catch (IllegalArgumentException e) {
 			// expected
+			e.printStackTrace();
 		}
 		try {
 			Spril err = new Spril(OpCode.RECEIVE, new Int(42)); // Wrong operand type
 			fail(err.toString());
 		} catch (IllegalArgumentException e) {
 			// expected
+			e.printStackTrace();
 		}
 		try {
 			Spril err = new Spril(OpCode.STORE, Register.A,
@@ -57,19 +66,21 @@ public class SprilTest {
 			fail(err.toString());
 		} catch (IllegalArgumentException e) {
 			// expected
+			e.printStackTrace();
 		}
 		try {
 			Spril err = new Spril(OpCode.PUSH); // Too few arguments
 			fail(err.toString());
 		} catch (IllegalArgumentException e) {
 			// expected
+			e.printStackTrace();
 		}
 		try {
 			Spril err = new Spril(OpCode.POP, Register.A, Register.B); // Too many arguments
 			fail(err.toString());
 		} catch (IllegalArgumentException e) {
 			// expected
+			e.printStackTrace();
 		}
 	}
-
 }
