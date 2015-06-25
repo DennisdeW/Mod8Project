@@ -1,6 +1,5 @@
 package tests;
 
-
 import static org.junit.Assert.*;
 
 import org.junit.Test;
@@ -9,8 +8,16 @@ import parsing.Scope;
 import parsing.Type;
 import parsing.Type.Func;
 
+/**
+ * Class ScopeTest is used to test the Scope class.
+ * 
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
+ */
 public class ScopeTest {
 
+	/**
+	 * Does a test on a scope with a single layer.
+	 */
 	@Test
 	public void testSingleLayer() {
 		Scope scope = new Scope();
@@ -24,7 +31,10 @@ public class ScopeTest {
 		assertEquals(1, scope.getOffset("b"));
 		assertEquals(Type.INT, scope.getType("a"));
 	}
-	
+
+	/**
+	 * Does a test on a scope with multiple layers.
+	 */
 	@Test
 	public void testMultiLayer() {
 		Scope scope = new Scope();
@@ -48,10 +58,13 @@ public class ScopeTest {
 			scope.closeScope();
 			fail();
 		} catch (IllegalStateException e) {
-			//expected - trying to close global scope
+			// expected - trying to close global scope
 		}
 	}
-	
+
+	/**
+	 * Does a test on a scope with functions.
+	 */
 	@Test
 	public void testFunctions() {
 		Scope scope = new Scope();
@@ -68,9 +81,13 @@ public class ScopeTest {
 		assertFalse(scope.isDeclared(c));
 		assertTrue(scope.declare(c));
 		assertTrue(scope.isDeclared(new Func("c", Type.BOOL, Type.INT)));
-		assertFalse(scope.isDeclared(new Func("a", Type.VOID, Type.INT, Type.INT)));
+		assertFalse(scope.isDeclared(new Func("a", Type.VOID, Type.INT,
+				Type.INT)));
 	}
-	
+
+	/**
+	 * Does a test on a scope with global variables.
+	 */
 	@Test
 	public void testShared() {
 		Scope scope = new Scope();
