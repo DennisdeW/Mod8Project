@@ -36,12 +36,19 @@ import parsing.BaseGrammarParser.*;
 /**
  * Class Checker is used to parse a program
  * 
- * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
  */
 public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		ANTLRErrorListener {
 
+	/**
+	 * Class CheckResult ?.
+	 * 
+	 * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
+	 */
 	public class CheckResult {
+
+		// Instance variables
 		private ParseTreeProperty<IType> types;
 		private Map<ParseTree, Integer> offsets;
 		private Set<FuncContext> functions;
@@ -49,6 +56,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		private ParseTreeProperty<Boolean> shared;
 		private Map<String, Integer> locks;
 
+		/**
+		 * Constructor CheckResult sets certain instance variables.
+		 */
 		public CheckResult() {
 			this.types = new ParseTreeProperty<>();
 			this.offsets = new HashMap<>();
@@ -58,6 +68,28 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			this.locks = new HashMap<>();
 		}
 
+		/**
+		 * Constructor CheckResult sets certain instance variables.
+		 * 
+		 * @param types
+		 *            The value that needs to be put in instance variable
+		 *            <code>types</code>.
+		 * @param offsets
+		 *            The value that needs to be put in instance variable
+		 *            <code>offsets</code>.
+		 * @param functions
+		 *            The value that needs to be put in instance variable
+		 *            <code>functions</code>.
+		 * @param errors
+		 *            The value that needs to be put in instance variable
+		 *            <code>errors</code>.
+		 * @param shared
+		 *            The value that needs to be put in instance variable
+		 *            <code>shared</code>.
+		 * @param locks
+		 *            The value that needs to be put in instance variable
+		 *            <code>locks</code>.
+		 */
 		public CheckResult(ParseTreeProperty<IType> types,
 				Map<ParseTree, Integer> offsets, Set<FuncContext> functions,
 				List<String> errors, ParseTreeProperty<Boolean> shared,
@@ -71,50 +103,116 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			this.locks = locks;
 		}
 
+		/**
+		 * Getter for the List with errors.
+		 * 
+		 * @return A List with errors.
+		 */
 		public List<String> getErrors() {
 			return errors;
 		}
 
+		/**
+		 * Getter for the Set with functions.
+		 * 
+		 * @return A Set with functions.
+		 */
 		public Set<FuncContext> getFunctions() {
 			return functions;
 		}
 
+		/**
+		 * Getter for the Map with locks.
+		 * 
+		 * @return A Map with locks.
+		 */
 		public Map<String, Integer> getLocks() {
 			return locks;
 		}
 
+		/**
+		 * Getter for the Map with errors.
+		 * 
+		 * @return A Map with offsets.
+		 */
 		public Map<ParseTree, Integer> getOffsets() {
 			return offsets;
 		}
 
+		/**
+		 * Getter for the ParseTreeProperty with booleans.
+		 * 
+		 * @return A ParseTreeProperty with booleans.
+		 */
 		public ParseTreeProperty<Boolean> getShared() {
 			return shared;
 		}
 
+		/**
+		 * Getter for the ParseTreeProperty with ITypes.
+		 * 
+		 * @return A ParseTreeProperty with ITypes.
+		 */
 		public ParseTreeProperty<IType> getTypes() {
 			return types;
 		}
 
+		/**
+		 * Setter for the List with errors.
+		 * 
+		 * @param errors
+		 *            The List that needs to become errors.
+		 */
 		public void setErrors(List<String> errors) {
 			this.errors = errors;
 		}
 
+		/**
+		 * Setter for the Set with functions.
+		 * 
+		 * @param errors
+		 *            The Set that needs to become functions.
+		 */
 		public void setFunctions(Set<FuncContext> functions) {
 			this.functions = functions;
 		}
 
+		/**
+		 * Setter for the Map with locks.
+		 * 
+		 * @param errors
+		 *            The Map that needs to become locks.
+		 */
 		public void setLocks(Map<String, Integer> locks) {
 			this.locks = locks;
 		}
 
+		/**
+		 * Setter for the Map with offsets.
+		 * 
+		 * @param errors
+		 *            The Map that needs to become offsets.
+		 */
 		public void setOffsets(Map<ParseTree, Integer> offsets) {
 			this.offsets = offsets;
 		}
 
+		/**
+		 * Setter for the ParseTreeProperty with booleans.
+		 * 
+		 * @param errors
+		 *            The ParseTreeProperty that needs to become booleans.
+		 */
 		public void setShared(ParseTreeProperty<Boolean> shared) {
 			this.shared = shared;
 		}
 
+		/**
+		 * Setter for the ParseTreeProperty with types.
+		 * 
+		 * @param errors
+		 *            The ParseTreeProperty that needs to become types.
+		 */
 		public void setTypes(ParseTreeProperty<IType> types) {
 			this.types = types;
 		}
@@ -125,16 +223,36 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 					+ ", funcAddrs=" + functions + ", errors=" + errors + "]";
 		}
 
+		/**
+		 * Adds locks to the instance variable containing locks.
+		 * 
+		 * @param locks
+		 *            The Set with locks that need to be added to the instance
+		 *            variable containing locks.
+		 */
 		void buildLocks(Set<String> locks) {
 			int addr = sharedStaticMemSize() + 1;
 			for (String lock : locks)
 				this.locks.put(lock, addr++);
 		}
 
+		/**
+		 * Returns the amount of functions that are in the corresponding
+		 * instance variable.
+		 * 
+		 * @return The amount of functions.
+		 */
 		int funcCount() {
 			return this.functions.size();
 		}
 
+		/**
+		 * Returns ?
+		 * 
+		 * @param name
+		 * @param types
+		 * @return
+		 */
 		FuncContext getMatchingFunc(String name, List<IType> types) {
 			return this.functions
 					.stream()
@@ -145,16 +263,29 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 					.orElse(null);
 		}
 
+		/**
+		 * ?
+		 * 
+		 * @return
+		 */
 		int localStaticMemSize() {
 			return maxOffset(false) + funcCount();
 		}
 
+		/**
+		 * Returns the maximal offset ?
+		 * 
+		 * @param shared
+		 *            Whether the variable is global or not.
+		 * @return
+		 */
 		int maxOffset(boolean shared) {
 			return this.offsets
 					.entrySet()
 					.stream()
 					.filter(e -> (this.shared == null) != shared
-							|| (this.shared.get(e.getKey()) != null && this.shared.get(e.getKey())))
+							|| (this.shared.get(e.getKey()) != null && this.shared
+									.get(e.getKey())))
 					.mapToInt(i -> i.getValue()).max().orElse(0);
 		}
 
@@ -174,6 +305,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		}
 	}
 
+	/**
+	 * Instance variables.
+	 */
 	private static final List<String> INVALID_NAMES = Arrays.asList("int",
 			"bool", "void", "if", "else", "while", "for", "return", "and",
 			"or", "xor", "true", "false", "def", "break", "not", "string");
@@ -187,15 +321,14 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	private Map<Func, TypedparamsContext> params;
 	private Map<Func, List<Func>> callTree;
 	private CheckResult result;
-
 	private boolean dirty;
 
 	/**
-	 * Check returns a checked program
+	 * Check returns a checked program.
 	 * 
 	 * @param stream
-	 *            The stream that needs to be processed
-	 * @return CheckedResult
+	 *            The stream that needs to be processed.
+	 * @return CheckedResult.
 	 */
 	public CheckResult check(ANTLRInputStream stream) {
 		dirty = false;
@@ -212,11 +345,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	/**
-	 * Check returns a check program
+	 * Check returns a check program.
 	 * 
 	 * @param prog
-	 *            The program that needs to be processed
-	 * @return CheckedResult
+	 *            The program that needs to be processed.
+	 * @return CheckedResult.
 	 */
 	public CheckResult check(ProgramContext prog) {
 		scope = new Scope();
@@ -237,18 +370,18 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	/**
-	 * The list with errors that occurred while processing the program
+	 * The list with errors that occurred while processing the program.
 	 * 
-	 * @return List<String> errors
+	 * @return List<String> errors.
 	 */
 	public List<String> getErrors() {
 		return new ArrayList<>(errors);
 	}
 
 	/**
-	 * Returns whether any errors occurred while processing a program
+	 * Returns whether any errors occurred while processing a program.
 	 * 
-	 * @return Whether an error has occurred
+	 * @return Whether an error has occurred.
 	 */
 	public boolean hasErrors() {
 		return errors.size() != 0;
@@ -281,6 +414,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		dirty = true;
 	}
 
+	/**
+	 * Called when an assign statement is recognized.
+	 */
 	public Void visitAssign(AssignContext ctx) {
 		String target = ctx.derefID().getText();
 		TerminalNode id = getID(ctx.derefID());
@@ -295,10 +431,14 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		IType sourceType = getType(ctx.expr());
 		checkType(ctx, targetType, sourceType);
 		shared.put(id, scope.isShared(target.replaceAll("\\*", "")));
-		result.getOffsets().put(id, scope.getOffset(target.replaceAll("\\*", "")));
+		result.getOffsets().put(id,
+				scope.getOffset(target.replaceAll("\\*", "")));
 		return null;
 	}
 
+	/**
+	 * Called when a block is recognized.
+	 */
 	public Void visitBlock(BlockContext ctx) {
 		scope.openScope();
 		ctx.stat().forEach(s -> visit(s));
@@ -306,6 +446,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when a boolean operator expression is recognized.
+	 */
 	public Void visitBoolOpExpr(BoolOpExprContext ctx) {
 		ExprContext fst = ctx.expr(0);
 		ExprContext snd = ctx.expr(1);
@@ -317,6 +460,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when a call expression is recognized.
+	 */
 	public Void visitCallExpr(CallExprContext ctx) {
 		Func function = call(ctx.call(), null);
 		types.put(ctx, function != null ? function.getReturnType()
@@ -324,11 +470,17 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when a call statement is recognized.
+	 */
 	public Void visitCallStat(CallStatContext ctx) {
 		call(ctx.call(), null);
 		return null;
 	}
 
+	/**
+	 * Called when a comparator expression is recognized.
+	 */
 	public Void visitCompExpr(CompExprContext ctx) {
 		ExprContext fst = ctx.expr(0);
 		ExprContext snd = ctx.expr(1);
@@ -340,6 +492,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when a declaration is recognized.
+	 */
 	public Void visitDecl(DeclContext ctx) {
 		String varId = ctx.ID().getText();
 		if (!checkName(ctx, varId))
@@ -360,12 +515,17 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 		return null;
 	}
-	
+
+	/**
+	 * Called when a times expression is recognized.
+	 */
 	public Void visitDerefExpr(DerefExprContext ctx) {
 		visit(ctx.expr());
 		IType ptr = types.get(ctx.expr());
 		if (!(ptr instanceof Pointer)) {
-			error(ctx, "Tried dereferencing %s (type %s), which is not a pointer.", ctx.expr().getText(), ptr);
+			error(ctx,
+					"Tried dereferencing %s (type %s), which is not a pointer.",
+					ctx.expr().getText(), ptr);
 			types.put(ctx, Type.ERR_TYPE);
 			return null;
 		}
@@ -373,16 +533,25 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when a division expression is recognized.
+	 */
 	public Void visitDivExpr(DivExprContext ctx) {
 		arithmeticExpr(ctx, ctx.expr(0), ctx.expr(1));
 		return null;
 	}
 
+	/**
+	 * Called when a false expression is recognized.
+	 */
 	public Void visitFalseExpr(FalseExprContext ctx) {
 		types.put(ctx, Type.BOOL);
 		return null;
 	}
 
+	/**
+	 * Called when a for statement is recognized.
+	 */
 	public Void visitForStat(ForStatContext ctx) {
 		if (!checkType(ctx, Type.INT,
 				typeForName(ctx, ctx.decl().type().getText()))) {
@@ -395,6 +564,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when a function is recognized.
+	 */
 	public Void visitFunc(FuncContext ctx) {
 		IType retType = IType.forName(ctx.type().getText());
 		types.put(ctx, retType);
@@ -415,6 +587,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when an id expression is recognized.
+	 */
 	public Void visitIdExpr(IdExprContext ctx) {
 		types.put(ctx, getType(ctx, ctx.ID().getText()));
 		shared.put(ctx.ID(), scope.isShared(ctx.ID().getText()));
@@ -422,6 +597,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when an if statement is recognized.
+	 */
 	public Void visitIfStat(IfStatContext ctx) {
 		for (int i = 0; i < ctx.expr().size(); i++) {
 			visit(ctx.expr(i));
@@ -431,11 +609,17 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when an in statement is recognized.
+	 */
 	public Void visitInStat(InStatContext ctx) {
 		visit(ctx.ID());
 		return null;
 	}
 
+	/**
+	 * Called when a lock statement is recognized.
+	 */
 	public Void visitLockStat(LockStatContext ctx) {
 		locks.add(ctx.ID().getText());
 		if (ctx.block().toString().matches("\\breturn\\b")) {
@@ -447,21 +631,33 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when a minus expression is recognized.
+	 */
 	public Void visitMinExpr(MinExprContext ctx) {
 		arithmeticExpr(ctx, ctx.expr(0), ctx.expr(1));
 		return null;
 	}
 
+	/**
+	 * Called when a mod expression is recognized.
+	 */
 	public Void visitModExpr(ModExprContext ctx) {
 		arithmeticExpr(ctx, ctx.expr(0), ctx.expr(1));
 		return null;
 	}
 
+	/**
+	 * Called when a multiplication expression is recognized.
+	 */
 	public Void visitMultExpr(MultExprContext ctx) {
 		arithmeticExpr(ctx, ctx.expr(0), ctx.expr(1));
 		return null;
 	}
 
+	/**
+	 * Called when a negate boolean expression is recognized.
+	 */
 	public Void visitNegBoolExpr(NegBoolExprContext ctx) {
 		visit(ctx.expr());
 		if (checkType(ctx, Type.BOOL, ctx.expr()))
@@ -471,6 +667,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when a negate number expression is recognized.
+	 */
 	public Void visitNegNumExpr(NegNumExprContext ctx) {
 		visit(ctx.expr());
 		if (checkType(ctx, Type.INT, ctx.expr()))
@@ -480,27 +679,42 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when a number expression is recognized.
+	 */
 	public Void visitNumExpr(NumExprContext ctx) {
 		types.put(ctx, Type.INT);
 		return null;
 	}
 
+	/**
+	 * Called when a out statement is recognized.
+	 */
 	public Void visitOutStat(OutStatContext ctx) {
 		visit(ctx.expr());
 		return null;
 	}
 
+	/**
+	 * Called when a par expression is recognized.
+	 */
 	public Void visitParExpr(ParExprContext ctx) {
 		visit(ctx.expr());
 		types.put(ctx, getType(ctx.expr()));
 		return null;
 	}
 
+	/**
+	 * Called when a plus expression is recognized.
+	 */
 	public Void visitPlusExpr(PlusExprContext ctx) {
 		arithmeticExpr(ctx, ctx.expr(0), ctx.expr(1));
 		return null;
 	}
 
+	/**
+	 * Called when a program expression is recognized.
+	 */
 	public Void visitProgram(ProgramContext ctx) {
 		ctx.decl().forEach(decl -> visit(decl));
 		ctx.func().forEach(func -> visit(func));
@@ -533,13 +747,19 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		// functions.forEach((fctx, func) -> processFunction(fctx, func));
 		return null;
 	}
-	
+
+	/**
+	 * Called when a ?
+	 */
 	public Void visitRefExpr(RefExprContext ctx) {
 		visit(ctx.expr());
 		types.put(ctx, new Pointer(types.get(ctx.expr())));
 		return null;
 	}
 
+	/**
+	 * Called when a return statement is recognized.
+	 */
 	public Void visitReturnStat(ReturnStatContext ctx) {
 		IType expected = currentFunc.getReturnType();
 		if (ctx.expr() != null) {
@@ -563,6 +783,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when a top level block is recognized.
+	 */
 	public Void visitTopLevelBlock(TopLevelBlockContext ctx) {
 		scope.openScope();
 		visit(params.get(currentFunc));
@@ -571,11 +794,17 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when a true expression is recognized.
+	 */
 	public Void visitTrueExpr(TrueExprContext ctx) {
 		types.put(ctx, Type.BOOL);
 		return null;
 	}
 
+	/**
+	 * Called when a typed parameter is recognized.
+	 */
 	public Void visitTypedparams(TypedparamsContext ctx) {
 		for (int i = 0; i < ctx.type().size(); i++) {
 			String name = ctx.ID(i).getText();
@@ -590,6 +819,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when a value is recognized.
+	 */
 	public Void visitVal(ValContext ctx) {
 		if (ctx.TRUE() != null || ctx.FALSE() != null)
 			types.put(ctx, Type.BOOL);
@@ -607,6 +839,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Called when a while statement is recognized.
+	 */
 	public Void visitWhileStat(WhileStatContext ctx) {
 		visit(ctx.expr());
 		checkType(ctx, Type.BOOL, getType(ctx.expr()));
@@ -614,6 +849,16 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	/**
+	 * Arithmetic expression.
+	 * 
+	 * @param ctx
+	 *            The complete expression.
+	 * @param fst
+	 *            The first expression.
+	 * @param snd
+	 *            The second expression.
+	 */
 	private void arithmeticExpr(ExprContext ctx, ExprContext fst,
 			ExprContext snd) {
 		visit(fst);
@@ -623,6 +868,13 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		types.put(ctx, Type.INT);
 	}
 
+	/**
+	 * ?
+	 * 
+	 * @param ctx
+	 * @param expectedReturn
+	 * @return
+	 */
 	private Func call(CallContext ctx, IType expectedReturn) {
 		List<IType> args = new ArrayList<>();
 		ctx.params().val().stream().forEachOrdered(val -> {
@@ -685,6 +937,15 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		}
 	}
 
+	/**
+	 * Checks whether a name is valid or not.
+	 * 
+	 * @param tree
+	 *            The ParseTree on which this function is called.
+	 * @param name
+	 *            The name that needs to be checked.
+	 * @return Whether a name is valid or not.
+	 */
 	private boolean checkName(ParseTree tree, String name) {
 		if (INVALID_NAMES.stream().anyMatch(inv -> name.equalsIgnoreCase(inv))) {
 			error(tree, "Invalid name: '%s' is a reserved word.", name);
@@ -693,6 +954,17 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return true;
 	}
 
+	/**
+	 * Checks the Type of a parameter.
+	 * 
+	 * @param tree
+	 *            The ParseTree on which this tree is called.
+	 * @param expected
+	 *            The expected type of a variable.
+	 * @param actual
+	 *            The actual type of a variable.
+	 * @return Whether a type of a variable is of a certain type or not.
+	 */
 	private boolean checkType(ParseTree tree, IType expected, IType actual) {
 		if (!expected.equals(actual)
 				&& !(expected instanceof Pointer && actual == Type.INT)
@@ -707,11 +979,29 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return true;
 	}
 
+	/**
+	 * Checks the type of a variable.
+	 * 
+	 * @param tree
+	 *            The ParseTree on which this function is called.
+	 * @param expected
+	 *            The expected type of a parameter.
+	 * @param ctx
+	 *            The ParserRuleContext on which this function is called.
+	 * @return Whether a variable is of a certain type or not.
+	 */
 	private boolean checkType(ParseTree tree, IType expected,
 			ParserRuleContext ctx) {
 		return checkType(tree, expected, getType(ctx));
 	}
 
+	/**
+	 * ?
+	 * 
+	 * @param tree
+	 * @param format
+	 * @param args
+	 */
 	private void error(ParseTree tree, String format, Object... args) {
 		String res = "Parse Error ";
 		if (tree instanceof ParserRuleContext) {
@@ -728,13 +1018,25 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		result.getErrors().add(res);
 	}
 
+	/**
+	 * 
+	 * @param ctx
+	 * @return
+	 */
 	private TerminalNode getID(DerefIDContext ctx) {
 		if (ctx.ID() != null)
 			return ctx.ID();
 		else
 			return getID(ctx.derefID());
 	}
-	
+
+	/**
+	 * Returns the type of a ParserRuleContext.
+	 * 
+	 * @param ctx
+	 *            The ParserRuleContext on which this function is called.
+	 * @return The type of a ParserRuleContext.
+	 */
 	private IType getType(ParserRuleContext ctx) {
 		IType type = types.get(ctx);
 		if (type == null)
@@ -743,6 +1045,15 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return type;
 	}
 
+	/**
+	 * Returns the type of a certain id in a ParseTree.
+	 * 
+	 * @param tree
+	 *            The tree of which this function is called.
+	 * @param varId
+	 *            The name of the variable on which this function is called.
+	 * @return The type of a certain variable.
+	 */
 	private IType getType(ParseTree tree, String varId) {
 		if (scope.isDeclared(varId))
 			return scope.getType(varId);
@@ -750,12 +1061,23 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return Type.ERR_TYPE;
 	}
 
+	/**
+	 * ?
+	 * @param ctx
+	 * @param func
+	 */
 	private void processFunction(FuncContext ctx, Func func) {
 		currentFunc = func;
 		visit(ctx.topLevelBlock());
 		currentFunc = null;
 	}
 
+	/**
+	 * ?
+	 * @param tree
+	 * @param typeName
+	 * @return
+	 */
 	private IType typeForName(ParseTree tree, String typeName) {
 		try {
 			return IType.forName(typeName);

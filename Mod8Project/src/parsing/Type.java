@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * All pre-defined types.
  * 
- * @author Dennis
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
  *
  */
 public enum Type implements IType {
@@ -40,12 +40,12 @@ public enum Type implements IType {
 		this.name = name;
 		this.size = 1;
 	}
-	
+
 	private Type(int size) {
 		this.name = this.name().toLowerCase();
 		this.size = size;
 	}
-	
+
 	private Type(String name, int size) {
 		this.name = name;
 		this.size = size;
@@ -58,7 +58,7 @@ public enum Type implements IType {
 		throw new IllegalArgumentException("Type '" + name
 				+ "' does not exist!");
 	}
-	
+
 	public int getSize() {
 		return size;
 	}
@@ -66,7 +66,7 @@ public enum Type implements IType {
 	public String toString() {
 		return name;
 	}
-	
+
 	/**
 	 * The definition of a function.
 	 * 
@@ -112,8 +112,6 @@ public enum Type implements IType {
 			System.arraycopy(types, 1, args, 0, types.length - 1);
 			this.args = Arrays.asList(args);
 		}
-
-		
 
 		@Override
 		public int hashCode() {
@@ -172,30 +170,51 @@ public enum Type implements IType {
 		public IType getReturnType() {
 			return ret;
 		}
-		
+
 		public String getReturnName() {
 			return String.format("<<retval_%s(%s):%s>>", name, args, ret);
 		}
-				
+
 		public String getName() {
 			return name;
 		}
 	}
 
+	/**
+	 * Class Pointer defines a Pointer.
+	 * 
+	 * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
+	 */
 	public static class Pointer implements IType {
-		
+
+		// Instance variables
 		public static final int POINTER_SIZE = INT.size;
-		
 		private final IType wrappedType;
-		
+
+		/**
+		 * Constructor Pointer.
+		 * 
+		 * @param wrappedType
+		 *            A certain type
+		 */
 		public Pointer(IType wrappedType) {
 			this.wrappedType = wrappedType;
 		}
-		
+
+		/**
+		 * Returns the size of the value.
+		 * 
+		 * @return The size of the values.
+		 */
 		public int getValueSize() {
 			return wrappedType.getSize();
 		}
-		
+
+		/**
+		 * Returns the type of this pointer.
+		 * 
+		 * @return The type of this pointer.
+		 */
 		public IType getWrappedType() {
 			return wrappedType;
 		}
@@ -204,7 +223,7 @@ public enum Type implements IType {
 		public int getSize() {
 			return POINTER_SIZE;
 		}
-		
+
 		@Override
 		public String toString() {
 			return wrappedType.toString() + '*';
@@ -235,6 +254,5 @@ public enum Type implements IType {
 				return false;
 			return true;
 		}
-		
 	}
 }
