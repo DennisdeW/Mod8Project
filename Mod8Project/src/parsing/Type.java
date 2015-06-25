@@ -10,7 +10,7 @@ import java.util.List;
  * @author Dennis
  *
  */
-public enum Type {
+public enum Type implements IType {
 	/**
 	 * The <code>int</code> type.
 	 */
@@ -180,5 +180,35 @@ public enum Type {
 		public String getName() {
 			return name;
 		}
+	}
+
+	public static class Pointer implements IType {
+		
+		public static final int POINTER_SIZE = INT.size;
+		
+		private final IType wrappedType;
+		
+		public Pointer(IType wrappedType) {
+			this.wrappedType = wrappedType;
+		}
+		
+		public int getValueSize() {
+			return wrappedType.getSize();
+		}
+		
+		public IType getWrappedType() {
+			return wrappedType;
+		}
+
+		@Override
+		public int getSize() {
+			return POINTER_SIZE;
+		}
+		
+		@Override
+		public String toString() {
+			return wrappedType.toString() + '*';
+		}
+		
 	}
 }

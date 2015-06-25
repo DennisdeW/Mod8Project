@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ANTLRErrorListener;
@@ -25,40 +26,10 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import parsing.BaseGrammarParser.AssignContext;
-import parsing.BaseGrammarParser.BlockContext;
-import parsing.BaseGrammarParser.BoolOpExprContext;
-import parsing.BaseGrammarParser.CallContext;
-import parsing.BaseGrammarParser.CallExprContext;
-import parsing.BaseGrammarParser.CallStatContext;
-import parsing.BaseGrammarParser.CompExprContext;
-import parsing.BaseGrammarParser.DeclContext;
-import parsing.BaseGrammarParser.DivExprContext;
-import parsing.BaseGrammarParser.ExprContext;
-import parsing.BaseGrammarParser.FalseExprContext;
-import parsing.BaseGrammarParser.ForStatContext;
 import parsing.BaseGrammarParser.FuncContext;
-import parsing.BaseGrammarParser.IdExprContext;
-import parsing.BaseGrammarParser.IfStatContext;
-import parsing.BaseGrammarParser.InStatContext;
-import parsing.BaseGrammarParser.LockStatContext;
-import parsing.BaseGrammarParser.MinExprContext;
-import parsing.BaseGrammarParser.ModExprContext;
-import parsing.BaseGrammarParser.MultExprContext;
-import parsing.BaseGrammarParser.NegBoolExprContext;
-import parsing.BaseGrammarParser.NegNumExprContext;
-import parsing.BaseGrammarParser.NumExprContext;
-import parsing.BaseGrammarParser.OutStatContext;
-import parsing.BaseGrammarParser.ParExprContext;
-import parsing.BaseGrammarParser.PlusExprContext;
-import parsing.BaseGrammarParser.ProgramContext;
-import parsing.BaseGrammarParser.ReturnStatContext;
-import parsing.BaseGrammarParser.TopLevelBlockContext;
-import parsing.BaseGrammarParser.TrueExprContext;
 import parsing.BaseGrammarParser.TypedparamsContext;
-import parsing.BaseGrammarParser.ValContext;
-import parsing.BaseGrammarParser.WhileStatContext;
 import parsing.Type.Func;
+import parsing.BaseGrammarParser.*;
 
 /**
  * Class Checker is used to parse a program
@@ -67,17 +38,15 @@ import parsing.Type.Func;
 public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		ANTLRErrorListener {
 
-	// Instance variable
 	private static final List<String> INVALID_NAMES = Arrays.asList("int",
 			"bool", "void", "if", "else", "while", "for", "return", "and",
 			"or", "xor", "true", "false", "def", "break", "not", "string");
 
-	// Instance variables
 	private Scope scope;
 	private List<String> errors;
 	private Map<FuncContext, Func> functions;
 	private Set<String> locks;
-	private ParseTreeProperty<Type> types;
+	private ParseTreeProperty<IType> types;
 	private ParseTreeProperty<Boolean> shared;
 	private Func currentFunc;
 	private Map<Func, TypedparamsContext> params;
@@ -143,9 +112,6 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return new ArrayList<>(errors);
 	}
 
-	/**
-	 * 
-	 */
 	public Void visitProgram(ProgramContext ctx) {
 		ctx.decl().forEach(decl -> visit(decl));
 		ctx.func().forEach(func -> visit(func));
@@ -186,14 +152,14 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	public Void visitFunc(FuncContext ctx) {
-		Type retType = Type.forName(ctx.type().getText());
+		IType retType = IType.forName(ctx.type().getText());
 		types.put(ctx, retType);
 
 		String name = ctx.ID().getText();
 		if (!checkName(ctx, name))
 			return null;
 
-		List<Type> argTypes = ctx.typedparams().type().stream()
+		List<IType> argTypes = ctx.typedparams().type().stream()
 				.map(t -> typeForName(ctx, t.getText()))
 				.collect(Collectors.toList());
 		Func func = new Func(name, retType, argTypes);
@@ -208,7 +174,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	public Void visitTypedparams(TypedparamsContext ctx) {
 		for (int i = 0; i < ctx.type().size(); i++) {
 			String name = ctx.ID(i).getText();
-			Type type = typeForName(ctx, ctx.type(i).getText());
+			IType type = typeForName(ctx, ctx.type(i).getText());
 			if (scope.isDeclaredLocally(name)) {
 				error(ctx, "Duplicate parameter '%s'.", name);
 			} else {
@@ -250,7 +216,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		if (!checkName(ctx, varId))
 			return null;
 
-		Type type = typeForName(ctx, ctx.type().getText());
+		IType type = typeForName(ctx, ctx.type().getText());
 		if (scope.isDeclaredLocally(varId)) {
 			error(ctx, "Duplicate declaration of variable '%s'", varId);
 			return null;
@@ -268,11 +234,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 	public Void visitAssign(AssignContext ctx) {
 		String target = ctx.ID().getText();
-		Type targetType = getType(ctx, target);
+		IType targetType = getType(ctx, target);
 		if (targetType == Type.ERR_TYPE)
 			return null;
 		visit(ctx.expr());
-		Type sourceType = getType(ctx.expr());
+		IType sourceType = getType(ctx.expr());
 		checkType(ctx, targetType, sourceType);
 		shared.put(ctx.ID(), scope.isShared(target));
 		result.getOffsets().put(ctx.ID(), scope.getOffset(target));
@@ -280,10 +246,10 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	public Void visitReturnStat(ReturnStatContext ctx) {
-		Type expected = currentFunc.getReturnType();
+		IType expected = currentFunc.getReturnType();
 		if (ctx.expr() != null) {
 			visit(ctx.expr());
-			Type exprType = getType(ctx.expr());
+			IType exprType = getType(ctx.expr());
 			if (exprType == Type.ERR_TYPE)
 				error(ctx,
 						"<Unable to check function return type because the expression cannot be evaluated>");
@@ -462,8 +428,8 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
-	private Func call(CallContext ctx, Type expectedReturn) {
-		List<Type> args = new ArrayList<>();
+	private Func call(CallContext ctx, IType expectedReturn) {
+		List<IType> args = new ArrayList<>();
 		ctx.params().val().stream().forEachOrdered(val -> {
 			visit(val);
 			args.add(getType(val));
@@ -481,7 +447,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			return func;
 		} else {
 			Func res = null;
-			for (Type type : Type.values()) {
+			for (IType type : IType.values()) {
 				func = new Func(ctx.ID().getText(), type, args);
 				if (scope.isDeclared(func)) {
 					if (res != null) {
@@ -526,7 +492,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return true;
 	}
 
-	private boolean checkType(ParseTree tree, Type expected, Type actual) {
+	private boolean checkType(ParseTree tree, IType expected, IType actual) {
 		if (expected != actual) {
 			if (actual == Type.ERR_TYPE)
 				error(tree, "<Caused by earlier error>");
@@ -538,29 +504,29 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return true;
 	}
 
-	private boolean checkType(ParseTree tree, Type expected,
+	private boolean checkType(ParseTree tree, IType expected,
 			ParserRuleContext ctx) {
 		return checkType(tree, expected, getType(ctx));
 	}
 
-	private Type getType(ParseTree tree, String varId) {
+	private IType getType(ParseTree tree, String varId) {
 		if (scope.isDeclared(varId))
 			return scope.getType(varId);
 		error(tree, "Variable '%s' was not declared in this scope.", varId);
 		return Type.ERR_TYPE;
 	}
 
-	private Type getType(ParserRuleContext ctx) {
-		Type type = types.get(ctx);
+	private IType getType(ParserRuleContext ctx) {
+		IType type = types.get(ctx);
 		if (type == null)
 			throw new IllegalArgumentException(String.format(
 					"Node '%s' has no type.", ctx.getText()));
 		return type;
 	}
 
-	private Type typeForName(ParseTree tree, String typeName) {
+	private IType typeForName(ParseTree tree, String typeName) {
 		try {
-			return Type.forName(typeName);
+			return IType.forName(typeName);
 		} catch (IllegalArgumentException e) {
 			error(tree, e.getMessage());
 		}
@@ -611,14 +577,14 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	public class CheckResult {
-		private ParseTreeProperty<Type> types;
+		private ParseTreeProperty<IType> types;
 		private Map<ParseTree, Integer> offsets;
 		private Set<FuncContext> functions;
 		private List<String> errors;
 		private ParseTreeProperty<Boolean> shared;
 		private Map<String, Integer> locks;
 
-		public CheckResult(ParseTreeProperty<Type> types,
+		public CheckResult(ParseTreeProperty<IType> types,
 				Map<ParseTree, Integer> offsets, Set<FuncContext> functions,
 				List<String> errors, ParseTreeProperty<Boolean> shared,
 				Map<String, Integer> locks) {
@@ -640,11 +606,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			this.locks = new HashMap<>();
 		}
 
-		public ParseTreeProperty<Type> getTypes() {
+		public ParseTreeProperty<IType> getTypes() {
 			return types;
 		}
 
-		public void setTypes(ParseTreeProperty<Type> types) {
+		public void setTypes(ParseTreeProperty<IType> types) {
 			this.types = types;
 		}
 
@@ -709,7 +675,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			return maxOffset(true) + locks.size();
 		}
 
-		FuncContext getMatchingFunc(String name, List<Type> types) {
+		FuncContext getMatchingFunc(String name, List<IType> types) {
 			return this.functions
 					.stream()
 					.filter(func -> func.typedparams().type().stream()
@@ -719,12 +685,12 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 					.orElse(null);
 		}
 
-		Type valType(ValContext ctx) {
+		IType valType(ValContext ctx) {
 			if (ctx.NUMBER() != null || ctx.SPID() != null)
 				return Type.INT;
 			else if (ctx.TRUE() != null || ctx.FALSE() != null)
 				return Type.BOOL;
-			Type res = types.get(ctx);
+			IType res = types.get(ctx);
 			if (res == null)
 				throw new RuntimeException("Could not get type of " + ctx.ID());
 			return res;

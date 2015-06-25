@@ -51,7 +51,7 @@ stat
 decl : SHARED? type ID EQ expr;
 assign : ID EQ expr;
 
-type : INT | BOOL | VOID | TYPE;
+type : INT | BOOL | VOID | TYPE | type TIMES;
 val : NUMBER | ID | TRUE | FALSE | SPID;
 comp : LT | GT | EQ EQ | LE | GE | NE;
 boolOp : AND | OR | XOR;
