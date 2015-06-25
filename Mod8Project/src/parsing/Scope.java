@@ -10,11 +10,10 @@ import parsing.Type.Func;
 /**
  * Stores declarations of variables and functions.
  * 
- * @author Dennis
- *
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
  */
 public class Scope {
-
+	// Instance variables
 	private Set<Func> functions;
 	private Level current;
 
@@ -114,6 +113,17 @@ public class Scope {
 		return current.declare(id, type);
 	}
 
+	/**
+	 * Declares a new variable in the current scope.
+	 * 
+	 * @param id
+	 *            The name of the variable.
+	 * @param type
+	 *            The type of the variable.
+	 * @param shared
+	 *            Whether the boolean is shared or not.
+	 * @return <code>true</code> iff the variable was not already declared.
+	 */
 	public boolean declare(String id, Type type, boolean shared) {
 		return current.declare(id, type, shared);
 	}
@@ -173,6 +183,13 @@ public class Scope {
 		return current.getVars();
 	}
 
+	/**
+	 * Returns whether a variable is shared or not.
+	 * 
+	 * @param id
+	 *            the name of the variable.
+	 * @return Whether the variable is shared or not.
+	 */
 	public boolean isShared(String id) {
 		return current.isShared(id);
 	}
@@ -180,10 +197,12 @@ public class Scope {
 	/**
 	 * The inner workings of {@link Scope}.
 	 * 
-	 * @author Dennis
+	 * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
 	 *
 	 */
 	private class Level {
+
+		// Instance variables
 		private Map<String, Type> vars;
 		private Map<String, Integer> offsets;
 		private Map<String, Boolean> shared;
@@ -192,6 +211,12 @@ public class Scope {
 		private final Level enclosing;
 		private int nextOffset, nextShared;
 
+		/**
+		 * Constructor Level sets a new Level.
+		 * 
+		 * @param enclosing
+		 *            A Level with certain values.
+		 */
 		Level(Level enclosing) {
 			this.vars = new HashMap<>();
 			this.offsets = new HashMap<>();
@@ -205,46 +230,84 @@ public class Scope {
 			this.nextShared = this.sharedOffset;
 		}
 
+		/**
+		 * Constructor Level
+		 */
 		Level() {
 			this(null);
 		}
 
+		/**
+		 * Returns this level of the scope.
+		 * 
+		 * @return This level.
+		 */
 		Level open() {
 			return new Level(this);
 		}
 
+		/**
+		 * Tries to close a Level, then returns the higher level.
+		 * 
+		 * @return Returns a higher level of the scope.
+		 */
 		Level close() {
 			if (isGlobal())
 				throw new IllegalStateException("Tried to close global scope!");
 			return enclosing;
 		}
 
+		/**
+		 * Returns the offset of a local variable.
+		 * 
+		 * @return The offset of a local variable.
+		 */
 		private int getOffset() {
-			/*return baseOffset
-					+ vars.entrySet().stream()
-							.filter(v -> !isShared(v.getKey()))
-							.mapToInt(t -> t.getValue().getSize()).sum();
-			 */
 			return nextOffset;
-			}
+		}
 
+		/**
+		 * Returns the offset of a global variable.
+		 * 
+		 * @return The offset of a global variable.
+		 */
 		private int getSharedOffset() {
-			/*return sharedOffset
-					+ vars.entrySet().stream()
-							.filter(v -> isShared(v.getKey()))
-							.mapToInt(t -> t.getValue().getSize()).sum();
-							*/
 			return nextShared;
 		}
 
+		/**
+		 * Returns whether a variable is global or not.
+		 * 
+		 * @return Whether a variable is global or not.
+		 */
 		boolean isGlobal() {
 			return enclosing == null;
 		}
 
+		/**
+		 * Declares a local variable.
+		 * 
+		 * @param id
+		 *            The name of the variable.
+		 * @param type
+		 *            The type of the variable.
+		 * @return Whether a variable is declared correctly or not.
+		 */
 		boolean declare(String id, Type type) {
 			return declare(id, type, false);
 		}
 
+		/**
+		 * Declares a variable.
+		 * 
+		 * @param id
+		 *            The name of the variable.
+		 * @param type
+		 *            The type of the variable.
+		 * @param shared
+		 *            Whether a variable is global or not.
+		 * @return Whether a variable is declared correctly or not.
+		 */
 		boolean declare(String id, Type type, boolean shared) {
 			if (isDeclaredLocally(id))
 				return false;
@@ -259,28 +322,69 @@ public class Scope {
 			return true;
 		}
 
-		private void bubble(boolean shared, int amount) {
+		/**
+		 * Bubble goes to a new Memaddr, where the next variable should be
+		 * declared. It also does the same with every overlaying scope.
+		 * 
+		 * @param shared
+		 *            Whether a variable is global or not.
+		 * @param size
+		 *            The size of the newly declared variable.
+		 */
+		private void bubble(boolean shared, int size) {
 			if (shared)
-				nextShared += amount;
+				nextShared += size;
 			else
-				nextOffset += amount;
+				nextOffset += size;
 			if (!isGlobal())
-				enclosing.bubble(shared, amount);
+				enclosing.bubble(shared, size);
 		}
 
+		/**
+		 * Returns whether a variable was declared already or not.
+		 * 
+		 * @param id
+		 *            The name of the variable.
+		 * @return Whether a variable was declared already or not.
+		 */
 		boolean isDeclared(String id) {
 			return vars.containsKey(id)
 					|| (!isGlobal() && enclosing.isDeclared(id));
 		}
 
+		/**
+		 * Returns whether a variable was declared locally or not.
+		 * 
+		 * @param id
+		 *            The name of the variable.
+		 * @return Whether a variable was declared already or not.
+		 */
 		boolean isDeclaredLocally(String id) {
 			return vars.containsKey(id);
 		}
 
+		/**
+		 * Returns whether a variable of the same type was declared already or
+		 * not.
+		 * 
+		 * @param id
+		 *            The name of the variable.
+		 * @param type
+		 *            The type of the variable.
+		 * @return Whether a variable of the same type was declared already or
+		 *         not.
+		 */
 		boolean isDeclared(String id, Type type) {
 			return isDeclared(id) && getType(id) == type;
 		}
 
+		/**
+		 * Returns whether a variable is global or not.
+		 * 
+		 * @param id
+		 *            The name of the variable.
+		 * @return Whether a variable is global or not.
+		 */
 		boolean isShared(String id) {
 			if (!isDeclared(id)) {
 				throw new IllegalArgumentException("Var '" + id
@@ -292,6 +396,13 @@ public class Scope {
 				return enclosing.isShared(id);
 		}
 
+		/**
+		 * Returns the type of a variable.
+		 * 
+		 * @param id
+		 *            The name of the variable.
+		 * @return The type of a variable.
+		 */
 		Type getType(String id) {
 			if (isDeclaredLocally(id))
 				return vars.get(id);
@@ -302,6 +413,13 @@ public class Scope {
 						+ "' was not declared.");
 		}
 
+		/**
+		 * Returns the offset of a variable.
+		 * 
+		 * @param id
+		 *            The name of the variable.
+		 * @return The offset of a variable.
+		 */
 		int getOffset(String id) {
 			if (isDeclaredLocally(id))
 				return isShared(id) ? sharedOffsets.get(id) : offsets.get(id);
@@ -312,10 +430,20 @@ public class Scope {
 						+ "' was not declared.");
 		}
 
+		/**
+		 * Returns the list with local variables, declared in this level.
+		 * 
+		 * @return HashMap containing local variables.
+		 */
 		Map<String, Type> getLocals() {
 			return new HashMap<>(vars);
 		}
 
+		/**
+		 * Returns the list with variables declared in this level and above.
+		 * 
+		 * @return HashMap containing all accessible variables in this level.
+		 */
 		Map<String, Type> getVars() {
 			Map<String, Type> res;
 			if (!isGlobal()) {

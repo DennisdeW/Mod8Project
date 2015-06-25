@@ -31,6 +31,10 @@ import parsing.BaseGrammarParser.TypedparamsContext;
 import parsing.Type.Func;
 import parsing.BaseGrammarParser.*;
 
+/**
+ * Class Checker is used to parse a program
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
+ */
 public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		ANTLRErrorListener {
 
@@ -50,6 +54,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	private CheckResult result;
 	private boolean dirty;
 
+	/**
+	 * Check returns a checked program
+	 * @param stream The stream that needs to be processed
+	 * @return CheckedResult
+	 */
 	public CheckResult check(ANTLRInputStream stream) {
 		dirty = false;
 		BaseGrammarLexer lexer = new BaseGrammarLexer(stream);
@@ -64,6 +73,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return check(prog);
 	}
 
+	/**
+	 * Check returns a check program
+	 * @param prog The program that needs to be processed
+	 * @return CheckedResult
+	 */
 	public CheckResult check(ProgramContext prog) {
 		scope = new Scope();
 		errors = new ArrayList<>();
@@ -82,10 +96,18 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return result;
 	}
 
+	/**
+	 * Returns whether any errors occurred while processing a program
+	 * @return Whether an error has occurred
+	 */
 	public boolean hasErrors() {
 		return errors.size() != 0;
 	}
 
+	/**
+	 * The list with errors that occurred while processing the program
+	 * @return List<String> errors
+	 */
 	public List<String> getErrors() {
 		return new ArrayList<>(errors);
 	}
