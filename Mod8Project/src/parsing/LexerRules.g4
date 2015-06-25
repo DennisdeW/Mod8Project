@@ -41,6 +41,7 @@ MINUS : '-';
 TIMES : '*';
 DIV : '/';
 MOD : '%';
+AMP : '&';
 SQUOT : '\'';
 DQUOT : '"';
 BACKSLASH : '\\';

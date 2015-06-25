@@ -95,7 +95,7 @@ def void sub() {
 				
 __________________________________
 
-program sumOfFac;
+program sumOfFac(3);
 
 int arg = 5;
 
@@ -136,3 +136,112 @@ def int main() {
 					+ "return sum;"
 				+ "}"
 				
+________________
+
+program ptr;
+
+def int main() {
+	int* ptrA = 4;
+	int* ptrB = 5;
+	out(ptrA + ptrB + 48);
+	return 1;
+}
+
+program ptr;    def int main() {   int* ptrA = 4;   int* ptrB = 5;   out(ptrA + ptrB + 48);   return 1;  }
+
+_______________
+
+program ptrTest;
+
+def int main() {
+	int x = 5;
+	int* ptr = &x;
+	int addr = *ptr;
+	ptr = ptr + 1;
+	bool same = addr == *ptr;
+	int o = 999;
+	if (same) {
+		o = 1;
+	} else {
+		o = 0;
+	}
+	out(o);
+	return o;
+}
+
+program ptrTest;    def int main() {   int x = 5;   int* ptr = &x;   int addr = *ptr;   ptr = ptr + 1;   bool same = addr == *ptr;   int o = 999;   if (same) {    o = 42;   } else {    o = 0;   }   out(o);   return o;  }
+
+_________________
+
+program PassByRef;
+
+def int main() {
+	int val = 5;
+	int* ptr = &val;
+	inc(ptr);
+	mult(ptr, 4);
+	return *ptr;
+}
+
+def void inc(int* ptr) {
+	*ptr = *ptr + 1;
+	return;
+}
+
+def void mult(int* ptr, int mul) {
+	*ptr = *ptr * mul;
+	return;
+}
+
+program PassByRef;    def int main() {   int val = 5;   int* ptr = &val;   inc(ptr);   mult(ptr, 4);   return *ptr;  }    def void inc(int* ptr) {   *ptr = *ptr + 1;   return;  }    def void mult(int* ptr, int mul) {   *ptr = *ptr * mul;   return;  }
+
+__________________
+
+program ptrToPtr;
+
+def int main() {
+	int val = 4;
+	int* ptr = &val;
+	int** ptrptr = &ptr;
+	**ptrptr = 5;
+	return val;
+}
+
+program ptrToPtr;    def int main() {   int val = 4;   int* ptr = &val;   int** ptrptr = &ptr;   **ptrptr = 5;   return val;  }
+
+___________________
+
+program swap;
+
+def int main() {
+	shared int val = 4;
+	int* ptr = &val;
+	
+	int x = 3;
+	int* xptr = &x;
+	
+	swap(ptr, xptr);
+	return *ptr;
+}
+
+def swap(int* x, int* y) {
+	int t = *x;
+	*x = *y;
+	*y = t;
+	return;
+}
+
+program swap;    def int main() {   shared int val = 4;   int* ptr = &val;      int x = 3;   int* xptr = &x;      swap(ptr, xptr);   return *ptr;  }    def swap(int* x, int* y) {   int t = *x;   *x = *y;   *y = t;   return;  }
+
+________________
+
+program globPtr;
+
+def int main() {
+	shared int val = 5;
+	shared int* ptr = &val;
+	*ptr = 8;
+	return val;
+}
+
+program globPtr;    def int main() {   shared int val = 5;   shared int* ptr = &val;   *ptr = 8;   return val;  }

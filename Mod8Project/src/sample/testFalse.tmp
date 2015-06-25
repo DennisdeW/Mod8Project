@@ -1,5 +1,15 @@
-def bool main() {
-	int i = 6;
+program testFalse;
+
+def int main() {
+	bool i = 6;
+	main4();
+	ambiguous();
+	main5(i);
+	main3();
+	loops();
+	int* ptr = ref(5);
+	*ptr = true;
+	ptr = 3;
 	return i;
 }
 
@@ -7,8 +17,16 @@ def int main4() {
 	return true;
 }
 
+def void ambiguous() {
+	return main8();
+}
+
 def int main8() {
 	return main6();
+}
+
+def bool main8() {
+	return false;
 }
 
 def int main5(int i) {
@@ -32,4 +50,8 @@ def void loops() {
 	for (bool c = false; i < 5; i = i + 1) {
 		c = !c;
 	}
+}
+
+def int* ref(int i) {
+	return *i;
 }

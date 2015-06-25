@@ -1,6 +1,19 @@
+program testTrue;
+
 def int main() {
 	int i = 0;
 	int j = 2;
+	main2();
+	main3();
+	main4();
+	main5();
+	main9();
+	main10(1);
+	mainV(true);
+	loops();
+	int* ptr = ref(5);
+	deref(ptr);
+	*ptr = 3;
 	return i * j;
 }
 
@@ -25,7 +38,7 @@ def int main4() {
 }
 
 def int main5() {
-	int i = main1();
+	int i = main2();
 	int j = main2();
 	int k = main3();
 	int l = main4();
@@ -69,4 +82,12 @@ def void loops() {
 			b = false;
 		}
 	}
+}
+
+def int* ref(int i) {
+	return &i;
+}
+
+def int deref(int* ptr) {
+	return *ptr;
 }

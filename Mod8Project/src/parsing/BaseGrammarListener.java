@@ -403,6 +403,16 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitCall(@NotNull BaseGrammarParser.CallContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BaseGrammarParser#derefID}.
+	 * @param ctx the parse tree
+	 */
+	void enterDerefID(@NotNull BaseGrammarParser.DerefIDContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BaseGrammarParser#derefID}.
+	 * @param ctx the parse tree
+	 */
+	void exitDerefID(@NotNull BaseGrammarParser.DerefIDContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BaseGrammarParser#func}.
 	 * @param ctx the parse tree
 	 */
@@ -412,6 +422,30 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFunc(@NotNull BaseGrammarParser.FuncContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code refExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterRefExpr(@NotNull BaseGrammarParser.RefExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code refExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitRefExpr(@NotNull BaseGrammarParser.RefExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code derefExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterDerefExpr(@NotNull BaseGrammarParser.DerefExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code derefExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitDerefExpr(@NotNull BaseGrammarParser.DerefExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code inStat}
 	 * labeled alternative in {@link BaseGrammarParser#stat}.

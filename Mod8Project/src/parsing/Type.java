@@ -75,8 +75,8 @@ public enum Type implements IType {
 	 */
 	public static class Func {
 		private final String name;
-		private final List<Type> args;
-		private final Type ret;
+		private final List<IType> args;
+		private final IType ret;
 
 		/**
 		 * @param name
@@ -86,7 +86,7 @@ public enum Type implements IType {
 		 * @param args
 		 *            The argument types (in order).
 		 */
-		public Func(String name, Type ret, List<Type> args) {
+		public Func(String name, IType ret, List<IType> args) {
 			this.name = name;
 			this.ret = ret;
 			this.args = new ArrayList<>(args);
@@ -102,7 +102,7 @@ public enum Type implements IType {
 		 *             If no return type is supplied. (<code>types.length</code>
 		 *             must be greater than 0)
 		 */
-		public Func(String name, Type... types) {
+		public Func(String name, IType... types) {
 			if (types.length == 0)
 				throw new IllegalArgumentException(
 						"Varargs parameters to Type.Func#<init> may not be empty.");
@@ -160,7 +160,7 @@ public enum Type implements IType {
 		 * 
 		 * @return The arguments.
 		 */
-		public List<Type> getArgs() {
+		public List<IType> getArgs() {
 			return args;
 		}
 
@@ -169,7 +169,7 @@ public enum Type implements IType {
 		 * 
 		 * @return The return type.
 		 */
-		public Type getReturnType() {
+		public IType getReturnType() {
 			return ret;
 		}
 		
@@ -208,6 +208,32 @@ public enum Type implements IType {
 		@Override
 		public String toString() {
 			return wrappedType.toString() + '*';
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((wrappedType == null) ? 0 : wrappedType.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Pointer other = (Pointer) obj;
+			if (wrappedType == null) {
+				if (other.wrappedType != null)
+					return false;
+			} else if (!wrappedType.equals(other.wrappedType))
+				return false;
+			return true;
 		}
 		
 	}

@@ -69,7 +69,7 @@ public class Scope {
 	 * @return <code>true</code> iff a variable called <code>id</code> is
 	 *         declared and its type matches <code>type</code>.
 	 */
-	public boolean isDeclared(String id, Type type) {
+	public boolean isDeclared(String id, IType type) {
 		return current.isDeclared(id, type);
 	}
 
@@ -109,7 +109,7 @@ public class Scope {
 	 *            The type of the variable.
 	 * @return <code>true</code> iff the variable was not already declared.
 	 */
-	public boolean declare(String id, Type type) {
+	public boolean declare(String id, IType type) {
 		return current.declare(id, type);
 	}
 
@@ -124,7 +124,7 @@ public class Scope {
 	 *            Whether the boolean is shared or not.
 	 * @return <code>true</code> iff the variable was not already declared.
 	 */
-	public boolean declare(String id, Type type, boolean shared) {
+	public boolean declare(String id, IType type, boolean shared) {
 		return current.declare(id, type, shared);
 	}
 
@@ -148,7 +148,7 @@ public class Scope {
 	 * @throws IllegalArgumentException
 	 *             If no variable with this name has been declared.
 	 */
-	public Type getType(String id) {
+	public IType getType(String id) {
 		return current.getType(id);
 	}
 
@@ -179,7 +179,7 @@ public class Scope {
 	 * 
 	 * @return The map of all variables.
 	 */
-	public Map<String, Type> getVars() {
+	public Map<String, IType> getVars() {
 		return current.getVars();
 	}
 
@@ -203,7 +203,7 @@ public class Scope {
 	private class Level {
 
 		// Instance variables
-		private Map<String, Type> vars;
+		private Map<String, IType> vars;
 		private Map<String, Integer> offsets;
 		private Map<String, Boolean> shared;
 		private Map<String, Integer> sharedOffsets;
@@ -293,7 +293,7 @@ public class Scope {
 		 *            The type of the variable.
 		 * @return Whether a variable is declared correctly or not.
 		 */
-		boolean declare(String id, Type type) {
+		boolean declare(String id, IType type) {
 			return declare(id, type, false);
 		}
 
@@ -308,7 +308,7 @@ public class Scope {
 		 *            Whether a variable is global or not.
 		 * @return Whether a variable is declared correctly or not.
 		 */
-		boolean declare(String id, Type type, boolean shared) {
+		boolean declare(String id, IType type, boolean shared) {
 			if (isDeclaredLocally(id))
 				return false;
 			this.vars.put(id, type);
@@ -374,7 +374,7 @@ public class Scope {
 		 * @return Whether a variable of the same type was declared already or
 		 *         not.
 		 */
-		boolean isDeclared(String id, Type type) {
+		boolean isDeclared(String id, IType type) {
 			return isDeclared(id) && getType(id) == type;
 		}
 
@@ -403,7 +403,7 @@ public class Scope {
 		 *            The name of the variable.
 		 * @return The type of a variable.
 		 */
-		Type getType(String id) {
+		IType getType(String id) {
 			if (isDeclaredLocally(id))
 				return vars.get(id);
 			else if (!isGlobal())
@@ -435,7 +435,7 @@ public class Scope {
 		 * 
 		 * @return HashMap containing local variables.
 		 */
-		Map<String, Type> getLocals() {
+		Map<String, IType> getLocals() {
 			return new HashMap<>(vars);
 		}
 
@@ -444,8 +444,8 @@ public class Scope {
 		 * 
 		 * @return HashMap containing all accessible variables in this level.
 		 */
-		Map<String, Type> getVars() {
-			Map<String, Type> res;
+		Map<String, IType> getVars() {
+			Map<String, IType> res;
 			if (!isGlobal()) {
 				res = enclosing.getVars();
 				res.putAll(vars);
