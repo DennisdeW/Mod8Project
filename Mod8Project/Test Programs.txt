@@ -1,0 +1,138 @@
+program fortest; 
+int sum = 0; 
+def int main() { 
+	for (int i = 1; i < 10; i = i + 1) { 
+		sum = sum + i; 
+	} 
+	return sum; 
+}
+
+program whiletest; int sum = 0; def int main() { int i = 10; while (i > 0) { sum = sum + i; i = i - 1; } return sum; }
+
+program iftest; int arg = 8; def int main() { if (arg == 1) { return 10; } else if (arg == 3) { return 5; } else if (arg == 2) {return 7;} else { return 42; }}
+
+program functest; def int main() { int i = 5;  i = plusOne(i); i = timesTwo(i); i = plusOne(i); return i; } def int plusOne(int i) { return i + 1; } def int timesTwo(int i) { return i * 2; } 
+
+________
+
+int start = 3;
+
+def void main() {
+	int j = 0;
+	int n = 10;
+	for (int i = 0; i < n; i = i + 1) {
+		if (isEven(i)) {
+			j = i;
+			while (j > 0) {
+				start = start + j;
+				j = j - 1;
+			}
+		} else {
+			start = start - square(i);
+		}
+	}
+}
+
+def bool isEven(int n) {
+	return n % 2 == 0;
+}
+
+def int square(int n) {
+	return n * n;
+}
+
+program even; int start = 3;    def int main() { int n = 10; int j = 0;  for (int i = 0; i < n; i = i + 1) {    if (isEven(i)) {     j = i;     while (j > 0) {      start = start + j;      j = j - 1;     }    } else {     start = start - square(i);    }   } return start; }    def bool isEven(int n) {   return n % 2 == 0;  }    def int square(int n) {   return n * n;  }
+
+_________________
+
+program xyz(5);
+
+shared int val = 0;
+
+def int main() {
+	LOCK (val_lock) {
+		for (int i = 0; i < 10; i = i + 1) {
+			add();
+		}
+	}
+	LOCK (val_lock) {
+		for (int j = 0; j < 10; j = j - 1) {
+			sub();
+		}
+	}
+	
+}
+
+def void add() {
+	val = val + 1;
+	return;
+}
+
+def void sub() {
+	val = val - 1;
+	return;
+}
+
+"program xyz(2);"
+				+ "shared int val = 0;"
+				+ "def int main() {"
+				+ "LOCK (val_lock) {"
+				+ "add();add();add();add();"
+				+ "}"
+				+ "LOCK (val_lock) {"
+				+ "sub();sub();sub();sub();"
+				+ "} "
+				+ "return val;"
+				+ "}"
+				+ "def void add() {"
+				+ "val = val + 1; "
+				+ "return;"
+				+ "}"
+				+ "def void sub() {"
+				+ "val = val - 1; "
+				+ "return;"
+				+ "}";
+				
+__________________________________
+
+program sumOfFac;
+
+int arg = 5;
+
+def int fac(int n) {
+	int res = 1;
+	for (int i = n; i > 0; i = i - 1) {
+		res = res * i;
+	}
+	return res;
+}
+
+def int main() {
+	int sum = 0;
+	for (int i = 0; i < arg; i = i + 1) {
+		sum = sum + fac(i);
+	}
+	return sum;
+}
+
+"program sumOfFac;"
+				+ "int arg = 5;"
+			
+				+ "def int fac(int n) {"
+					+ "int res = 1;"
+					+ "int i = n; "
+					+ "while (i != 0) {"
+						+ "res = res * i; "
+						+ "i = i - 1;"
+					+ "}"
+					+ "return res;"
+				+ "}"
+				
+				+ "def int main() {"
+					+ "int sum = 0;"
+					+ "for (int i = 1; i <= arg; i = i + 1) {"
+						+ "sum = sum + fac(i);"
+					+ "}"
+					+ "return sum;"
+				+ "}"
+				
