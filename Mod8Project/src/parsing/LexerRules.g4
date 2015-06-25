@@ -94,4 +94,6 @@ fragment X: [xX];
 fragment Y: [yY];
 fragment Z: [zZ];
 
+COMMENT: DIV TIMES .*? TIMES DIV -> skip;
+
 WS :  [ \r\n\t] -> skip;

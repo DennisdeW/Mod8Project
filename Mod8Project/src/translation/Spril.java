@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 /**
  * An instruction in the Spril language.
  * 
- * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
  */
 public class Spril {
 
@@ -64,18 +64,18 @@ public class Spril {
 	}
 
 	/**
-	 * getOpCode() returns opcode, the opcode corresponding with this Spril
+	 * getOpCode() returns the OpCode corresponding to this Spril.
 	 * 
-	 * @return opCode
+	 * @return The OpCode corresponding to this Spril.
 	 */
 	public OpCode getOpCode() {
 		return opcode;
 	}
 
 	/**
-	 * getOperands() returns the array containing operands
+	 * getOperands() returns an array containing all the operands of a Spril.
 	 * 
-	 * @return operands
+	 * @return An Array containing all the operands of a Spril.
 	 */
 	public Operand[] getOperands() {
 		return operands;
@@ -123,18 +123,19 @@ public class Spril {
 	}
 
 	/**
-	 * getComment() returns the comment of this spril
+	 * getComment() returns the comment belonging to this Spril.
 	 * 
-	 * @return comment
+	 * @return The comment belonging to this Spril.
 	 */
 	public String getComment() {
 		return comment;
 	}
 
 	/**
-	 * addComment() adds a comment
+	 * addComment() adds a comment to this Spril.
 	 * 
 	 * @param comment
+	 *            The comment that needs to be added to this Spril.
 	 */
 	public void addComment(String comment) {
 		if (this.comment.equals("")) {
@@ -145,10 +146,10 @@ public class Spril {
 	}
 
 	/**
-	 * setComment() sets the comment of this Spril
+	 * setComment() sets the comment of this Spril.
 	 * 
 	 * @param comment
-	 *            , the value that needs to be set
+	 *            The value that needs to become the comment belonging to this Spril.
 	 */
 	public void setComment(String comment) {
 		this.comment = comment;

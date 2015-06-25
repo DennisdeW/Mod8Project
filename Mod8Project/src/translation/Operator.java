@@ -2,26 +2,28 @@ package translation;
 
 /**
  * A representation of Spril operators.
- * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
+ * 
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
  */
 public enum Operator implements Operand {
-	ADD, SUB, MUL, DIV, MOD, EQ("Equal"), NEQ("NEq"), GT, GTE("GtE"), LT, LTE("LtE"), AND, OR, XOR, LSHIFT(
-			"LShift"), RSHIFT("RShift");
+	ADD, SUB, MUL, DIV, MOD, EQ("Equal"), NEQ("NEq"), GT, GTE("GtE"), LT, LTE(
+			"LtE"), AND, OR, XOR, LSHIFT("LShift"), RSHIFT("RShift");
 
 	// Instance variables
 	private String name;
 
 	/**
-	 * Use default name: First character capitalized, the rest lower case
+	 * Use default name: First character capitalized, the rest lower case.
 	 */
 	private Operator() {
 		this.name = name().charAt(0) + name().substring(1).toLowerCase();
 	}
 
 	/**
-	 * Use custom name
+	 * Use custom name.
+	 * 
 	 * @param name
-	 *            The name to use
+	 *            The name to use.
 	 */
 	private Operator(String name) {
 		this.name = name;
@@ -43,9 +45,11 @@ public enum Operator implements Operand {
 	}
 
 	/**
-	 * boolOp is used to parse a certain boolean operator
+	 * boolOp is used to parse a certain boolean operator.
+	 * 
 	 * @param text
-	 * @return Operator
+	 *            The text containing a boolean operator.
+	 * @return Operator The operator that is hidden inside <code>text</code>.
 	 */
 	public static Operator boolOp(String text) {
 		switch (text) {
@@ -61,9 +65,11 @@ public enum Operator implements Operand {
 	}
 
 	/**
-	 * comparator is used to parse a certain compare statement
+	 * Comparator is used to parse a certain compare statement.
+	 * 
 	 * @param text
-	 * @return Operator
+	 *            The text that contains the comparator.
+	 * @return Operator The operator hidden inside <code>text</code>.
 	 */
 	public static Operator comparator(String text) {
 		switch (text) {
@@ -83,13 +89,14 @@ public enum Operator implements Operand {
 			throw new Error("Impossible Comparator");
 		}
 	}
-	
+
 	/**
-	 * invert() is used invert a certain comparator
-	 * @return Operator
+	 * invert() is used invert a certain comparator.
+	 * 
+	 * @return Operator The Operator that is the inverted operator of the input.
 	 */
 	public Operator invert() {
-		switch(this) {
+		switch (this) {
 		case EQ:
 			return NEQ;
 		case GT:
@@ -103,7 +110,7 @@ public enum Operator implements Operand {
 		case NEQ:
 			return EQ;
 		default:
-			throw new RuntimeException("Can only invert comparators.");		
+			throw new RuntimeException("Can only invert comparators.");
 		}
 	}
 }

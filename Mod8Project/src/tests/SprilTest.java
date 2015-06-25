@@ -13,33 +13,33 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Class SprilTest is used to test whether the program can correctly make instructions
- * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
+ * Class SprilTest is used to test whether the program can correctly make
+ * instructions.
+ * 
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
  */
 public class SprilTest {
 
 	/**
-	 * doTest() tries to make instructions and checks whether they are correct
+	 * doTest() tries to make instructions and checks whether they are correct.
 	 */
 	@Test
 	public void doTest() {
 		Spril cnst = new Spril(OpCode.CONST, new Int(5), Register.A);
 		assertEquals("Const 5 RegA", cnst.toString());
 
-		Spril load = new Spril(OpCode.LOAD, MemAddr.direct(1234),
-				Register.C);
+		Spril load = new Spril(OpCode.LOAD, MemAddr.direct(1234), Register.C);
 		assertEquals("Load (Addr 1234) RegC", load.toString());
 
 		Spril compA = new Spril(OpCode.COMPUTE, Operator.ADD, Register.A,
 				Register.ZERO, Register.PC);
 		assertEquals("Compute Add RegA Zero PC", compA.toString());
 
-		Spril compB = new Spril(OpCode.COMPUTE, Operator.LSHIFT,
-				Register.SP, Register.SPID, Register.E);
+		Spril compB = new Spril(OpCode.COMPUTE, Operator.LSHIFT, Register.SP,
+				Register.SPID, Register.E);
 		assertEquals("Compute LShift SP SPID RegE", compB.toString());
 
-		Spril branch = new Spril(OpCode.BRANCH, Target.relative(-7),
-				Register.B);
+		Spril branch = new Spril(OpCode.BRANCH, Target.relative(-7), Register.B);
 		assertEquals("Branch (Rel -7) RegB", branch.toString());
 
 		Spril write = new Spril(OpCode.WRITE, Register.ZERO,
@@ -47,14 +47,16 @@ public class SprilTest {
 		assertEquals("Write Zero (Deref SPID)", write.toString());
 
 		try {
-			Spril err = new Spril(OpCode.LOAD, new Int(42)); //Wrong operand type
+			Spril err = new Spril(OpCode.LOAD, new Int(42)); // Wrong operand
+																// type
 			fail(err.toString());
 		} catch (IllegalArgumentException e) {
 			// expected
 			e.printStackTrace();
 		}
 		try {
-			Spril err = new Spril(OpCode.RECEIVE, new Int(42)); // Wrong operand type
+			Spril err = new Spril(OpCode.RECEIVE, new Int(42)); // Wrong operand
+																// type
 			fail(err.toString());
 		} catch (IllegalArgumentException e) {
 			// expected
@@ -76,7 +78,9 @@ public class SprilTest {
 			e.printStackTrace();
 		}
 		try {
-			Spril err = new Spril(OpCode.POP, Register.A, Register.B); // Too many arguments
+			Spril err = new Spril(OpCode.POP, Register.A, Register.B); // Too
+																		// many
+																		// arguments
 			fail(err.toString());
 		} catch (IllegalArgumentException e) {
 			// expected

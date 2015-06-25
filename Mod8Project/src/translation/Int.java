@@ -2,7 +2,8 @@ package translation;
 
 /**
  * A wrapper for an int.
- * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
+ * 
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
  */
 public class Int implements Operand {
 
@@ -13,7 +14,9 @@ public class Int implements Operand {
 
 	/**
 	 * Construct an Int with the given value.
-	 * @param value The value of this Int
+	 * 
+	 * @param value
+	 *            The value of this Int
 	 */
 	public Int(int value) {
 		this.value = value;

@@ -10,7 +10,7 @@ import translation.Program;
  * environment variable. All IO from the Haskell/Sprockell program is rerouted
  * to <code>System.[out/err/in]<code>.
  * 
- * @author Dennis
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
  *
  */
 public final class ProgramRunner {
@@ -19,19 +19,19 @@ public final class ProgramRunner {
 	private static final String BASE_PATH = new File("").getAbsolutePath();
 
 	/**
-	 * Empty Constructor
+	 * Empty Constructor.
 	 */
 	private ProgramRunner() {
 	}
 
 	/**
-	 * run() compiles a haskell file and runs the .exe it created
+	 * run() compiles a haskell file and runs the .exe it created.
 	 * 
 	 * @param prog
-	 *            The program that needs to be compiled
+	 *            The program that needs to be compiled.
 	 * @param temp
 	 *            Boolean whether the created files should be deleted after
-	 *            execution
+	 *            execution.
 	 */
 	private static void run(Program prog, boolean temp) {
 		String name = prog.getName();
