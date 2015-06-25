@@ -17,23 +17,26 @@ params : LBRACE (val (COMMA val)*)? RBRACE;
 call : ID params;
 
 expr
-	: MINUS expr			# negNumExpr
-	| EXCLAMATION expr 		# negBoolExpr
-	| AMP expr				# refExpr
-	| TIMES expr			# derefExpr
-	| expr TIMES expr 		# multExpr
-	| expr DIV expr 		# divExpr
-	| expr MINUS expr		# minExpr
-	| expr PLUS expr 		# plusExpr
-	| expr MOD expr 		# modExpr
-	| expr boolOp expr		# boolOpExpr
-	| expr comp expr 		# compExpr
-	| LBRACE expr RBRACE	# parExpr
-	| call					# callExpr
-	| ID					# idExpr
-	| NUMBER				# numExpr
-	| TRUE					# trueExpr
-	| FALSE					# falseExpr
+	: MINUS expr				# negNumExpr
+	| EXCLAMATION expr 			# negBoolExpr
+	| AMP expr					# refExpr
+	| TIMES expr				# derefExpr
+	| expr TIMES expr 			# multExpr
+	| expr DIV expr 			# divExpr
+	| expr MINUS expr			# minExpr
+	| expr PLUS expr 			# plusExpr
+	| expr MOD expr 			# modExpr
+	| expr boolOp expr			# boolOpExpr
+	| expr comp expr 			# compExpr
+	| LBRACE expr RBRACE		# parExpr
+	| call						# callExpr
+	| ID LSQUARE NUMBER RSQUARE # constArrayExpr
+	| ID LSQUARE expr RSQUARE	# exprArrayExpr
+	| LBRACE val (COMMA val)* RBRACE # arrayLiteralExpr
+	| ID						# idExpr
+	| NUMBER					# numExpr
+	| TRUE						# trueExpr
+	| FALSE						# falseExpr
 	;
 
 stat
@@ -53,7 +56,7 @@ stat
 decl : SHARED? type ID EQ expr;
 assign : derefID EQ expr;
 
-type : INT | BOOL | VOID | TYPE | type TIMES;
+type : INT | BOOL | VOID | TYPE | type TIMES | type LSQUARE RSQUARE;
 val : NUMBER | ID | TRUE | FALSE | SPID;
 comp : LT | GT | EQ EQ | LE | GE | NE;
 boolOp : AND | OR | XOR;

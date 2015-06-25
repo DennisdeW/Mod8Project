@@ -91,6 +91,13 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitType(@NotNull BaseGrammarParser.TypeContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code exprArrayExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprArrayExpr(@NotNull BaseGrammarParser.ExprArrayExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code parExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree
@@ -177,6 +184,13 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitBoolOp(@NotNull BaseGrammarParser.BoolOpContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code constArrayExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConstArrayExpr(@NotNull BaseGrammarParser.ConstArrayExprContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link BaseGrammarParser#comp}.
 	 * @param ctx the parse tree
@@ -276,6 +290,13 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitInStat(@NotNull BaseGrammarParser.InStatContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code arrayLiteralExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayLiteralExpr(@NotNull BaseGrammarParser.ArrayLiteralExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code assignStat}
 	 * labeled alternative in {@link BaseGrammarParser#stat}.

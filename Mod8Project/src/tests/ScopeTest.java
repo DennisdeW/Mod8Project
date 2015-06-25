@@ -4,9 +4,9 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import parsing.Func;
 import parsing.Scope;
-import parsing.Type;
-import parsing.Type.Func;
+import parsing.Primitive;
 
 /**
  * Class ScopeTest is used to test the Scope class.
@@ -21,15 +21,15 @@ public class ScopeTest {
 	@Test
 	public void testSingleLayer() {
 		Scope scope = new Scope();
-		scope.declare("a", Type.INT);
-		scope.declare("b", Type.BOOL);
+		scope.declare("a", Primitive.INT);
+		scope.declare("b", Primitive.BOOL);
 		assertTrue(scope.isDeclared("a"));
 		assertTrue(scope.isDeclaredLocally("b"));
-		assertTrue(scope.isDeclared("a", Type.INT));
-		assertFalse(scope.isDeclared("b", Type.VOID));
+		assertTrue(scope.isDeclared("a", Primitive.INT));
+		assertFalse(scope.isDeclared("b", Primitive.VOID));
 		assertEquals(0, scope.getOffset("a"));
 		assertEquals(1, scope.getOffset("b"));
-		assertEquals(Type.INT, scope.getType("a"));
+		assertEquals(Primitive.INT, scope.getType("a"));
 	}
 
 	/**
@@ -38,21 +38,21 @@ public class ScopeTest {
 	@Test
 	public void testMultiLayer() {
 		Scope scope = new Scope();
-		scope.declare("a", Type.INT);
+		scope.declare("a", Primitive.INT);
 		scope.openScope();
 		assertTrue(scope.isDeclared("a"));
 		assertFalse(scope.isDeclaredLocally("a"));
 		scope.openScope();
-		scope.declare("a", Type.BOOL);
+		scope.declare("a", Primitive.BOOL);
 		assertTrue(scope.isDeclaredLocally("a"));
-		assertEquals(Type.BOOL, scope.getType("a"));
+		assertEquals(Primitive.BOOL, scope.getType("a"));
 		assertEquals(1, scope.getOffset("a"));
 		scope.closeScope();
 		assertEquals(0, scope.getOffset("a"));
-		assertEquals(Type.INT, scope.getType("a"));
+		assertEquals(Primitive.INT, scope.getType("a"));
 		scope.closeScope();
 		assertTrue(scope.isDeclaredLocally("a"));
-		scope.declare("b", Type.BOOL);
+		scope.declare("b", Primitive.BOOL);
 		assertEquals(2, scope.getOffset("b"));
 		try {
 			scope.closeScope();
@@ -68,9 +68,9 @@ public class ScopeTest {
 	@Test
 	public void testFunctions() {
 		Scope scope = new Scope();
-		Func a = new Func("a", Type.INT, Type.INT, Type.INT);
-		Func b = new Func("b", Type.VOID);
-		Func c = new Func("c", Type.BOOL, Type.INT);
+		Func a = new Func("a", Primitive.INT, Primitive.INT, Primitive.INT);
+		Func b = new Func("b", Primitive.VOID);
+		Func c = new Func("c", Primitive.BOOL, Primitive.INT);
 		assertTrue(scope.declare(a));
 		assertTrue(scope.isDeclared(a));
 		scope.openScope();
@@ -80,9 +80,9 @@ public class ScopeTest {
 		assertTrue(scope.isDeclared(b));
 		assertFalse(scope.isDeclared(c));
 		assertTrue(scope.declare(c));
-		assertTrue(scope.isDeclared(new Func("c", Type.BOOL, Type.INT)));
-		assertFalse(scope.isDeclared(new Func("a", Type.VOID, Type.INT,
-				Type.INT)));
+		assertTrue(scope.isDeclared(new Func("c", Primitive.BOOL, Primitive.INT)));
+		assertFalse(scope.isDeclared(new Func("a", Primitive.VOID, Primitive.INT,
+				Primitive.INT)));
 	}
 
 	/**
@@ -91,17 +91,17 @@ public class ScopeTest {
 	@Test
 	public void testShared() {
 		Scope scope = new Scope();
-		scope.declare("a", Type.BOOL, true);
-		scope.declare("b", Type.INT, false);
+		scope.declare("a", Primitive.BOOL, true);
+		scope.declare("b", Primitive.INT, false);
 		assertEquals(0, scope.getOffset("a"));
 		assertEquals(0, scope.getOffset("b"));
 		assertTrue(scope.isShared("a"));
 		assertFalse(scope.isShared("b"));
 		scope.openScope();
-		scope.declare("a", Type.INT, true);
+		scope.declare("a", Primitive.INT, true);
 		assertEquals(1, scope.getOffset("a"));
 		scope.openScope();
-		scope.declare("a", Type.BOOL, false);
+		scope.declare("a", Primitive.BOOL, false);
 		assertEquals(1, scope.getOffset("a"));
 	}
 }

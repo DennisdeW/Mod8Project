@@ -16,7 +16,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import parsing.BaseGrammarParser.*;
 import parsing.Checker.CheckResult;
-import parsing.Type.Func;
 import parsing.Type.Pointer;
 import translation.Int;
 import translation.MemAddr;
@@ -31,7 +30,7 @@ import write.ProgramRunner;
 
 public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 
-	public static final Func MAIN_FUNC_SIG = new Func("main", Type.INT);
+	public static final Func MAIN_FUNC_SIG = new Func("main", Primitive.INT);
 
 	public static void main(String[] args) {
 		String prog = "program globPtr; shared int a = 4;  def int main() {   shared int val = 5;   shared int* ptr = &val;   *ptr = 8;   return val;  }";
@@ -91,7 +90,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 
 		FuncContext mainFuncCtx = cres.getMatchingFunc(MAIN_FUNC_SIG.getName(),
 				MAIN_FUNC_SIG.getArgs());
-		if (Type.forName(mainFuncCtx.type().getText()) != MAIN_FUNC_SIG
+		if (Primitive.forName(mainFuncCtx.type().getText()) != MAIN_FUNC_SIG
 				.getReturnType())
 			System.err.println("WARNING: Main function return type should be "
 					+ MAIN_FUNC_SIG.getReturnType());
@@ -431,7 +430,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 				result.add(new Spril(OpCode.POP, Register.A));
 			addr = cres.getOffsets().get(((IdExprContext) ctx.expr()).ID());
 		} else {
-			IType type = cres.getTypes().get(ctx.expr());
+			Type type = cres.getTypes().get(ctx.expr());
 			addr = heapPtr;
 			heapPtr += type.getSize();
 			if (result.get(result.size() - 1).equals(
@@ -586,7 +585,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 	private List<Spril> call(CallContext ctx, boolean wantResult) {
 		List<Spril> result = new ArrayList<>();
 
-		List<IType> types = ctx.params().val().stream()
+		List<Type> types = ctx.params().val().stream()
 				.map(v -> cres.valType(v)).collect(Collectors.toList());
 		FuncContext func = cres.getMatchingFunc(ctx.ID().getText(), types);
 		if (func == null) {

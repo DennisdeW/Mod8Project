@@ -29,8 +29,8 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import parsing.BaseGrammarParser.DerefIDContext;
 import parsing.BaseGrammarParser.FuncContext;
 import parsing.BaseGrammarParser.TypedparamsContext;
-import parsing.Type.Func;
 import parsing.Type.Pointer;
+import parsing.Type.Array;
 import parsing.BaseGrammarParser.*;
 
 /**
@@ -42,7 +42,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		ANTLRErrorListener {
 
 	public class CheckResult {
-		private ParseTreeProperty<IType> types;
+		private ParseTreeProperty<Type> types;
 		private Map<ParseTree, Integer> offsets;
 		private Set<FuncContext> functions;
 		private List<String> errors;
@@ -58,7 +58,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			this.locks = new HashMap<>();
 		}
 
-		public CheckResult(ParseTreeProperty<IType> types,
+		public CheckResult(ParseTreeProperty<Type> types,
 				Map<ParseTree, Integer> offsets, Set<FuncContext> functions,
 				List<String> errors, ParseTreeProperty<Boolean> shared,
 				Map<String, Integer> locks) {
@@ -91,7 +91,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			return shared;
 		}
 
-		public ParseTreeProperty<IType> getTypes() {
+		public ParseTreeProperty<Type> getTypes() {
 			return types;
 		}
 
@@ -115,7 +115,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			this.shared = shared;
 		}
 
-		public void setTypes(ParseTreeProperty<IType> types) {
+		public void setTypes(ParseTreeProperty<Type> types) {
 			this.types = types;
 		}
 
@@ -135,7 +135,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			return this.functions.size();
 		}
 
-		FuncContext getMatchingFunc(String name, List<IType> types) {
+		FuncContext getMatchingFunc(String name, List<Type> types) {
 			return this.functions
 					.stream()
 					.filter(func -> func.typedparams().type().stream()
@@ -154,7 +154,8 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 					.entrySet()
 					.stream()
 					.filter(e -> (this.shared == null) != shared
-							|| (this.shared.get(e.getKey()) != null && this.shared.get(e.getKey())))
+							|| (this.shared.get(e.getKey()) != null && this.shared
+									.get(e.getKey())))
 					.mapToInt(i -> i.getValue()).max().orElse(0);
 		}
 
@@ -162,12 +163,12 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			return maxOffset(true) + locks.size();
 		}
 
-		IType valType(ValContext ctx) {
+		Type valType(ValContext ctx) {
 			if (ctx.NUMBER() != null || ctx.SPID() != null)
-				return Type.INT;
+				return Primitive.INT;
 			else if (ctx.TRUE() != null || ctx.FALSE() != null)
-				return Type.BOOL;
-			IType res = types.get(ctx);
+				return Primitive.BOOL;
+			Type res = types.get(ctx);
 			if (res == null)
 				throw new RuntimeException("Could not get type of " + ctx.ID());
 			return res;
@@ -181,7 +182,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	private List<String> errors;
 	private Map<FuncContext, Func> functions;
 	private Set<String> locks;
-	private ParseTreeProperty<IType> types;
+	private ParseTreeProperty<Type> types;
 	private ParseTreeProperty<Boolean> shared;
 	private Func currentFunc;
 	private Map<Func, TypedparamsContext> params;
@@ -284,18 +285,36 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	public Void visitAssign(AssignContext ctx) {
 		String target = ctx.derefID().getText();
 		TerminalNode id = getID(ctx.derefID());
-		IType targetType = getType(ctx, target.replaceAll("\\*", ""));
-		if (targetType == Type.ERR_TYPE)
+		Type targetType = getType(ctx, target.replaceAll("\\*", ""));
+		if (targetType == Primitive.ERR_TYPE)
 			return null;
 		visit(ctx.expr());
 		while (target.startsWith("*")) {
-			targetType = new Pointer(targetType);
+			targetType = new Type.Pointer(targetType);
 			target = target.substring(1);
 		}
-		IType sourceType = getType(ctx.expr());
-		checkType(ctx, targetType, sourceType);
+		Type sourceType = getType(ctx.expr());
+		if (!(targetType instanceof Pointer && sourceType == Primitive.INT))
+			checkType(ctx, targetType, sourceType);
 		shared.put(id, scope.isShared(target.replaceAll("\\*", "")));
-		result.getOffsets().put(id, scope.getOffset(target.replaceAll("\\*", "")));
+		result.getOffsets().put(id,
+				scope.getOffset(target.replaceAll("\\*", "")));
+		return null;
+	}
+
+	public Void visitArrayLiteralExpr(ArrayLiteralExprContext ctx) {
+		ctx.val().forEach(v -> visit(v));
+		Type firstType = getType(ctx, ctx.val(0).getText());
+		if (ctx.val().stream()
+				.anyMatch(v -> !getType(ctx, v.getText()).equals(firstType))) {
+			error(ctx, "Mixed types in array");
+			return null;
+		}
+		
+		int count = ctx.val().size();
+		Type arr = new Array(firstType, count);
+		types.put(ctx, arr);
+		
 		return null;
 	}
 
@@ -311,16 +330,16 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		ExprContext snd = ctx.expr(1);
 		visit(fst);
 		visit(snd);
-		checkType(ctx, Type.BOOL, fst);
-		checkType(ctx, Type.BOOL, snd);
-		types.put(ctx, Type.BOOL);
+		checkType(ctx, Primitive.BOOL, fst);
+		checkType(ctx, Primitive.BOOL, snd);
+		types.put(ctx, Primitive.BOOL);
 		return null;
 	}
 
 	public Void visitCallExpr(CallExprContext ctx) {
 		Func function = call(ctx.call(), null);
 		types.put(ctx, function != null ? function.getReturnType()
-				: Type.ERR_TYPE);
+				: Primitive.ERR_TYPE);
 		return null;
 	}
 
@@ -329,14 +348,20 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	public Void visitConstArrayExpr(ConstArrayExprContext ctx) {
+		visit(ctx.ID());
+		types.put(ctx, getType(ctx, ctx.ID().getText()));
+		return null;
+	}
+
 	public Void visitCompExpr(CompExprContext ctx) {
 		ExprContext fst = ctx.expr(0);
 		ExprContext snd = ctx.expr(1);
 		visit(fst);
 		visit(snd);
-		checkType(ctx, Type.INT, fst);
-		checkType(ctx, Type.INT, snd);
-		types.put(ctx, Type.BOOL);
+		checkType(ctx, Primitive.INT, fst);
+		checkType(ctx, Primitive.INT, snd);
+		types.put(ctx, Primitive.BOOL);
 		return null;
 	}
 
@@ -345,7 +370,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		if (!checkName(ctx, varId))
 			return null;
 
-		IType type = typeForName(ctx, ctx.type().getText());
+		Type type = typeForName(ctx, ctx.type().getText());
 		if (scope.isDeclaredLocally(varId)) {
 			error(ctx, "Duplicate declaration of variable '%s'", varId);
 			return null;
@@ -360,16 +385,18 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 		return null;
 	}
-	
+
 	public Void visitDerefExpr(DerefExprContext ctx) {
 		visit(ctx.expr());
-		IType ptr = types.get(ctx.expr());
-		if (!(ptr instanceof Pointer)) {
-			error(ctx, "Tried dereferencing %s (type %s), which is not a pointer.", ctx.expr().getText(), ptr);
-			types.put(ctx, Type.ERR_TYPE);
+		Type ptr = types.get(ctx.expr());
+		if (!(ptr instanceof Type.Pointer)) {
+			error(ctx,
+					"Tried dereferencing %s (type %s), which is not a pointer.",
+					ctx.expr().getText(), ptr);
+			types.put(ctx, Primitive.ERR_TYPE);
 			return null;
 		}
-		types.put(ctx, ((Pointer) ptr).getWrappedType());
+		types.put(ctx, ((Type.Pointer) ptr).getWrappedType());
 		return null;
 	}
 
@@ -379,12 +406,12 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	public Void visitFalseExpr(FalseExprContext ctx) {
-		types.put(ctx, Type.BOOL);
+		types.put(ctx, Primitive.BOOL);
 		return null;
 	}
 
 	public Void visitForStat(ForStatContext ctx) {
-		if (!checkType(ctx, Type.INT,
+		if (!checkType(ctx, Primitive.INT,
 				typeForName(ctx, ctx.decl().type().getText()))) {
 			return null;
 		}
@@ -396,14 +423,14 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	public Void visitFunc(FuncContext ctx) {
-		IType retType = IType.forName(ctx.type().getText());
+		Type retType = Type.forName(ctx.type().getText());
 		types.put(ctx, retType);
 
 		String name = ctx.ID().getText();
 		if (!checkName(ctx, name))
 			return null;
 
-		List<IType> argTypes = ctx.typedparams().type().stream()
+		List<Type> argTypes = ctx.typedparams().type().stream()
 				.map(t -> typeForName(ctx, t.getText()))
 				.collect(Collectors.toList());
 		Func func = new Func(name, retType, argTypes);
@@ -412,6 +439,14 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		functions.put(ctx, func);
 		result.getFunctions().add(ctx);
 		result.getTypes().put(ctx, retType);
+		return null;
+	}
+
+	public Void visitExprArrayExpr(ExprArrayExprContext ctx) {
+		visit(ctx.ID());
+		visit(ctx.expr());
+		checkType(ctx, Primitive.INT, ctx.expr());
+		types.put(ctx, getType(ctx, ctx.ID().getText()));
 		return null;
 	}
 
@@ -425,7 +460,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	public Void visitIfStat(IfStatContext ctx) {
 		for (int i = 0; i < ctx.expr().size(); i++) {
 			visit(ctx.expr(i));
-			checkType(ctx, Type.BOOL, getType(ctx.expr(i)));
+			checkType(ctx, Primitive.BOOL, getType(ctx.expr(i)));
 		}
 		ctx.block().forEach(block -> visit(block));
 		return null;
@@ -464,24 +499,24 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 	public Void visitNegBoolExpr(NegBoolExprContext ctx) {
 		visit(ctx.expr());
-		if (checkType(ctx, Type.BOOL, ctx.expr()))
-			types.put(ctx, Type.BOOL);
+		if (checkType(ctx, Primitive.BOOL, ctx.expr()))
+			types.put(ctx, Primitive.BOOL);
 		else
-			types.put(ctx, Type.ERR_TYPE);
+			types.put(ctx, Primitive.ERR_TYPE);
 		return null;
 	}
 
 	public Void visitNegNumExpr(NegNumExprContext ctx) {
 		visit(ctx.expr());
-		if (checkType(ctx, Type.INT, ctx.expr()))
-			types.put(ctx, Type.INT);
+		if (checkType(ctx, Primitive.INT, ctx.expr()))
+			types.put(ctx, Primitive.INT);
 		else
-			types.put(ctx, Type.ERR_TYPE);
+			types.put(ctx, Primitive.ERR_TYPE);
 		return null;
 	}
 
 	public Void visitNumExpr(NumExprContext ctx) {
-		types.put(ctx, Type.INT);
+		types.put(ctx, Primitive.INT);
 		return null;
 	}
 
@@ -533,19 +568,19 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		// functions.forEach((fctx, func) -> processFunction(fctx, func));
 		return null;
 	}
-	
+
 	public Void visitRefExpr(RefExprContext ctx) {
 		visit(ctx.expr());
-		types.put(ctx, new Pointer(types.get(ctx.expr())));
+		types.put(ctx, new Type.Pointer(types.get(ctx.expr())));
 		return null;
 	}
 
 	public Void visitReturnStat(ReturnStatContext ctx) {
-		IType expected = currentFunc.getReturnType();
+		Type expected = currentFunc.getReturnType();
 		if (ctx.expr() != null) {
 			visit(ctx.expr());
-			IType exprType = getType(ctx.expr());
-			if (exprType == Type.ERR_TYPE)
+			Type exprType = getType(ctx.expr());
+			if (exprType == Primitive.ERR_TYPE)
 				error(ctx,
 						"<Unable to check function return type because the expression cannot be evaluated>");
 			else if (!exprType.equals(expected)) {
@@ -554,7 +589,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 						exprType, currentFunc.getName(), expected);
 			}
 		} else {
-			if (expected != Type.VOID) {
+			if (expected != Primitive.VOID) {
 				error(ctx,
 						"Returning void in function '%s' with non-void return type '%s'.",
 						currentFunc.getName(), expected);
@@ -572,14 +607,14 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	public Void visitTrueExpr(TrueExprContext ctx) {
-		types.put(ctx, Type.BOOL);
+		types.put(ctx, Primitive.BOOL);
 		return null;
 	}
 
 	public Void visitTypedparams(TypedparamsContext ctx) {
 		for (int i = 0; i < ctx.type().size(); i++) {
 			String name = ctx.ID(i).getText();
-			IType type = typeForName(ctx, ctx.type(i).getText());
+			Type type = typeForName(ctx, ctx.type(i).getText());
 			if (scope.isDeclaredLocally(name)) {
 				error(ctx, "Duplicate parameter '%s'.", name);
 			} else {
@@ -592,9 +627,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 	public Void visitVal(ValContext ctx) {
 		if (ctx.TRUE() != null || ctx.FALSE() != null)
-			types.put(ctx, Type.BOOL);
+			types.put(ctx, Primitive.BOOL);
 		else if (ctx.NUMBER() != null)
-			types.put(ctx, Type.INT);
+			types.put(ctx, Primitive.INT);
 		else if (ctx.ID() != null) {
 			types.put(ctx, getType(ctx, ctx.ID().getText()));
 			result.getOffsets().put(ctx.ID(),
@@ -602,14 +637,14 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			shared.put(ctx.ID(), scope.isShared(ctx.ID().getText()));
 			return null;
 		} else {
-			types.put(ctx, Type.INT);
+			types.put(ctx, Primitive.INT);
 		}
 		return null;
 	}
 
 	public Void visitWhileStat(WhileStatContext ctx) {
 		visit(ctx.expr());
-		checkType(ctx, Type.BOOL, getType(ctx.expr()));
+		checkType(ctx, Primitive.BOOL, getType(ctx.expr()));
 		visit(ctx.block());
 		return null;
 	}
@@ -618,18 +653,18 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			ExprContext snd) {
 		visit(fst);
 		visit(snd);
-		checkType(ctx, Type.INT, fst);
-		checkType(ctx, Type.INT, snd);
-		types.put(ctx, Type.INT);
+		checkType(ctx, Primitive.INT, fst);
+		checkType(ctx, Primitive.INT, snd);
+		types.put(ctx, Primitive.INT);
 	}
 
-	private Func call(CallContext ctx, IType expectedReturn) {
-		List<IType> args = new ArrayList<>();
+	private Func call(CallContext ctx, Type expectedReturn) {
+		List<Type> args = new ArrayList<>();
 		ctx.params().val().stream().forEachOrdered(val -> {
 			visit(val);
 			args.add(getType(val));
 		});
-		if (args.stream().anyMatch(type -> type == Type.ERR_TYPE))
+		if (args.stream().anyMatch(type -> type == Primitive.ERR_TYPE))
 			return null;
 		Func func = null;
 		if (expectedReturn != null) {
@@ -693,11 +728,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return true;
 	}
 
-	private boolean checkType(ParseTree tree, IType expected, IType actual) {
-		if (!expected.equals(actual)
-				&& !(expected instanceof Pointer && actual == Type.INT)
-				&& !(expected == Type.INT && actual instanceof Pointer)) {
-			if (actual == Type.ERR_TYPE)
+	private boolean checkType(ParseTree tree, Type expected, Type actual) {
+		if (!expected.equals(actual)) {
+			if (actual == Primitive.ERR_TYPE)
 				error(tree, "<Caused by earlier error>");
 			else
 				error(tree, "Type mismatch. Expected '%s', but saw '%s'.",
@@ -707,7 +740,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return true;
 	}
 
-	private boolean checkType(ParseTree tree, IType expected,
+	private boolean checkType(ParseTree tree, Type expected,
 			ParserRuleContext ctx) {
 		return checkType(tree, expected, getType(ctx));
 	}
@@ -734,20 +767,20 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		else
 			return getID(ctx.derefID());
 	}
-	
-	private IType getType(ParserRuleContext ctx) {
-		IType type = types.get(ctx);
+
+	private Type getType(ParserRuleContext ctx) {
+		Type type = types.get(ctx);
 		if (type == null)
 			throw new IllegalArgumentException(String.format(
 					"Node '%s' has no type.", ctx.getText()));
 		return type;
 	}
 
-	private IType getType(ParseTree tree, String varId) {
+	private Type getType(ParseTree tree, String varId) {
 		if (scope.isDeclared(varId))
 			return scope.getType(varId);
 		error(tree, "Variable '%s' was not declared in this scope.", varId);
-		return Type.ERR_TYPE;
+		return Primitive.ERR_TYPE;
 	}
 
 	private void processFunction(FuncContext ctx, Func func) {
@@ -756,12 +789,12 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		currentFunc = null;
 	}
 
-	private IType typeForName(ParseTree tree, String typeName) {
+	private Type typeForName(ParseTree tree, String typeName) {
 		try {
-			return IType.forName(typeName);
+			return Type.forName(typeName);
 		} catch (IllegalArgumentException e) {
 			error(tree, e.getMessage());
 		}
-		return Type.ERR_TYPE;
+		return Primitive.ERR_TYPE;
 	}
 }

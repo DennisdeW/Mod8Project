@@ -143,6 +143,18 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitType(@NotNull BaseGrammarParser.TypeContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code exprArrayExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprArrayExpr(@NotNull BaseGrammarParser.ExprArrayExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code exprArrayExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprArrayExpr(@NotNull BaseGrammarParser.ExprArrayExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code parExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree
@@ -290,6 +302,18 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitBoolOp(@NotNull BaseGrammarParser.BoolOpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code constArrayExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterConstArrayExpr(@NotNull BaseGrammarParser.ConstArrayExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code constArrayExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitConstArrayExpr(@NotNull BaseGrammarParser.ConstArrayExprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BaseGrammarParser#comp}.
 	 * @param ctx the parse tree
@@ -458,6 +482,18 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitInStat(@NotNull BaseGrammarParser.InStatContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code arrayLiteralExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrayLiteralExpr(@NotNull BaseGrammarParser.ArrayLiteralExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code arrayLiteralExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrayLiteralExpr(@NotNull BaseGrammarParser.ArrayLiteralExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code assignStat}
 	 * labeled alternative in {@link BaseGrammarParser#stat}.
