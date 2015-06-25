@@ -3,7 +3,7 @@ package translation;
 /**
  * A jump target. It may be absolute, relative or indirect (using a register).
  * 
- * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
  */
 public class Target implements Operand {
 
@@ -13,10 +13,10 @@ public class Target implements Operand {
 	private boolean isReg, isAbs;
 
 	/**
-	 * Constructor Target sets certain instance variables
+	 * Constructor Target sets certain instance variables.
 	 * 
 	 * @param reg
-	 *            the register that needs to be set
+	 *            The register that needs to be set.
 	 */
 	private Target(Register reg) {
 		this.reg = reg;
@@ -24,12 +24,12 @@ public class Target implements Operand {
 	}
 
 	/**
-	 * Constructor Target sets certain instance variables
+	 * Constructor Target sets certain instance variables.
 	 * 
 	 * @param addr
-	 *            the address that needs to be set
+	 *            The address that needs to be set.
 	 * @param isAbs
-	 *            the value for isAbs that needs to be set
+	 *            The value for isAbs that needs to be set.
 	 */
 	private Target(int addr, boolean isAbs) {
 		this.addr = addr;
@@ -54,7 +54,7 @@ public class Target implements Operand {
 	 * 
 	 * @param addr
 	 *            The address to jump to.
-	 * @return A Target pointing to <code>addr</code>
+	 * @return A Target pointing to <code>addr</code>.
 	 */
 	public static Target absolute(int addr) {
 		return new Target(addr, true);

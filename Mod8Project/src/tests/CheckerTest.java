@@ -18,18 +18,19 @@ import parsing.Checker;
 import parsing.Checker.CheckResult;
 
 /**
- * Class CheckerTest is used to test the Checker class
- * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
+ * Class CheckerTest is used to test the Checker class.
+ * 
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
  */
 public class CheckerTest {
-	
+
 	// Instance Variables
 	private FileInputStream testCorrect;
 	private FileInputStream testIncorrect;
 	private Checker checker;
 
 	/**
-	 * init() initializes the instance variables
+	 * init() initializes the instance variables.
 	 */
 	@Before
 	public void init() {
@@ -45,7 +46,8 @@ public class CheckerTest {
 	}
 
 	/**
-	 * tearDown() is used to close the FileInputStreams testCorrect and testIncorrect
+	 * tearDown() is used to close the FileInputStreams testCorrect and
+	 * testIncorrect.
 	 */
 	@After
 	public void tearDown() {
@@ -58,14 +60,16 @@ public class CheckerTest {
 	}
 
 	/**
-	 * testCorrect() tries to parse testTrue.tmp and checks whether it is parsed correctly
+	 * testCorrect() tries to parse testTrue.tmp and checks whether it is parsed
+	 * correctly.
 	 */
 	@Test
 	public void testCorrect() {
-		try {		
+		try {
 			checker.check(new ANTLRInputStream(testCorrect));
 			if (checker.hasErrors()) {
-				System.out.println(checker.getErrors().stream().collect(Collectors.joining("\n")));
+				System.out.println(checker.getErrors().stream()
+						.collect(Collectors.joining("\n")));
 				fail();
 			}
 			checker = new Checker();
@@ -76,7 +80,8 @@ public class CheckerTest {
 	}
 
 	/**
-	 * testIncorrect() tries to parse testFalse.tmp and checks whether it is parsed correctly
+	 * testIncorrect() tries to parse testFalse.tmp and checks whether it is
+	 * parsed correctly.
 	 */
 	@Test
 	public void testInCorrect() {
@@ -85,7 +90,8 @@ public class CheckerTest {
 			if (!checker.hasErrors()) {
 				fail();
 			}
-			System.out.println(checker.getErrors().stream().collect(Collectors.joining("\n")));
+			System.out.println(checker.getErrors().stream()
+					.collect(Collectors.joining("\n")));
 			checker = new Checker();
 		} catch (RecognitionException | IOException e) {
 			e.printStackTrace();
