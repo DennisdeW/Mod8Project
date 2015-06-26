@@ -245,3 +245,20 @@ def int main() {
 }
 
 program globPtr;    def int main() {   shared int val = 5;   shared int* ptr = &val;   *ptr = 8;   return val;  }
+
+___________
+
+program arrTest;
+
+def int main() {
+	int[] x = [1,2,3,4];
+	int a = 3;
+	int b = 8;
+	int[] y = [a, b];
+	bool[] bools = [true, false, true];
+	bool c = true;
+	bool d = false;
+	bool[] bools2 = [c, d];
+	return 0;
+}
+program arrTest;    def int main() {   int[] x = [1,2,3,4];   int a = 3;   int b = 8;   int[] y = [a, b];   bool[] bools = [true, false, true];   bool c = true;   bool d = false;   bool[] bools2 = [c, d];   return 0;  }

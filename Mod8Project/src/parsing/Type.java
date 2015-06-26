@@ -38,7 +38,7 @@ public interface Type {
 					+ ((wrappedType == null) ? 0 : wrappedType.hashCode());
 			return result;
 		}
-
+		
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -91,7 +91,7 @@ public interface Type {
 		public Type getContainedType() {
 			return containedType;
 		}
-
+		
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -124,12 +124,22 @@ public interface Type {
 		}
 
 	}
-
+	
 	int getSize();
 
 	@Override
 	String toString();
 
+	static Primitive baseType(Type type) {
+		if (type instanceof Primitive)
+			return (Primitive) type;
+		if (type instanceof Array)
+			return baseType(((Array) type).getContainedType());
+		if (type instanceof Pointer)
+			return baseType(((Pointer) type).getWrappedType());
+		throw new IllegalArgumentException();
+	}
+	
 	static Type forName(String name) {
 		Type type = null;
 		for (Primitive t : Primitive.values()) {

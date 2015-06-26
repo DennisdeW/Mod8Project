@@ -11,6 +11,8 @@ def int main() {
 	main10(1);
 	mainV(true);
 	loops();
+	int[] arr = [1,2,3,4];
+	arr[i] = 3;
 	int* ptr = ref(5);
 	deref(ptr);
 	*ptr = 3;

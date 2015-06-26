@@ -471,6 +471,16 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitDerefExpr(@NotNull BaseGrammarParser.DerefExprContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BaseGrammarParser#arrayVal}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrayVal(@NotNull BaseGrammarParser.ArrayValContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BaseGrammarParser#arrayVal}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrayVal(@NotNull BaseGrammarParser.ArrayValContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code inStat}
 	 * labeled alternative in {@link BaseGrammarParser#stat}.
 	 * @param ctx the parse tree

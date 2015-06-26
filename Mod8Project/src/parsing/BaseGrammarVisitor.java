@@ -284,6 +284,12 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDerefExpr(@NotNull BaseGrammarParser.DerefExprContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link BaseGrammarParser#arrayVal}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayVal(@NotNull BaseGrammarParser.ArrayValContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code inStat}
 	 * labeled alternative in {@link BaseGrammarParser#stat}.
 	 * @param ctx the parse tree

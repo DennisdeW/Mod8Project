@@ -26,6 +26,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import parsing.BaseGrammarParser.ArrayLiteralExprContext;
 import parsing.BaseGrammarParser.DerefIDContext;
 import parsing.BaseGrammarParser.FuncContext;
 import parsing.BaseGrammarParser.TypedparamsContext;
@@ -188,6 +189,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	private Map<Func, TypedparamsContext> params;
 	private Map<Func, List<Func>> callTree;
 	private CheckResult result;
+	private int arrCount;
 
 	private boolean dirty;
 
@@ -229,6 +231,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		callTree = new HashMap<>();
 		result = new CheckResult();
 		locks = new HashSet<>();
+		arrCount = 0;
 		currentFunc = null;
 		visit(prog);
 		result.setTypes(types);
@@ -282,39 +285,66 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		dirty = true;
 	}
 
-	public Void visitAssign(AssignContext ctx) {
-		String target = ctx.derefID().getText();
-		TerminalNode id = getID(ctx.derefID());
-		Type targetType = getType(ctx, target.replaceAll("\\*", ""));
-		if (targetType == Primitive.ERR_TYPE)
+	
+
+	public Void visitArrayVal(ArrayValContext ctx) {
+		String arrId = ctx.ID().getText();
+		Type arrType = getType(ctx, arrId);
+		if (!(arrType instanceof Array)) {
+			error(ctx,
+					"Variable %s is not an array (it's %s), but it is accessed like one.",
+					arrId, arrType);
 			return null;
-		visit(ctx.expr());
-		while (target.startsWith("*")) {
-			targetType = new Type.Pointer(targetType);
-			target = target.substring(1);
 		}
-		Type sourceType = getType(ctx.expr());
-		if (!(targetType instanceof Pointer && sourceType == Primitive.INT))
-			checkType(ctx, targetType, sourceType);
-		shared.put(id, scope.isShared(target.replaceAll("\\*", "")));
-		result.getOffsets().put(id,
-				scope.getOffset(target.replaceAll("\\*", "")));
+
+		visit(ctx.expr());
+		checkType(ctx, Primitive.INT, ctx.expr());
+
+		types.put(ctx, arrType);
+		result.getOffsets().put(ctx, scope.getOffset(arrId));
+		shared.put(ctx, shared.get(ctx.ID()));
+
 		return null;
 	}
 
-	public Void visitArrayLiteralExpr(ArrayLiteralExprContext ctx) {
-		ctx.val().forEach(v -> visit(v));
-		Type firstType = getType(ctx, ctx.val(0).getText());
-		if (ctx.val().stream()
-				.anyMatch(v -> !getType(ctx, v.getText()).equals(firstType))) {
-			error(ctx, "Mixed types in array");
-			return null;
+	public Void visitAssign(AssignContext ctx) {
+		if (ctx.derefID() != null) {
+			String target = ctx.derefID().getText();
+			TerminalNode id = getID(ctx.derefID());
+			Type targetType = getType(ctx, target.replaceAll("\\*", ""));
+			if (targetType == Primitive.ERR_TYPE)
+				return null;
+			visit(ctx.expr());
+			while (target.startsWith("*")) {
+				targetType = new Type.Pointer(targetType);
+				target = target.substring(1);
+			}
+			Type sourceType = getType(ctx.expr());
+			if (!(targetType instanceof Pointer && sourceType == Primitive.INT)
+					&& !(targetType == Primitive.INT && sourceType instanceof Pointer))
+				checkType(ctx, targetType, sourceType);
+			shared.put(id, scope.isShared(target.replaceAll("\\*", "")));
+			result.getOffsets().put(id,
+					scope.getOffset(target.replaceAll("\\*", "")));
+		} else if (ctx.arrayVal() != null) {
+			String target = ctx.arrayVal().ID().getText();
+			TerminalNode id = ctx.arrayVal().ID();
+			Type targetType = ((Array) getType(ctx, target)).getContainedType();
+			visit(ctx.expr());
+			Type sourceType = getType(ctx.expr());
+			checkType(ctx, targetType, sourceType);
+			types.put(id, targetType);
+			shared.put(id,  scope.isShared(target));
+			result.getOffsets().put(id, scope.getOffset(target));
+		} else {
+			visit(ctx.arrayVal());
+			Array arr = (Array) types.get(ctx.arrayVal());
+			Type sourceType = getType(ctx.expr());
+			Type targetType = arr.getContainedType();
+			if (!(targetType instanceof Pointer && sourceType == Primitive.INT)
+					&& !(targetType == Primitive.INT && sourceType instanceof Pointer))
+				checkType(ctx, targetType, sourceType);
 		}
-		
-		int count = ctx.val().size();
-		Type arr = new Array(firstType, count);
-		types.put(ctx, arr);
-		
 		return null;
 	}
 
@@ -348,12 +378,6 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
-	public Void visitConstArrayExpr(ConstArrayExprContext ctx) {
-		visit(ctx.ID());
-		types.put(ctx, getType(ctx, ctx.ID().getText()));
-		return null;
-	}
-
 	public Void visitCompExpr(CompExprContext ctx) {
 		ExprContext fst = ctx.expr(0);
 		ExprContext snd = ctx.expr(1);
@@ -365,8 +389,14 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	public Void visitConstArrayExpr(ConstArrayExprContext ctx) {
+		visit(ctx.ID());
+		types.put(ctx, getType(ctx, ctx.ID().getText()));
+		return null;
+	}
+
 	public Void visitDecl(DeclContext ctx) {
-		String varId = ctx.ID().getText();
+		String varId = ctx.ID().getText().replaceAll("[\\[\\]\\*]", "");
 		if (!checkName(ctx, varId))
 			return null;
 
@@ -375,17 +405,44 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			error(ctx, "Duplicate declaration of variable '%s'", varId);
 			return null;
 		}
-		scope.declare(varId, type, ctx.SHARED() != null);
-		types.put(ctx, type);
-		shared.put(ctx.ID(), ctx.SHARED() != null);
-		result.getOffsets().put(ctx.ID(), scope.getOffset(varId));
 
-		visit(ctx.expr());
+		if (ctx.expr() instanceof ArrayLiteralExprContext) {
+			makeArray((ArrayLiteralExprContext) ctx.expr(), varId);
+			types.put(ctx, types.get(ctx.expr()));
+			result.getOffsets().put(ctx.ID(), scope.getOffset(varId));
+		} else {
+			visit(ctx.expr());
+			scope.declare(varId, type, ctx.SHARED() != null);
+			types.put(ctx, type);
+			result.getOffsets().put(ctx.ID(), scope.getOffset(varId));
+		}
 		checkType(ctx, type, ctx.expr());
+		shared.put(ctx.ID(), ctx.SHARED() != null);
 
 		return null;
 	}
 
+	public Void visitArrayLiteralExpr(ArrayLiteralExprContext ctx) {
+		makeArray(ctx, "<arr_" + ++arrCount + ">");
+		return null;
+	}
+	
+	private void makeArray(ArrayLiteralExprContext ctx, String id) {
+		ctx.val().forEach(v -> visit(v));
+		Type firstType = getType(ctx, ctx.val(0).getText());
+		if (ctx.val().stream()
+				.anyMatch(v -> !getType(ctx, v.getText()).equals(firstType))) {
+			error(ctx, "Mixed types in array");
+			return;
+		}
+
+		int count = ctx.val().size();
+		Type arr = new Array(firstType, count);
+		types.put(ctx, arr);
+		scope.declare(id, arr);
+		result.getOffsets().put(ctx, scope.getOffset(id));
+	}
+	
 	public Void visitDerefExpr(DerefExprContext ctx) {
 		visit(ctx.expr());
 		Type ptr = types.get(ctx.expr());
@@ -402,6 +459,12 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 	public Void visitDivExpr(DivExprContext ctx) {
 		arithmeticExpr(ctx, ctx.expr(0), ctx.expr(1));
+		return null;
+	}
+
+	public Void visitExprArrayExpr(ExprArrayExprContext ctx) {
+		visit(ctx.arrayVal());
+		types.put(ctx, getType(ctx.arrayVal()));
 		return null;
 	}
 
@@ -438,15 +501,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		scope.declare(func);
 		functions.put(ctx, func);
 		result.getFunctions().add(ctx);
-		result.getTypes().put(ctx, retType);
-		return null;
-	}
-
-	public Void visitExprArrayExpr(ExprArrayExprContext ctx) {
-		visit(ctx.ID());
-		visit(ctx.expr());
-		checkType(ctx, Primitive.INT, ctx.expr());
-		types.put(ctx, getType(ctx, ctx.ID().getText()));
+		types.put(ctx, retType);
 		return null;
 	}
 
@@ -636,6 +691,12 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 					scope.getOffset(ctx.ID().getText()));
 			shared.put(ctx.ID(), scope.isShared(ctx.ID().getText()));
 			return null;
+		} else if (ctx.arrayVal() != null) {
+			visit(ctx.arrayVal());
+			types.put(ctx, types.get(ctx.arrayVal()));
+			result.getOffsets().put(ctx,
+					result.getOffsets().get(ctx.arrayVal()));
+			shared.put(ctx, shared.get(ctx.arrayVal()));
 		} else {
 			types.put(ctx, Primitive.INT);
 		}
@@ -728,6 +789,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return true;
 	}
 
+	private boolean checkType(ParseTree tree, Type expected,
+			ParserRuleContext ctx) {
+		return checkType(tree, expected, getType(ctx));
+	}
+
 	private boolean checkType(ParseTree tree, Type expected, Type actual) {
 		if (!expected.equals(actual)) {
 			if (actual == Primitive.ERR_TYPE)
@@ -738,11 +804,6 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			return false;
 		}
 		return true;
-	}
-
-	private boolean checkType(ParseTree tree, Type expected,
-			ParserRuleContext ctx) {
-		return checkType(tree, expected, getType(ctx));
 	}
 
 	private void error(ParseTree tree, String format, Object... args) {
@@ -769,6 +830,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	private Type getType(ParserRuleContext ctx) {
+		if (ctx instanceof NumExprContext)
+			return Primitive.INT;
+		else if (ctx instanceof TrueExprContext
+				|| ctx instanceof FalseExprContext)
+			return Primitive.BOOL;
 		Type type = types.get(ctx);
 		if (type == null)
 			throw new IllegalArgumentException(String.format(
@@ -777,6 +843,10 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	private Type getType(ParseTree tree, String varId) {
+		if (varId.equalsIgnoreCase("true") || varId.equalsIgnoreCase("false"))
+			return Primitive.BOOL;
+		if (varId.codePoints().allMatch(i -> Character.isDigit(i)))
+			return Primitive.INT;
 		if (scope.isDeclared(varId))
 			return scope.getType(varId);
 		error(tree, "Variable '%s' was not declared in this scope.", varId);

@@ -15,7 +15,9 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import parsing.BaseGrammarParser.*;
+import parsing.BaseGrammarParser.ArrayLiteralExprContext;
 import parsing.Checker.CheckResult;
+import parsing.Type.Array;
 import parsing.Type.Pointer;
 import translation.Int;
 import translation.MemAddr;
@@ -33,7 +35,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 	public static final Func MAIN_FUNC_SIG = new Func("main", Primitive.INT);
 
 	public static void main(String[] args) {
-		String prog = "program globPtr; shared int a = 4;  def int main() {   shared int val = 5;   shared int* ptr = &val;   *ptr = 8;   return val;  }";
+		String prog = "program arrTest;    def int main() {   int[] x = [1,2,3,4];  x[3] = 9;  int a = 6;   int b = 8;   int[] y = [a, b];   bool[] bools = [true, false, true];   bool c = true;   bool d = false;   bool[] bools2 = [c, d];   return 0;  }";
 		ProgramContext ctx = new BaseGrammarParser(new CommonTokenStream(
 				new BaseGrammarLexer(new ANTLRInputStream(prog)))).program();
 		CheckResult cres = new Checker().check(ctx);
@@ -63,7 +65,13 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		this.functions = new HashMap<>();
 		this.functionAddrs = new HashMap<>();
 		this.calls = new HashMap<>();
-		this.heapPtr = cres.localStaticMemSize() + 1;
+		this.heapPtr = cres
+				.getOffsets()
+				.entrySet()
+				.stream()
+				.filter(e -> cres.getShared().get(e.getKey()) == null
+						|| !cres.getShared().get(e.getKey()))
+				.mapToInt(e -> e.getValue()).max().getAsInt();
 
 		if (ctx.progdef().NUMBER() != null)
 			prog.setCoreCount(Integer
@@ -79,10 +87,10 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		instrs.add(new Spril(OpCode.PUSH, Register.A));
 
 		int addr = 5;
-		
+
 		for (ParserRuleContext prc : ctx.decl())
 			addr += prc.getText().contains("shared") ? 3 : 2;
-		
+
 		ctx.decl().stream().map(decl -> visit(decl)).forEach(decl -> {
 			decl.forEach(ins -> instrs.add(ins));
 		});
@@ -105,7 +113,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 				Target.absolute(-1));
 		instrs.add(jumpToMain);
 
-		//addr = 5 + ctx.decl().size() * 2;// + cres.getLocks().size();
+		// addr = 5 + ctx.decl().size() * 2;// + cres.getLocks().size();
 		for (FuncContext func : ctx.func()) {
 			functionAddrs.put(func, addr);
 			if (calls.get(func) != null)
@@ -138,11 +146,34 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		return prog;
 	}
 
+	public List<Spril> visitArrayLiteralExpr(ArrayLiteralExprContext ctx) {
+		List<Spril> result = new ArrayList<>();
+
+		Type valType = getType(ctx.val(0));
+		Primitive baseType = Type.baseType(valType);
+
+		switch (baseType) {
+		case INT:
+			ctx.val().forEach(v -> {
+				int val = Integer.parseInt(v.getText());
+
+			});
+			break;
+		case BOOL:
+			break;
+		default:
+			throw new Error();
+		}
+
+		return result;
+	}
+
 	public List<Spril> visitAssign(AssignContext ctx) {
-		TerminalNode id = getID(ctx.derefID());
-		List<Spril> result = assign(ctx.derefID(), ctx.expr());
+		List<Spril> result = assign(ctx.derefID() == null ? ctx.arrayVal()
+				: ctx.derefID(), ctx.expr());
 		result.get(0).addComment(
-				ctx.derefID().getText() + " = " + ctx.expr().getText());
+				(ctx.derefID() == null ? ctx.arrayVal().getText() : ctx
+						.derefID().getText()) + " = " + ctx.expr().getText());
 		return result;
 	}
 
@@ -180,11 +211,80 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 	}
 
 	public List<Spril> visitDecl(DeclContext ctx) {
-		List<Spril> result = assign(ctx.ID(), ctx.expr());
-		result.get(0).addComment(
-				"Declaration of " + ctx.ID().getText() + "(="
-						+ ctx.expr().getText() + ")");
-		return result;
+		if (getType(ctx) instanceof Array
+				&& ctx.expr() instanceof ArrayLiteralExprContext) {
+			List<Spril> result = new ArrayList<>();
+			ArrayLiteralExprContext arrCtx = (ArrayLiteralExprContext) ctx
+					.expr();
+			Type valType = getType(arrCtx.val(0));
+			int ptrOffset = cres.getOffsets().get(ctx.ID());
+			int arrBaseAddr = heapPtr + 1;
+			int valSize = valType.getSize();
+			heapPtr += valSize * arrCtx.val().size();
+
+			result.add(new Spril(OpCode.CONST, "Base addr for array "
+					+ ctx.ID().getText(), new Int(arrBaseAddr), Register.A));
+			result.add(new Spril(OpCode.STORE, Register.A, MemAddr
+					.direct(ptrOffset)));
+
+			for (int i = 0; i < arrCtx.val().size(); i++) {
+				if (valType == Primitive.INT || valType instanceof Pointer
+						|| valType instanceof Array) {
+					int val;
+					if (valType == Primitive.INT
+							&& cres.getOffsets().get(arrCtx.val(i).ID()) == null) {
+						val = Integer.parseInt(arrCtx.val(i).getText());
+						result.add(new Spril(OpCode.CONST, new Int(val),
+								Register.A));
+					} else {
+						int offset = cres.getOffsets().get(arrCtx.val(i).ID());
+						if (valType instanceof Pointer
+								|| valType instanceof Array) {
+							result.add(new Spril(OpCode.LOAD, MemAddr
+									.direct(offset), Register.D));
+							result.add(new Spril(OpCode.LOAD, MemAddr
+									.deref(Register.D), Register.A));
+						} else {
+							result.add(new Spril(OpCode.LOAD, MemAddr
+									.direct(offset), Register.A));
+						}
+					}
+					result.add(new Spril(OpCode.STORE, ctx.ID().getText() + "["
+							+ i + "]", Register.A, MemAddr.direct(arrBaseAddr
+							+ (i * valSize))));
+				} else if (valType == Primitive.BOOL) {
+					if (cres.getOffsets().get(arrCtx.val(i).ID()) == null) {
+						String val = arrCtx.val(i).getText();
+						if (val.equalsIgnoreCase("true")) {
+							result.add(new Spril(OpCode.CONST, new Int(-1),
+									Register.A));
+							result.add(new Spril(OpCode.STORE, ctx.ID()
+									.getText() + "[" + i + "]", Register.A,
+									MemAddr.direct(arrBaseAddr + (i * valSize))));
+						} else {
+							result.add(new Spril(OpCode.STORE, ctx.ID()
+									.getText() + "[" + i + "]", Register.ZERO,
+									MemAddr.direct(arrBaseAddr + (i * valSize))));
+						}
+					} else {
+						int offset = cres.getOffsets().get(arrCtx.val(i).ID());
+						result.add(new Spril(OpCode.LOAD, MemAddr
+								.direct(offset), Register.A));
+						result.add(new Spril(OpCode.STORE, ctx.ID().getText()
+								+ "[" + i + "]", Register.A, MemAddr
+								.direct(arrBaseAddr + (i * valSize))));
+					}
+				}
+			}
+
+			return result;
+		} else {
+			List<Spril> result = assign(ctx.ID(), ctx.expr());
+			result.get(0).addComment(
+					"Declaration of " + ctx.ID().getText() + "(="
+							+ ctx.expr().getText() + ")");
+			return result;
+		}
 	}
 
 	public List<Spril> visitDeclStat(DeclStatContext ctx) {
@@ -544,6 +644,30 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 							MemAddr.deref(Register.D), Register.D));
 				}
 			}
+		} else if (tree instanceof ArrayValContext) {
+			ArrayValContext ctx = (ArrayValContext) tree;
+			id = ctx.ID();
+			// TODO: shared arrays
+
+			offset = cres.getOffsets().get(id);
+			result.add(new Spril(OpCode.CONST, new Int(offset), Register.D));
+			result.add(new Spril(OpCode.LOAD, "Get base addr for array "
+					+ id.getText(), MemAddr.deref(Register.D), Register.D));
+			result.addAll(visit(ctx.expr()));
+			if (result.get(result.size() - 1).equals(
+					new Spril(OpCode.PUSH, Register.A)))
+				result.remove(result.size() - 1);
+			else
+				result.add(new Spril(OpCode.POP, Register.A));
+			Type valType = cres.getTypes().get(id);
+			if (valType.getSize() != 1) {
+				result.add(new Spril(OpCode.CONST, "Size of array values",
+						new Int(valType.getSize()), Register.D));
+				result.add(new Spril(OpCode.COMPUTE, "Corrected index",
+						Operator.MUL, Register.A, Register.B, Register.A));
+			}
+			result.add(new Spril(OpCode.COMPUTE, "Compute target addr",
+					Operator.ADD, Register.A, Register.D, Register.D));
 		} else {
 			id = (TerminalNode) tree;
 			offset = cres.getOffsets().get(id);
@@ -661,6 +785,19 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 			return ctx.ID();
 		else
 			return getID(ctx.derefID());
+	}
+
+	private Type getType(ParseTree ctx) {
+		if (ctx instanceof NumExprContext)
+			return Primitive.INT;
+		else if (ctx instanceof TrueExprContext
+				|| ctx instanceof FalseExprContext)
+			return Primitive.BOOL;
+		Type type = cres.getTypes().get(ctx);
+		if (type == null)
+			throw new IllegalArgumentException(String.format(
+					"Node '%s' has no type.", ctx.getText()));
+		return type;
 	}
 
 	private void invertComputation(Spril comp) {
