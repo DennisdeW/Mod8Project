@@ -93,10 +93,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 				Register.A));
 		instrs.add(new Spril(OpCode.PUSH, Register.A));
 
-		int addr = 5;
-
-		for (ParserRuleContext prc : ctx.decl())
-			addr += 3;
+		int addr = 0;
 
 		ctx.decl().stream().map(decl -> visit(decl)).forEach(decl -> {
 			decl.forEach(ins -> instrs.add(ins));
