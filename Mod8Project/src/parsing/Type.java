@@ -24,6 +24,15 @@ public interface Type {
 		public int getSize() {
 			return POINTER_SIZE;
 		}
+		
+		public static Pointer pointerChain(Type base, int length) {
+			if (length <= 0)
+				throw new IllegalArgumentException();
+			Type current = base;
+			for (int i = 0; i < length; i++)
+				current = new Pointer(current);
+			return (Pointer) current;
+		}
 
 		@Override
 		public String toString() {

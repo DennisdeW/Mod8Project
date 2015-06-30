@@ -83,9 +83,9 @@ expr
 	| call # callExpr
 	| ID LSQUARE NUMBER RSQUARE # constArrayExpr
 	| arrayVal # exprArrayExpr
-	| LSQUARE val
+	| LSQUARE expr
 	(
-		COMMA val
+		COMMA expr
 	)* RSQUARE # arrayLiteralExpr
 	| ID # idExpr
 	| NUMBER # numExpr
@@ -116,7 +116,7 @@ stat
 
 decl
 :
-	SHARED? type ID EQ expr
+	SHARED? type ID EQ (expr | type LSQUARE NUMBER RSQUARE)
 ;
 
 assign
@@ -144,12 +144,12 @@ type
 
 val
 :
-	NUMBER
-	| ID
-	| TRUE
-	| FALSE
-	| SPID
-	| arrayVal
+	NUMBER #numVal
+	| derefID   #idVal
+	| TRUE #trueVal
+	| FALSE #falseVal
+	| SPID #spidVal
+	| arrayVal #arrVal
 ;
 
 comp

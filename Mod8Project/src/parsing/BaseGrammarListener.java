@@ -21,6 +21,18 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitBlockStat(@NotNull BaseGrammarParser.BlockStatContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code arrVal}
+	 * labeled alternative in {@link BaseGrammarParser#val}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrVal(@NotNull BaseGrammarParser.ArrValContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code arrVal}
+	 * labeled alternative in {@link BaseGrammarParser#val}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrVal(@NotNull BaseGrammarParser.ArrValContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code minExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree
@@ -55,30 +67,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitDecl(@NotNull BaseGrammarParser.DeclContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code trueExpr}
-	 * labeled alternative in {@link BaseGrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterTrueExpr(@NotNull BaseGrammarParser.TrueExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code trueExpr}
-	 * labeled alternative in {@link BaseGrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitTrueExpr(@NotNull BaseGrammarParser.TrueExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code outStat}
-	 * labeled alternative in {@link BaseGrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void enterOutStat(@NotNull BaseGrammarParser.OutStatContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code outStat}
-	 * labeled alternative in {@link BaseGrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void exitOutStat(@NotNull BaseGrammarParser.OutStatContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link BaseGrammarParser#prefix}.
 	 * @param ctx the parse tree
 	 */
@@ -88,16 +76,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPrefix(@NotNull BaseGrammarParser.PrefixContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link BaseGrammarParser#typedparams}.
-	 * @param ctx the parse tree
-	 */
-	void enterTypedparams(@NotNull BaseGrammarParser.TypedparamsContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BaseGrammarParser#typedparams}.
-	 * @param ctx the parse tree
-	 */
-	void exitTypedparams(@NotNull BaseGrammarParser.TypedparamsContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code negBoolExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
@@ -110,18 +88,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitNegBoolExpr(@NotNull BaseGrammarParser.NegBoolExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code declStat}
-	 * labeled alternative in {@link BaseGrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void enterDeclStat(@NotNull BaseGrammarParser.DeclStatContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code declStat}
-	 * labeled alternative in {@link BaseGrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void exitDeclStat(@NotNull BaseGrammarParser.DeclStatContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BaseGrammarParser#program}.
 	 * @param ctx the parse tree
@@ -143,18 +109,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitType(@NotNull BaseGrammarParser.TypeContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code exprArrayExpr}
-	 * labeled alternative in {@link BaseGrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterExprArrayExpr(@NotNull BaseGrammarParser.ExprArrayExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code exprArrayExpr}
-	 * labeled alternative in {@link BaseGrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitExprArrayExpr(@NotNull BaseGrammarParser.ExprArrayExprContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code parExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree
@@ -166,18 +120,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitParExpr(@NotNull BaseGrammarParser.ParExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code lockStat}
-	 * labeled alternative in {@link BaseGrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void enterLockStat(@NotNull BaseGrammarParser.LockStatContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code lockStat}
-	 * labeled alternative in {@link BaseGrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void exitLockStat(@NotNull BaseGrammarParser.LockStatContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code compExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
@@ -225,18 +167,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitDivExpr(@NotNull BaseGrammarParser.DivExprContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code callExpr}
-	 * labeled alternative in {@link BaseGrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterCallExpr(@NotNull BaseGrammarParser.CallExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code callExpr}
-	 * labeled alternative in {@link BaseGrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitCallExpr(@NotNull BaseGrammarParser.CallExprContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code falseExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree
@@ -271,38 +201,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitWhileStat(@NotNull BaseGrammarParser.WhileStatContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code ifStat}
-	 * labeled alternative in {@link BaseGrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void enterIfStat(@NotNull BaseGrammarParser.IfStatContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code ifStat}
-	 * labeled alternative in {@link BaseGrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void exitIfStat(@NotNull BaseGrammarParser.IfStatContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 */
-	void enterVal(@NotNull BaseGrammarParser.ValContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 */
-	void exitVal(@NotNull BaseGrammarParser.ValContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link BaseGrammarParser#boolOp}.
-	 * @param ctx the parse tree
-	 */
-	void enterBoolOp(@NotNull BaseGrammarParser.BoolOpContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BaseGrammarParser#boolOp}.
-	 * @param ctx the parse tree
-	 */
-	void exitBoolOp(@NotNull BaseGrammarParser.BoolOpContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code constArrayExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree
@@ -325,16 +223,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitComp(@NotNull BaseGrammarParser.CompContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BaseGrammarParser#progdef}.
-	 * @param ctx the parse tree
-	 */
-	void enterProgdef(@NotNull BaseGrammarParser.ProgdefContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BaseGrammarParser#progdef}.
-	 * @param ctx the parse tree
-	 */
-	void exitProgdef(@NotNull BaseGrammarParser.ProgdefContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code boolOpExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree
@@ -346,18 +234,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitBoolOpExpr(@NotNull BaseGrammarParser.BoolOpExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code callStat}
-	 * labeled alternative in {@link BaseGrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void enterCallStat(@NotNull BaseGrammarParser.CallStatContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code callStat}
-	 * labeled alternative in {@link BaseGrammarParser#stat}.
-	 * @param ctx the parse tree
-	 */
-	void exitCallStat(@NotNull BaseGrammarParser.CallStatContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BaseGrammarParser#params}.
 	 * @param ctx the parse tree
@@ -393,18 +269,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitNumExpr(@NotNull BaseGrammarParser.NumExprContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code plusExpr}
-	 * labeled alternative in {@link BaseGrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterPlusExpr(@NotNull BaseGrammarParser.PlusExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code plusExpr}
-	 * labeled alternative in {@link BaseGrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitPlusExpr(@NotNull BaseGrammarParser.PlusExprContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code forStat}
 	 * labeled alternative in {@link BaseGrammarParser#stat}.
 	 * @param ctx the parse tree
@@ -417,16 +281,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitForStat(@NotNull BaseGrammarParser.ForStatContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BaseGrammarParser#call}.
-	 * @param ctx the parse tree
-	 */
-	void enterCall(@NotNull BaseGrammarParser.CallContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BaseGrammarParser#call}.
-	 * @param ctx the parse tree
-	 */
-	void exitCall(@NotNull BaseGrammarParser.CallContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link BaseGrammarParser#derefID}.
 	 * @param ctx the parse tree
 	 */
@@ -436,16 +290,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDerefID(@NotNull BaseGrammarParser.DerefIDContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link BaseGrammarParser#func}.
-	 * @param ctx the parse tree
-	 */
-	void enterFunc(@NotNull BaseGrammarParser.FuncContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BaseGrammarParser#func}.
-	 * @param ctx the parse tree
-	 */
-	void exitFunc(@NotNull BaseGrammarParser.FuncContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code refExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
@@ -470,6 +314,224 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDerefExpr(@NotNull BaseGrammarParser.DerefExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code falseVal}
+	 * labeled alternative in {@link BaseGrammarParser#val}.
+	 * @param ctx the parse tree
+	 */
+	void enterFalseVal(@NotNull BaseGrammarParser.FalseValContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code falseVal}
+	 * labeled alternative in {@link BaseGrammarParser#val}.
+	 * @param ctx the parse tree
+	 */
+	void exitFalseVal(@NotNull BaseGrammarParser.FalseValContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code trueExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterTrueExpr(@NotNull BaseGrammarParser.TrueExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code trueExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitTrueExpr(@NotNull BaseGrammarParser.TrueExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code outStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void enterOutStat(@NotNull BaseGrammarParser.OutStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code outStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void exitOutStat(@NotNull BaseGrammarParser.OutStatContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BaseGrammarParser#typedparams}.
+	 * @param ctx the parse tree
+	 */
+	void enterTypedparams(@NotNull BaseGrammarParser.TypedparamsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BaseGrammarParser#typedparams}.
+	 * @param ctx the parse tree
+	 */
+	void exitTypedparams(@NotNull BaseGrammarParser.TypedparamsContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code trueVal}
+	 * labeled alternative in {@link BaseGrammarParser#val}.
+	 * @param ctx the parse tree
+	 */
+	void enterTrueVal(@NotNull BaseGrammarParser.TrueValContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code trueVal}
+	 * labeled alternative in {@link BaseGrammarParser#val}.
+	 * @param ctx the parse tree
+	 */
+	void exitTrueVal(@NotNull BaseGrammarParser.TrueValContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code spidVal}
+	 * labeled alternative in {@link BaseGrammarParser#val}.
+	 * @param ctx the parse tree
+	 */
+	void enterSpidVal(@NotNull BaseGrammarParser.SpidValContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code spidVal}
+	 * labeled alternative in {@link BaseGrammarParser#val}.
+	 * @param ctx the parse tree
+	 */
+	void exitSpidVal(@NotNull BaseGrammarParser.SpidValContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code declStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void enterDeclStat(@NotNull BaseGrammarParser.DeclStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code declStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void exitDeclStat(@NotNull BaseGrammarParser.DeclStatContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code exprArrayExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprArrayExpr(@NotNull BaseGrammarParser.ExprArrayExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code exprArrayExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprArrayExpr(@NotNull BaseGrammarParser.ExprArrayExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code lockStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void enterLockStat(@NotNull BaseGrammarParser.LockStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code lockStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void exitLockStat(@NotNull BaseGrammarParser.LockStatContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code callExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterCallExpr(@NotNull BaseGrammarParser.CallExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code callExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitCallExpr(@NotNull BaseGrammarParser.CallExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ifStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void enterIfStat(@NotNull BaseGrammarParser.IfStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ifStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void exitIfStat(@NotNull BaseGrammarParser.IfStatContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BaseGrammarParser#boolOp}.
+	 * @param ctx the parse tree
+	 */
+	void enterBoolOp(@NotNull BaseGrammarParser.BoolOpContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BaseGrammarParser#boolOp}.
+	 * @param ctx the parse tree
+	 */
+	void exitBoolOp(@NotNull BaseGrammarParser.BoolOpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code numVal}
+	 * labeled alternative in {@link BaseGrammarParser#val}.
+	 * @param ctx the parse tree
+	 */
+	void enterNumVal(@NotNull BaseGrammarParser.NumValContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code numVal}
+	 * labeled alternative in {@link BaseGrammarParser#val}.
+	 * @param ctx the parse tree
+	 */
+	void exitNumVal(@NotNull BaseGrammarParser.NumValContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BaseGrammarParser#progdef}.
+	 * @param ctx the parse tree
+	 */
+	void enterProgdef(@NotNull BaseGrammarParser.ProgdefContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BaseGrammarParser#progdef}.
+	 * @param ctx the parse tree
+	 */
+	void exitProgdef(@NotNull BaseGrammarParser.ProgdefContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code callStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void enterCallStat(@NotNull BaseGrammarParser.CallStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code callStat}
+	 * labeled alternative in {@link BaseGrammarParser#stat}.
+	 * @param ctx the parse tree
+	 */
+	void exitCallStat(@NotNull BaseGrammarParser.CallStatContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code plusExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterPlusExpr(@NotNull BaseGrammarParser.PlusExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code plusExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitPlusExpr(@NotNull BaseGrammarParser.PlusExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BaseGrammarParser#call}.
+	 * @param ctx the parse tree
+	 */
+	void enterCall(@NotNull BaseGrammarParser.CallContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BaseGrammarParser#call}.
+	 * @param ctx the parse tree
+	 */
+	void exitCall(@NotNull BaseGrammarParser.CallContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code idVal}
+	 * labeled alternative in {@link BaseGrammarParser#val}.
+	 * @param ctx the parse tree
+	 */
+	void enterIdVal(@NotNull BaseGrammarParser.IdValContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code idVal}
+	 * labeled alternative in {@link BaseGrammarParser#val}.
+	 * @param ctx the parse tree
+	 */
+	void exitIdVal(@NotNull BaseGrammarParser.IdValContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BaseGrammarParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunc(@NotNull BaseGrammarParser.FuncContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BaseGrammarParser#func}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunc(@NotNull BaseGrammarParser.FuncContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BaseGrammarParser#arrayVal}.
 	 * @param ctx the parse tree

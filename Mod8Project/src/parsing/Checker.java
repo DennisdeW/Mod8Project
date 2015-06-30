@@ -28,11 +28,13 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import parsing.BaseGrammarParser.ArrayLiteralExprContext;
 import parsing.BaseGrammarParser.DerefIDContext;
+import parsing.BaseGrammarParser.ExprArrayExprContext;
 import parsing.BaseGrammarParser.FuncContext;
 import parsing.BaseGrammarParser.TypedparamsContext;
 import parsing.Type.Pointer;
 import parsing.Type.Array;
 import parsing.BaseGrammarParser.*;
+import translation.Spril;
 
 /**
  * Class Checker is used to parse a program
@@ -165,13 +167,14 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		}
 
 		Type valType(ValContext ctx) {
-			if (ctx.NUMBER() != null || ctx.SPID() != null)
+			if (ctx instanceof NumValContext || ctx instanceof SpidValContext)
 				return Primitive.INT;
-			else if (ctx.TRUE() != null || ctx.FALSE() != null)
+			if (ctx instanceof TrueValContext || ctx instanceof FalseValContext)
 				return Primitive.BOOL;
 			Type res = types.get(ctx);
 			if (res == null)
-				throw new RuntimeException("Could not get type of " + ctx.ID());
+				throw new RuntimeException("Could not get type of "
+						+ ctx.getText());
 			return res;
 		}
 	}
@@ -285,8 +288,6 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		dirty = true;
 	}
 
-	
-
 	public Void visitArrayVal(ArrayValContext ctx) {
 		String arrId = ctx.ID().getText();
 		Type arrType = getType(ctx, arrId);
@@ -327,14 +328,15 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			result.getOffsets().put(id,
 					scope.getOffset(target.replaceAll("\\*", "")));
 		} else if (ctx.arrayVal() != null) {
+			visit(ctx.arrayVal());
 			String target = ctx.arrayVal().ID().getText();
 			TerminalNode id = ctx.arrayVal().ID();
 			Type targetType = ((Array) getType(ctx, target)).getContainedType();
 			visit(ctx.expr());
-			Type sourceType = getType(ctx.expr());
+			Type sourceType = Type.baseType(getType(ctx.expr()));
 			checkType(ctx, targetType, sourceType);
 			types.put(id, targetType);
-			shared.put(id,  scope.isShared(target));
+			shared.put(id, scope.isShared(target));
 			result.getOffsets().put(id, scope.getOffset(target));
 		} else {
 			visit(ctx.arrayVal());
@@ -400,7 +402,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		if (!checkName(ctx, varId))
 			return null;
 
-		Type type = typeForName(ctx, ctx.type().getText());
+		Type type = typeForName(ctx, ctx.type(0).getText());
 		if (scope.isDeclaredLocally(varId)) {
 			error(ctx, "Duplicate declaration of variable '%s'", varId);
 			return null;
@@ -410,13 +412,22 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			makeArray((ArrayLiteralExprContext) ctx.expr(), varId);
 			types.put(ctx, types.get(ctx.expr()));
 			result.getOffsets().put(ctx.ID(), scope.getOffset(varId));
+		} else if (ctx.type().size() > 1) {
+			scope.declare(varId, type, ctx.SHARED() != null);
+			types.put(ctx, type);
+			result.getOffsets().put(ctx.ID(), scope.getOffset(varId));
 		} else {
 			visit(ctx.expr());
 			scope.declare(varId, type, ctx.SHARED() != null);
 			types.put(ctx, type);
 			result.getOffsets().put(ctx.ID(), scope.getOffset(varId));
 		}
-		checkType(ctx, type, ctx.expr());
+
+		if (ctx.type().size() == 1)
+			checkType(ctx, type, ctx.expr());
+		else {
+			checkType(ctx, new Array(Type.forName(ctx.type(1).getText())), type);
+		}
 		shared.put(ctx.ID(), ctx.SHARED() != null);
 
 		return null;
@@ -426,23 +437,22 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		makeArray(ctx, "<arr_" + ++arrCount + ">");
 		return null;
 	}
-	
+
 	private void makeArray(ArrayLiteralExprContext ctx, String id) {
-		ctx.val().forEach(v -> visit(v));
-		Type firstType = getType(ctx, ctx.val(0).getText());
-		if (ctx.val().stream()
-				.anyMatch(v -> !getType(ctx, v.getText()).equals(firstType))) {
+		ctx.expr().forEach(e -> visit(e));
+		Type type = getType(ctx.expr(0));
+		if (ctx.expr().stream().anyMatch(e -> !getType(e).equals(type))) {
 			error(ctx, "Mixed types in array");
 			return;
 		}
 
-		int count = ctx.val().size();
-		Type arr = new Array(firstType, count);
+		int count = ctx.expr().size();
+		Type arr = new Array(type, count);
 		types.put(ctx, arr);
 		scope.declare(id, arr);
 		result.getOffsets().put(ctx, scope.getOffset(id));
 	}
-	
+
 	public Void visitDerefExpr(DerefExprContext ctx) {
 		visit(ctx.expr());
 		Type ptr = types.get(ctx.expr());
@@ -465,6 +475,8 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	public Void visitExprArrayExpr(ExprArrayExprContext ctx) {
 		visit(ctx.arrayVal());
 		types.put(ctx, getType(ctx.arrayVal()));
+		result.getOffsets().put(ctx, result.getOffsets().get(ctx.arrayVal()));
+		shared.put(ctx, shared.get(ctx.arrayVal()));
 		return null;
 	}
 
@@ -475,13 +487,15 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 	public Void visitForStat(ForStatContext ctx) {
 		if (!checkType(ctx, Primitive.INT,
-				typeForName(ctx, ctx.decl().type().getText()))) {
+				typeForName(ctx, ctx.decl().type(0).getText()))) {
 			return null;
 		}
+		scope.openScope();
 		visit(ctx.decl());
 		visit(ctx.expr());
 		visit(ctx.assign());
 		visit(ctx.block());
+		scope.closeScope();
 		return null;
 	}
 
@@ -680,26 +694,53 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
-	public Void visitVal(ValContext ctx) {
-		if (ctx.TRUE() != null || ctx.FALSE() != null)
-			types.put(ctx, Primitive.BOOL);
-		else if (ctx.NUMBER() != null)
-			types.put(ctx, Primitive.INT);
-		else if (ctx.ID() != null) {
-			types.put(ctx, getType(ctx, ctx.ID().getText()));
-			result.getOffsets().put(ctx.ID(),
-					scope.getOffset(ctx.ID().getText()));
-			shared.put(ctx.ID(), scope.isShared(ctx.ID().getText()));
-			return null;
-		} else if (ctx.arrayVal() != null) {
-			visit(ctx.arrayVal());
-			types.put(ctx, types.get(ctx.arrayVal()));
-			result.getOffsets().put(ctx,
-					result.getOffsets().get(ctx.arrayVal()));
-			shared.put(ctx, shared.get(ctx.arrayVal()));
-		} else {
-			types.put(ctx, Primitive.INT);
+	public Void visitTrueVal(TrueValContext ctx) {
+		types.put(ctx, Primitive.BOOL);
+		return null;
+	}
+
+	public Void visitFalseVal(FalseValContext ctx) {
+		types.put(ctx, Primitive.BOOL);
+		return null;
+	}
+
+	public Void visitNumVal(NumValContext ctx) {
+		types.put(ctx, Primitive.INT);
+		return null;
+	}
+
+	public Void visitArrVal(ArrValContext ctx) {
+		visit(ctx.arrayVal());
+		types.put(ctx, types.get(ctx.arrayVal()));
+		result.getOffsets().put(ctx, result.getOffsets().get(ctx.arrayVal()));
+		shared.put(ctx, shared.get(ctx.arrayVal()));
+		return null;
+	}
+
+	public Void visitIdVal(IdValContext ctx) {
+		DerefIDContext deref = ctx.derefID();
+		TerminalNode id = getID(deref);
+		String text = id.getText();
+		Type base = getType(ctx, id.getText());
+		boolean shared = scope.isShared(text);
+		int depth = 0;
+		while (deref.ID() == null) {
+			depth++;
+			deref = deref.derefID();
 		}
+		deref = ctx.derefID();
+		for (int i = 0; i < depth; i++, deref = deref.derefID()) {
+			types.put(deref, Pointer.pointerChain(base, depth - i));
+			this.shared.put(deref, shared);
+		}
+		types.put(ctx, depth == 0 ? base : Pointer.pointerChain(base, depth));
+		result.getOffsets().put(id, scope.getOffset(text));
+		this.shared.put(ctx, shared);
+		return null;
+	}
+
+	public Void visitSpidVal(SpidValContext ctx) {
+		types.put(ctx, Primitive.INT);
 		return null;
 	}
 

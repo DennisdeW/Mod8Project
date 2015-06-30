@@ -1,11 +1,4 @@
-program fortest; 
-int sum = 0; 
-def int main() { 
-	for (int i = 1; i < 10; i = i + 1) { 
-		sum = sum + i; 
-	} 
-	return sum; 
-}
+program fortest; int sum = 0; def int main() { for (int i = 1; i < 10; i = i + 1) { sum = sum + i; } return sum; }
 
 program whiletest; int sum = 0; def int main() { int i = 10; while (i > 0) { sum = sum + i; i = i - 1; } return sum; }
 
@@ -262,3 +255,33 @@ def int main() {
 	return 0;
 }
 program arrTest;    def int main() {   int[] x = [1,2,3,4];   int a = 3;   int b = 8;   int[] y = [a, b];   bool[] bools = [true, false, true];   bool c = true;   bool d = false;   bool[] bools2 = [c, d];   return 0;  }
+
+______________
+
+program sharedTest;
+
+shared int val = 0;
+
+def int main() {
+	int tmp = 1;
+	for (int i = 0; i < 3; i = i + 1) {
+		add();
+	}
+	tmp = 3;
+	for (int j = 0; j < 3; j = j + 1) {
+		sub();
+	}
+	return val;
+}
+
+def void add() {
+	val = val + 1;
+	return;
+}
+
+def void sub() {
+	val = val - 1;
+	return;
+}
+
+program sharedTest;shared int val = 0;def int main() {int tmp = 1;for (int i = 0; i < 3; i = i + 1) {add();}tmp = 3;for (int j = 0; j < 3; j = j + 1) {sub();}return val;}def void add() {val = val + 1;return;}def void sub() {val = val - 1;return;}
