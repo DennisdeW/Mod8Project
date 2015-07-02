@@ -54,9 +54,9 @@ params
 :
 	LBRACE
 	(
-		val
+		expr
 		(
-			COMMA val
+			COMMA expr
 		)*
 	)? RBRACE
 ;

@@ -475,14 +475,14 @@ public class BaseGrammarParser extends Parser {
 
 	public static class ParamsContext extends ParserRuleContext {
 		public TerminalNode RBRACE() { return getToken(BaseGrammarParser.RBRACE, 0); }
+		public List<ExprContext> expr() {
+			return getRuleContexts(ExprContext.class);
+		}
 		public TerminalNode LBRACE() { return getToken(BaseGrammarParser.LBRACE, 0); }
+		public ExprContext expr(int i) {
+			return getRuleContext(ExprContext.class,i);
+		}
 		public List<TerminalNode> COMMA() { return getTokens(BaseGrammarParser.COMMA); }
-		public ValContext val(int i) {
-			return getRuleContext(ValContext.class,i);
-		}
-		public List<ValContext> val() {
-			return getRuleContexts(ValContext.class);
-		}
 		public TerminalNode COMMA(int i) {
 			return getToken(BaseGrammarParser.COMMA, i);
 		}
@@ -515,9 +515,9 @@ public class BaseGrammarParser extends Parser {
 			setState(99); match(LBRACE);
 			setState(108);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << TRUE) | (1L << FALSE) | (1L << SPID) | (1L << TIMES) | (1L << ID) | (1L << NUMBER))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << TRUE) | (1L << FALSE) | (1L << EXCLAMATION) | (1L << LBRACE) | (1L << LSQUARE) | (1L << MINUS) | (1L << TIMES) | (1L << AMP) | (1L << ID) | (1L << NUMBER))) != 0)) {
 				{
-				setState(100); val();
+				setState(100); expr(0);
 				setState(105);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -525,7 +525,7 @@ public class BaseGrammarParser extends Parser {
 					{
 					{
 					setState(101); match(COMMA);
-					setState(102); val();
+					setState(102); expr(0);
 					}
 					}
 					setState(107);
@@ -2527,10 +2527,10 @@ public class BaseGrammarParser extends Parser {
 		"\23\2\2PQ\5\34\17\2QR\79\2\2RS\5\f\7\2ST\5\b\5\2T\13\3\2\2\2Ua\7 \2\2"+
 		"VW\5\34\17\2W^\79\2\2XY\7\35\2\2YZ\5\34\17\2Z[\79\2\2[]\3\2\2\2\\X\3\2"+
 		"\2\2]`\3\2\2\2^\\\3\2\2\2^_\3\2\2\2_b\3\2\2\2`^\3\2\2\2aV\3\2\2\2ab\3"+
-		"\2\2\2bc\3\2\2\2cd\7!\2\2d\r\3\2\2\2en\7 \2\2fk\5\36\20\2gh\7\35\2\2h"+
-		"j\5\36\20\2ig\3\2\2\2jm\3\2\2\2ki\3\2\2\2kl\3\2\2\2lo\3\2\2\2mk\3\2\2"+
-		"\2nf\3\2\2\2no\3\2\2\2op\3\2\2\2pq\7!\2\2q\17\3\2\2\2rs\79\2\2st\5\16"+
-		"\b\2t\21\3\2\2\2uv\b\n\1\2vw\7\'\2\2w\u0098\5\22\n\26xy\7\37\2\2y\u0098"+
+		"\2\2\2bc\3\2\2\2cd\7!\2\2d\r\3\2\2\2en\7 \2\2fk\5\22\n\2gh\7\35\2\2hj"+
+		"\5\22\n\2ig\3\2\2\2jm\3\2\2\2ki\3\2\2\2kl\3\2\2\2lo\3\2\2\2mk\3\2\2\2"+
+		"nf\3\2\2\2no\3\2\2\2op\3\2\2\2pq\7!\2\2q\17\3\2\2\2rs\79\2\2st\5\16\b"+
+		"\2t\21\3\2\2\2uv\b\n\1\2vw\7\'\2\2w\u0098\5\22\n\26xy\7\37\2\2y\u0098"+
 		"\5\22\n\25z{\7+\2\2{\u0098\5\22\n\24|}\7(\2\2}\u0098\5\22\n\23~\177\7"+
 		" \2\2\177\u0080\5\22\n\2\u0080\u0081\7!\2\2\u0081\u0098\3\2\2\2\u0082"+
 		"\u0098\5\20\t\2\u0083\u0084\79\2\2\u0084\u0085\7$\2\2\u0085\u0086\7:\2"+

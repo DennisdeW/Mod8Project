@@ -73,7 +73,7 @@ withDevice addr | addr < stdioAddr = memDevice
 
 processRequest :: Maybe Request -> SharedMem -> IO (SharedMem, Maybe Reply)
 processRequest Nothing    mem = return (mem, Nothing)
-processRequest (Just out) mem = withDevice (fst out) mem out
+processRequest (Just out) mem = {-traceShow out $-} withDevice (fst out) mem out
 
 updateElemWith :: (a -> (a,b)) -> Int -> [a] -> ([a],b)
 updateElemWith f n xs = (take n xs ++ x' : drop (n + 1) xs, y)
@@ -108,7 +108,7 @@ simulate sysConf debugFunc sysState
     | all halted (sprs sysState) = return sysState
     | otherwise = do
         sysState' <- system sysConf sysState
-        putStr (debugFunc sysState')
+        hPutStrLn stderr (debugFunc sysState')
         simulate sysConf debugFunc sysState'
 
 -- ===========================================================================================

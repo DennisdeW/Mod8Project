@@ -1,0 +1,55 @@
+program singleThreadArrayTest;
+
+def int main() {
+	testSimple();
+	testSparse();
+	testFunctions();
+	testPointerElements();
+	testPointerArray();
+	return 1;
+}
+
+def void testSimple() {
+	int[] arr = [1,2,3,4];
+	arr[1] = arr[2];
+	arr[1] = arr[1] + arr[3];
+	out(arr[1]);
+	return;
+}
+
+def void testSparse() {
+	int[] arr = int[5];
+	arr[3] = 8;
+	out(arr[3]);
+	return;
+}
+
+def void testPointerElements() {
+	int a = 1;
+	int b = 2;
+	int c = 3;
+	int*[] arr = [&a,&b,&c];
+	int* x = arr[1];
+	out(*x);
+	return;
+}
+
+def void testPointerArray() {
+	int[] base  = [1,2,3,4];
+	int[]* arr = &base;
+	int[] deref = *arr;
+	out(deref[3]);
+	return;
+}
+
+def void testFunctions() {
+	int[] arr = [1,2,3,4];
+	arr = sub(arr);
+	out(arr[0]);
+	return;
+}
+
+def int[] sub(int[] arr) {
+	arr[0] = 9;
+	return arr;
+}
