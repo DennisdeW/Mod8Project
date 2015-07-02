@@ -131,7 +131,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		void buildLocks(Set<String> locks) {
 			int addr = sharedStaticMemSize() + 1;
 			for (String lock : locks)
-				this.locks.put(lock, addr++);
+				this.locks.putIfAbsent(lock, addr++);
 		}
 
 		int funcCount() {
@@ -156,8 +156,8 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			return this.offsets
 					.entrySet()
 					.stream()
-					.filter(e -> (this.shared == null) != shared
-							|| (this.shared.get(e.getKey()) != null && this.shared
+					.filter(e -> !(this.shared == null && shared)
+							&& (this.shared.get(e.getKey()) != null && this.shared
 									.get(e.getKey())))
 					.mapToInt(i -> i.getValue()).max().orElse(0);
 		}

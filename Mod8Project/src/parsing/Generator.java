@@ -33,10 +33,11 @@ import write.ProgramRunner;
 
 public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 
-	public static final Func MAIN_FUNC_SIG = new Func("main", Primitive.INT);
+	public static final Func	MAIN_FUNC_SIG	= new Func("main",
+														Primitive.INT);
 
 	public static void main(String[] args) {
-		String prog = "program toString;\n\ndef int main() {\nprintInteger(1234);\nreturn 0;\n}\n\ndef void printInteger(int input) {\nint pos = 0;\nif (input > 0) {\npos = size(input);\n} else {\nint tmp = -input;\npos = size(tmp);\n}\nint[] toPrint = toString(input, pos);\nfor (int i = 0; i < pos; i = i + 1) {\nout(toPrint[i]);\n}\nreturn;\n}\n\ndef int[] toString(int input, int pos) {\nint q = 0;\nint r = 0;\nint sign = 0;\nint[] result = int[10];\n\nif (input < 0) {\nsign = 45;\ninput = -input;\n}\n\nwhile (input >= 65536) {\nq = input / 100;\nr = input - (q * 100);\ninput = q;\npos = pos - 1;\nresult[pos] = ones[r];\npos = pos - 1;\nresult[pos] = tens[r];\n}\n\nwhile (input != 0) {\nq = input / 10;\nr = input - (q*10);\npos = pos - 1;\nresult[pos] = digits[r];\ninput = q;\n}\n\nif (sign != 0) {\npos = pos - 1;\nresult[pos] = sign;\n}\n\nreturn result;\n}\n\ndef int size(int i) {\nif (i < 9) {\nreturn 1;\n}\nif (i < 99) {\nreturn 2;\n}\nif (i < 999) {\nreturn 3;\n}\nif (i < 9999) {\nreturn 4;\n}\nif (i < 99999) {\nreturn 5;\n}\nif (i < 999999) {\nreturn 6;\n}\nif (i < 9999999) {\nreturn 7;\n}\nif (i < 99999999) {\nreturn 8;\n}\nif (i < 999999999) {\nreturn 9;\n}\nreturn 10;\n}\n\nshared int[] ones = [48,49,50,51,52,53,54,55,56,57,\n 48,49,50,51,52,53,54,55,56,57,\n 48,49,50,51,52,53,54,55,56,57,\n 48,49,50,51,52,53,54,55,56,57,\n 48,49,50,51,52,53,54,55,56,57,\n 48,49,50,51,52,53,54,55,56,57,\n 48,49,50,51,52,53,54,55,56,57,\n 48,49,50,51,52,53,54,55,56,57,\n 48,49,50,51,52,53,54,55,56,57,\n 48,49,50,51,52,53,54,55,56,57];\n \nshared int[] tens = [48,48,48,48,48,48,48,48,48,48,\n  49,49,49,49,49,49,49,49,49,49,\n  50,50,50,50,50,50,50,50,50,50,\n  51,51,51,51,51,51,51,51,51,51,\n  52,52,52,52,52,52,52,52,52,52,\n  53,53,53,53,53,53,53,53,53,53,\n  54,54,54,54,54,54,54,54,54,54,\n  55,55,55,55,55,55,55,55,55,55,\n  56,56,56,56,56,56,56,56,56,56,\n  57,57,57,57,57,57,57,57,57,57];\n  \nshared int[] digits = [48,49,50,51,52,52,53,54,55,56,57,\n97,98,99,100,101,102,103,104,105,\n106,107,108,109,110,111,112,113,114,\n115,116,117,118,119,120,121,122];";
+		String prog = "program sharedTest(50);shared int val = 0; shared int addc = 0; shared int subc = 0;def int main() {int tmp = 1;LOCK(val_lock){for (int i = 0; i < 3; i = i + 1) {add();}}tmp = 3;LOCK(val_lock){for (int j = 0; j < 3; j = j + 1) {sub();}}return val;}def void add() {val = val + 1; addc = addc+1;return;}def void sub() {val = val - 1;subc = subc + 1;return;}";
 		ProgramContext ctx = new BaseGrammarParser(new CommonTokenStream(
 				new BaseGrammarLexer(new ANTLRInputStream(prog)))).program();
 		CheckResult cres = new Checker().check(ctx);
@@ -52,13 +53,13 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		ProgramRunner.runAndRemove(list);
 	}
 
-	private CheckResult cres;
-	private Program prog;
-	private Map<FuncContext, List<Spril>> functions;
-	private Map<FuncContext, Integer> functionAddrs;
-	private int heapPtr, sharedPtr;
+	private CheckResult						cres;
+	private Program							prog;
+	private Map<FuncContext, List<Spril>>	functions;
+	private Map<FuncContext, Integer>		functionAddrs;
+	private int								heapPtr, sharedPtr;
 
-	private Map<FuncContext, List<Spril>> calls;
+	private Map<FuncContext, List<Spril>>	calls;
 
 	public Program compile(ProgramContext ctx, CheckResult cres) {
 		this.cres = cres;
