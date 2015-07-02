@@ -130,6 +130,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 		void buildLocks(Set<String> locks) {
 			int addr = sharedStaticMemSize() + 1;
+			this.locks.put("<$INIT_LOCK$>", addr++);
 			for (String lock : locks)
 				this.locks.putIfAbsent(lock, addr++);
 		}
@@ -303,7 +304,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 		types.put(ctx, arrType);
 		result.getOffsets().put(ctx, scope.getOffset(arrId));
-		shared.put(ctx, shared.get(ctx.ID()));
+		shared.put(ctx, scope.isShared(arrId));
 
 		return null;
 	}
@@ -394,6 +395,8 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	public Void visitConstArrayExpr(ConstArrayExprContext ctx) {
 		visit(ctx.ID());
 		types.put(ctx, getType(ctx, ctx.ID().getText()));
+		result.getOffsets().put(ctx, scope.getOffset(ctx.ID().getText()));
+		shared.put(ctx, scope.isShared(ctx.ID().getText()));
 		return null;
 	}
 
@@ -409,7 +412,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		}
 
 		if (ctx.expr() instanceof ArrayLiteralExprContext) {
-			makeArray((ArrayLiteralExprContext) ctx.expr(), varId);
+			makeArray((ArrayLiteralExprContext) ctx.expr(), varId, ctx.SHARED() != null);
 			types.put(ctx, types.get(ctx.expr()));
 			result.getOffsets().put(ctx.ID(), scope.getOffset(varId));
 		} else if (ctx.type().size() > 1) {
@@ -434,11 +437,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	public Void visitArrayLiteralExpr(ArrayLiteralExprContext ctx) {
-		makeArray(ctx, "<arr_" + ++arrCount + ">");
+		makeArray(ctx, "<arr_" + ++arrCount + ">", false);
 		return null;
 	}
 
-	private void makeArray(ArrayLiteralExprContext ctx, String id) {
+	private void makeArray(ArrayLiteralExprContext ctx, String id, boolean shared) {
 		ctx.expr().forEach(e -> visit(e));
 		Type type = getType(ctx.expr(0));
 		if (ctx.expr().stream().anyMatch(e -> !getType(e).equals(type))) {
@@ -449,7 +452,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		int count = ctx.expr().size();
 		Type arr = new Array(type, count);
 		types.put(ctx, arr);
-		scope.declare(id, arr);
+		scope.declare(id, arr, shared);
 		result.getOffsets().put(ctx, scope.getOffset(id));
 	}
 
@@ -476,7 +479,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		visit(ctx.arrayVal());
 		types.put(ctx, getType(ctx.arrayVal()));
 		result.getOffsets().put(ctx, result.getOffsets().get(ctx.arrayVal()));
-		shared.put(ctx, shared.get(ctx.arrayVal()));
+		shared.put(ctx, scope.isShared(ctx.arrayVal().ID().getText()));
 		return null;
 	}
 
@@ -623,8 +626,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		if (main != null) {
 			Queue<Func> funcs = new ArrayDeque<>();
 			funcs.offer(main);
+			Func prev = null;
 			while (!funcs.isEmpty()) {
 				Func current = funcs.poll();
+				if (current.equals(prev))
+					continue;
 				FuncContext fctx = functions.entrySet().stream()
 						.filter(e -> e.getValue().equals(current)).findAny()
 						.map(e -> e.getKey()).get();
@@ -632,6 +638,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 				List<Func> callees;
 				if ((callees = callTree.get(current)) != null)
 					callees.forEach(callee -> funcs.offer(callee));
+				prev = current;
 			}
 		}
 		// functions.forEach((fctx, func) -> processFunction(fctx, func));
@@ -762,7 +769,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 	private Func call(CallContext ctx, Type expectedReturn) {
 		List<Type> args = new ArrayList<>();
-		ctx.params().val().stream().forEachOrdered(val -> {
+		ctx.params().expr().stream().forEachOrdered(val -> {
 			visit(val);
 			args.add(getType(val));
 		});
