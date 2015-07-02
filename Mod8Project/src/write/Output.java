@@ -5,13 +5,11 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 
 public class Output {
-	private static String fileName = "prog.hs";
-
-	public static void write(String[] lines) {
+	public static void write(String title, int cores, String[] lines) {
 		PrintWriter writer = null;
 
 		try {
-			writer = new PrintWriter(fileName, "UTF-8");
+			writer = new PrintWriter(title, "UTF-8");
 		} catch (FileNotFoundException e) {
 		} catch (UnsupportedEncodingException e) {
 		}
@@ -29,13 +27,8 @@ public class Output {
 		}
 		writer.println("		, EndProg");
 		writer.println("       ]\n");
-		writer.println("main = run 1 prog");
+		writer.println("main = run "+cores+" prog");
 		writer.flush();
 		writer.close();
-	}
-
-	public static void main(String[] args) {
-		String[] lines = new String[]{"Const 6 RegA", "Const 7 RegB", "Compute Mul RegA RegB RegC"};
-		write(lines);
 	}
 }

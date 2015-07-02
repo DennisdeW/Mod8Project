@@ -1,0 +1,28 @@
+Test template.
+main must write exactly one number to stdout.
+Tests are considered successful if the value 0 is written.
+
+program <name>Test(X);
+
+<declarations>
+
+def int main() {
+	int result = 0;
+	if (!test1()) {
+		result = 1;
+	}
+	if (!test2()) {
+		result = 2;
+	}
+	<more tests>
+	out(result);
+	return result;
+}
+
+def bool test1() {
+	<do test>
+}
+
+def bool test2() {
+	<do test>
+}

@@ -1,7 +1,14 @@
 package write;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.lang.ProcessBuilder.Redirect;
+import java.util.List;
+import java.util.Scanner;
 
 import translation.Program;
 
@@ -16,7 +23,7 @@ import translation.Program;
 public final class ProgramRunner {
 
 	// Instance variables
-	private static final String BASE_PATH = new File("").getAbsolutePath();
+	private static final String	BASE_PATH	= new File("").getAbsolutePath();
 
 	/**
 	 * Empty Constructor.
@@ -90,5 +97,62 @@ public final class ProgramRunner {
 	 */
 	public static void runAndRemove(Program prog) {
 		run(prog, true);
+	}
+
+	public static boolean runTest(Program prog) {
+		String name = prog.getName();
+		if (name == null)
+			name = BASE_PATH + "\\sprockell\\prog" + System.currentTimeMillis();
+		Output.write(name + ".hs", prog.getCoreCount(), prog.print());
+		File tmpdir = new File("./tmp");
+		tmpdir.mkdir();
+		ProcessBuilder compileBuilder = new ProcessBuilder("ghc", "-i"
+				+ BASE_PATH + "\\sprockell\\Sprockell", "-outputdir ./tmp",
+				name + ".hs");
+		Process compile = null;
+		try {
+			System.out.printf("Compiling %s...", name);
+			compile = compileBuilder.start();
+			compile.waitFor();
+			System.out.println("Done");
+		} catch (IOException | InterruptedException e1) {
+			e1.printStackTrace();
+			return false;
+		}
+		ProcessBuilder runBuilder = new ProcessBuilder(name + ".exe");
+
+		StringBuilder output = new StringBuilder();
+		try {
+			System.out.printf("Running %s...", name);
+			Process run = runBuilder.start();
+			new Thread(() -> {
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(run.getInputStream()));
+				try {
+					String line;
+					while ((line = reader.readLine()) != null)
+						output.append(line);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}).start();
+			new Thread(() -> {
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(run.getErrorStream()));
+				try {
+					String line;
+					while ((line = reader.readLine()) != null);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}).start();
+			run.waitFor();
+			int result = Integer.parseInt(output.toString());
+			System.out.println("Done: " + result);
+			return result == 0;
+		} catch (IOException | InterruptedException | NumberFormatException e1) {
+			e1.printStackTrace();
+			return false;
+		}
 	}
 }

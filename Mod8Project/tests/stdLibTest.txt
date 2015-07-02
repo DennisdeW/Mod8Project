@@ -1,0 +1,49 @@
+program stdLibTest;
+
+def int main() {
+	int result = 0;
+	if (!testArraysEqual()) {
+		result = 1;
+	}
+	if (!testIntToStr()) {
+		result = 2;
+	}
+	out(result);
+	return result;
+}
+
+def bool testArraysEqual() {
+	int[] a = [1,2,3];
+	int[] b = [1,2,3];
+	int[] c = [0,0];
+	int[] d = int[2];
+	if (!arraysEqual(a, a, 3)) {
+		return false;
+	}if (!arraysEqual(a, b, 3)) {
+		return false;
+	}
+	if (!arraysEqual(b, a, 3)) {
+		return false;
+	}
+	if (arraysEqual(a, c, 2)) {
+		return false;
+	}
+	if (!arraysEqual(c, d, 2)) {
+		return false;
+	}
+	return true;
+}
+
+def bool testIntToStr() {
+	int i1 = 1234;
+	int arr1 = [1,2,3,4];
+	if (arraysEqual(arr1, intToStr(i1), 4)) {
+		return false;
+	}
+	int i2 = 0;
+	int arr2 = [0];
+	if (arraysEqual(arr2, intToStr(i2), 1)) {
+		return false;
+	}
+	return true;
+}

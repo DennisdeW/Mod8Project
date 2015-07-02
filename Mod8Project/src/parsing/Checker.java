@@ -45,12 +45,12 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		ANTLRErrorListener {
 
 	public class CheckResult {
-		private ParseTreeProperty<Type> types;
-		private Map<ParseTree, Integer> offsets;
-		private Set<FuncContext> functions;
-		private List<String> errors;
-		private ParseTreeProperty<Boolean> shared;
-		private Map<String, Integer> locks;
+		private ParseTreeProperty<Type>		types;
+		private Map<ParseTree, Integer>		offsets;
+		private Set<FuncContext>			functions;
+		private List<String>				errors;
+		private ParseTreeProperty<Boolean>	shared;
+		private Map<String, Integer>		locks;
 
 		public CheckResult() {
 			this.types = new ParseTreeProperty<>();
@@ -180,22 +180,37 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		}
 	}
 
-	private static final List<String> INVALID_NAMES = Arrays.asList("int",
-			"bool", "void", "if", "else", "while", "for", "return", "and",
-			"or", "xor", "true", "false", "def", "break", "not", "string");
-	private Scope scope;
-	private List<String> errors;
-	private Map<FuncContext, Func> functions;
-	private Set<String> locks;
-	private ParseTreeProperty<Type> types;
-	private ParseTreeProperty<Boolean> shared;
-	private Func currentFunc;
-	private Map<Func, TypedparamsContext> params;
-	private Map<Func, List<Func>> callTree;
-	private CheckResult result;
-	private int arrCount;
+	private static final List<String>		INVALID_NAMES	= Arrays.asList(
+																	"int",
+																	"bool",
+																	"void",
+																	"if",
+																	"else",
+																	"while",
+																	"for",
+																	"return",
+																	"and",
+																	"or",
+																	"xor",
+																	"true",
+																	"false",
+																	"def",
+																	"break",
+																	"not",
+																	"string");
+	private Scope							scope;
+	private List<String>					errors;
+	private Map<FuncContext, Func>			functions;
+	private Set<String>						locks;
+	private ParseTreeProperty<Type>			types;
+	private ParseTreeProperty<Boolean>		shared;
+	private Func							currentFunc;
+	private Map<Func, TypedparamsContext>	params;
+	private Map<Func, List<Func>>			callTree;
+	private CheckResult						result;
+	private int								arrCount;
 
-	private boolean dirty;
+	private boolean							dirty;
 
 	/**
 	 * Check returns a checked program
@@ -219,7 +234,8 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	/**
-	 * Check returns a check program
+	 * Check returns a check program. This method assumes the standard library
+	 * has been added already.
 	 * 
 	 * @param prog
 	 *            The program that needs to be processed
@@ -412,7 +428,8 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		}
 
 		if (ctx.expr() instanceof ArrayLiteralExprContext) {
-			makeArray((ArrayLiteralExprContext) ctx.expr(), varId, ctx.SHARED() != null);
+			makeArray((ArrayLiteralExprContext) ctx.expr(), varId,
+					ctx.SHARED() != null);
 			types.put(ctx, types.get(ctx.expr()));
 			result.getOffsets().put(ctx.ID(), scope.getOffset(varId));
 		} else if (ctx.type().size() > 1) {
@@ -437,11 +454,12 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	public Void visitArrayLiteralExpr(ArrayLiteralExprContext ctx) {
-		makeArray(ctx, "<arr_" + ++arrCount + ">", false);
+		makeArray(ctx, "<arr_" + ctx.hashCode() + ">", false);
 		return null;
 	}
 
-	private void makeArray(ArrayLiteralExprContext ctx, String id, boolean shared) {
+	private void makeArray(ArrayLiteralExprContext ctx, String id,
+			boolean shared) {
 		ctx.expr().forEach(e -> visit(e));
 		Type type = getType(ctx.expr(0));
 		if (ctx.expr().stream().anyMatch(e -> !getType(e).equals(type))) {
@@ -623,7 +641,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 									Generator.MAIN_FUNC_SIG);
 							return null;
 						});
-		if (main != null) {
+		/*if (main != null) {
 			Queue<Func> funcs = new ArrayDeque<>();
 			funcs.offer(main);
 			Func prev = null;
@@ -640,8 +658,8 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 					callees.forEach(callee -> funcs.offer(callee));
 				prev = current;
 			}
-		}
-		// functions.forEach((fctx, func) -> processFunction(fctx, func));
+		}*/
+		 functions.forEach((fctx, func) -> processFunction(fctx, func));
 		return null;
 	}
 
@@ -671,6 +689,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 						currentFunc.getName(), expected);
 			}
 		}
+		types.put(ctx, expected);
 		return null;
 	}
 
