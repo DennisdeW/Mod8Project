@@ -33,7 +33,8 @@ import write.ProgramRunner;
 
 public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 
-	public static final Func MAIN_FUNC_SIG = new Func("main", Primitive.INT);
+	public static final Func	MAIN_FUNC_SIG	= new Func("main",
+														Primitive.INT);
 
 	public static void main(String[] args) {
 		String prog = "program sharedTest(50);shared int val = 0; shared int addc = 0; shared int subc = 0;def int main() {int tmp = 1;LOCK(val_lock){for (int i = 0; i < 3; i = i + 1) {add();}}tmp = 3;LOCK(val_lock){for (int j = 0; j < 3; j = j + 1) {sub();}}return val;}def void add() {val = val + 1; addc = addc+1;return;}def void sub() {val = val - 1;subc = subc + 1;return;}";
@@ -52,13 +53,13 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		ProgramRunner.runAndRemove(list);
 	}
 
-	private CheckResult cres;
-	private Program prog;
-	private Map<FuncContext, List<Spril>> functions;
-	private Map<FuncContext, Integer> functionAddrs;
-	private int heapPtr, sharedPtr;
+	private CheckResult						cres;
+	private Program							prog;
+	private Map<FuncContext, List<Spril>>	functions;
+	private Map<FuncContext, Integer>		functionAddrs;
+	private int								heapPtr, sharedPtr;
 
-	private Map<FuncContext, List<Spril>> calls;
+	private Map<FuncContext, List<Spril>>	calls;
 
 	public Program compile(ProgramContext ctx, CheckResult cres) {
 		this.cres = cres;
@@ -776,6 +777,13 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		return result;
 	}
 
+	public List<Spril> visitSpidExpr(SpidExprContext ctx) {
+		List<Spril> result = new ArrayList<>();
+		result.add(new Spril(OpCode.PUSH, Register.SPID));
+		return result;
+
+	}
+
 	public List<Spril> visitSpidVal(SpidValContext ctx) {
 		List<Spril> result = new ArrayList<>();
 		result.add(new Spril(OpCode.PUSH, Register.SPID));
@@ -878,11 +886,15 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 					&& cres.getShared().get(ctx);
 			offset = cres.getOffsets().get(id);
 			result.add(new Spril(OpCode.CONST, new Int(offset), Register.D));
-			result.add(new Spril(shared ? OpCode.READ : OpCode.LOAD,
-					"Get base addr for array " + id.getText(), MemAddr
-							.deref(Register.D), Register.D));
-			if (shared)
+		
+			if (shared) {
+				result.add(new Spril(OpCode.READ, "Get base addr for array "
+						+ id.getText(), MemAddr.deref(Register.D)));
 				result.add(new Spril(OpCode.RECEIVE, Register.D));
+			} else {
+				result.add(new Spril(OpCode.LOAD, "Get base addr for array "
+						+ id.getText(), MemAddr.deref(Register.D), Register.D));
+			}
 			result.addAll(visit(ctx.expr()));
 			if (result.get(result.size() - 1).equals(
 					new Spril(OpCode.PUSH, Register.A)))

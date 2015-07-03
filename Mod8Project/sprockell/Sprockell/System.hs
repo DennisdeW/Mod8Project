@@ -25,7 +25,7 @@ data SystemConfig = SysConf
 defaultConfig :: SystemConfig
 defaultConfig = SysConf
         { bufferDelay = 4
-        , dataMemSize = 128
+        , dataMemSize = 512
         , coreCount = 4
         , multiplier = 2
         }

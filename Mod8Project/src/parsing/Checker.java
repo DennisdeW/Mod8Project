@@ -702,6 +702,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	public Void visitSpidExpr(SpidExprContext ctx) {
+		types.put(ctx, Primitive.INT);
+		return null;
+	}
+	
 	public Void visitTopLevelBlock(TopLevelBlockContext ctx) {
 		scope.openScope();
 		visit(params.get(currentFunc));

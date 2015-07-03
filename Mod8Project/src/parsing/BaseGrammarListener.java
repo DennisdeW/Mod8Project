@@ -579,6 +579,18 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitAssignStat(@NotNull BaseGrammarParser.AssignStatContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code spidExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterSpidExpr(@NotNull BaseGrammarParser.SpidExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code spidExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitSpidExpr(@NotNull BaseGrammarParser.SpidExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code negNumExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree

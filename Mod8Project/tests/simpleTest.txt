@@ -15,11 +15,11 @@ def int main() {
 def bool testAddition() {
 	int x = 4;
 	int y = 5;
-	return x + y == 9;
+	return (x + y) == 9;
 }
 
 def bool testMultiply() {
 	int x = 3;
 	int y = 3;
-	return x * y  == 9;
+	return (x * y)  == 9;
 }

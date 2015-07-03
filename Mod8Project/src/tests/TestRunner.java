@@ -44,6 +44,8 @@ public class TestRunner {
 			ctx = new BaseGrammarParser(new CommonTokenStream(
 					new BaseGrammarLexer(new ANTLRInputStream(base + "\n\n\n"
 							+ std)))).program();
+			reader.close();
+			stdreader.close();
 		} catch (RecognitionException | IOException e) {
 			e.printStackTrace();
 			fail("An exception occured while scanning/parsing.");

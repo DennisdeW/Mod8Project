@@ -1,0 +1,29 @@
+program bankV2(10);
+
+shared int[] accounts = [1000,2000,3000,2000,1000,1000,2000,3000,2000,1000];
+shared int[] accounts_copy = [1000,2000,3000,2000,1000,1000,2000,3000,2000,1000];
+shared int doneCount = 0;
+
+def int main() {
+	for (int i = 0; i < 10; i = i + 1) {
+		if ($SPID != i) {
+			lock(acc_lock) {
+				accounts[$SPID] = accounts[$SPID] - 20;
+				accounts[i] = accounts[i] + 20;
+			}
+		}
+	}
+	lock(done_lock) {
+		doneCount = doneCount + 1;
+	}
+	if ($SPID == 0) {
+		while (doneCount < 10) {}
+		if (arraysEqual(accounts, accounts_copy, 10)) {
+			out(0);
+		} else {
+			printArray(accounts, 10);
+			out(1);
+		}
+	}
+	return 0;
+}

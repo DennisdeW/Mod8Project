@@ -347,6 +347,13 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAssignStat(@NotNull BaseGrammarParser.AssignStatContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code spidExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSpidExpr(@NotNull BaseGrammarParser.SpidExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code negNumExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree

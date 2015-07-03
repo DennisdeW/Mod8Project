@@ -91,6 +91,7 @@ expr
 	| NUMBER # numExpr
 	| TRUE # trueExpr
 	| FALSE # falseExpr
+	| SPID # spidExpr
 ;
 
 stat

@@ -368,6 +368,13 @@ public class BaseGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> imple
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitSpidExpr(@NotNull BaseGrammarParser.SpidExprContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitNegNumExpr(@NotNull BaseGrammarParser.NegNumExprContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
