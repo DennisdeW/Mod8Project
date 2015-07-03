@@ -627,6 +627,15 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	public Void visitProgram(ProgramContext ctx) {
+
+		TerminalNode sprockellCount = ctx.progdef().NUMBER();
+		if (sprockellCount != null
+				&& Integer.parseInt(sprockellCount.getText()) < 1) {
+			error(ctx,
+					"Invalid Sprockell count: %d. Please supply a value >= 1.",
+					sprockellCount);
+		}
+
 		ctx.decl().forEach(decl -> visit(decl));
 		ctx.func().forEach(func -> visit(func));
 		Func main = functions
@@ -659,7 +668,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 				prev = current;
 			}
 		}*/
-		 functions.forEach((fctx, func) -> processFunction(fctx, func));
+		functions.forEach((fctx, func) -> processFunction(fctx, func));
 		return null;
 	}
 
