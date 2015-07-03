@@ -9,7 +9,7 @@ def int main() {
 		result = 2;
 	}
 	out(result);
-	return result;
+	return 0;
 }
 
 def bool testArraysEqual() {
@@ -37,13 +37,133 @@ def bool testArraysEqual() {
 def bool testIntToStr() {
 	int i1 = 1234;
 	int arr1 = [1,2,3,4];
-	if (arraysEqual(arr1, intToStr(i1), 4)) {
+	if (!arraysEqual(arr1, intToStr(i1), 4)) {
+		printArray(arr1, 4);
+		printArray(intToStr(i1), 4);
 		return false;
 	}
 	int i2 = 0;
 	int arr2 = [0];
-	if (arraysEqual(arr2, intToStr(i2), 1)) {
+	if (!arraysEqual(arr2, intToStr(i2), 1)) {
+		out(0);
 		return false;
 	}
 	return true;
+}
+
+def int[] intToStr(int i) {
+	if ((i >= 0) AND (i < 10)) {
+		return [i];
+	}
+	int[] res = int[10];
+	bool neg = i < 0;
+	int q = 0;
+	int r = 0;
+	int pos = 9;
+	bool first = true;
+	while (first OR i != 0) {
+		first = false;
+		q = i / 10;
+		r = i - (q * 10);
+		res[pos] = r;
+		pos = pos - 1;
+		i = q;
+	}
+	if (neg) {
+		res[pos] = -3;
+	}
+	return res;
+}
+
+def void printInt(int i) {
+	if ((i >= 0) AND (i < 10)) {
+		out(i);
+		return;
+	}
+	int[] res = int[10];
+	bool neg = i < 0;
+	int q = 0;
+	int r = 0;
+	int pos = 9;
+	bool first = true;
+	while (first OR i != 0) {
+		first = false;
+		q = i / 10;
+		r = i - (q * 10);
+		res[pos] = r;
+		pos = pos - 1;
+		i = q;
+	}
+	if (neg) {
+		res[pos] = -3;
+		pos = pos - 1;
+	}
+	for(int i = pos; i < 10; i = i + 1) {
+		out(res[i]);
+	}
+	return;
+}
+
+def void printBool(bool b) {
+	if (b) {
+		out([36,34,37,21]);
+	} else {
+		out([22,17,28,35,21]);
+	}
+	return;
+}
+
+def int[] boolToStr(bool b) {
+	if (b) {
+		return [36,34,37,21];
+	} else {
+		return [22,17,28,35,21];
+	}
+}
+
+def int boolToInt(bool b) {
+	if (b) {
+		return 1;
+	}
+	return 0;
+}
+
+def bool intToBool(int i) {
+	if (i == 0) {
+		return false;
+	}
+	return true;
+}
+
+def bool arraysEqual(int[] x, int[] y, int len) {
+	for (int i = 0; i < len; i = i + 1) {
+		if (x[i] != y[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
+def void printArray(int[] arr, int len) {
+	out(43); /* '[' */
+	for (int i = 0; i < (len - 1); i = i + 1) {
+		printInt(arr[i]);
+		out(-4); /* ',' */
+		out(-16); /* ' ' */
+	}
+	out(arr[len - 1]);
+	out(45); /* ']' */
+	return;
+}
+
+def void printArray(bool[] arr, int len) {
+	out(43); /* '[' */
+	for (int i = 0; i < (len - 1); i = i + 1) {
+		printBool(arr[i]);
+		out(-4); /* ',' */
+		out(-16); /* ' ' */
+	}
+	out(arr[len - 1]);
+	out(45); /* ']' */
+	return;
 }

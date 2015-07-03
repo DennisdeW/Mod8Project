@@ -73,7 +73,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 				.stream()
 				.filter(e -> cres.getShared().get(e.getKey()) == null
 						|| !cres.getShared().get(e.getKey()))
-				.mapToInt(e -> e.getValue()).max().getAsInt();
+				.mapToInt(e -> e.getValue()).max().orElse(0);
 		this.sharedPtr = cres
 				.getOffsets()
 				.entrySet()
@@ -174,11 +174,6 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		int valSize = valType.getSize();
 		heapPtr += valSize * ctx.expr().size();
 
-		result.add(new Spril(OpCode.CONST, "Base addr for (anon) array "
-				+ ctx.hashCode(), new Int(arrBaseAddr), Register.A));
-		result.add(new Spril(OpCode.STORE, Register.A, MemAddr
-				.direct(ptrOffset)));
-
 		for (int i = 0; i < ctx.expr().size(); i++) {
 			result.addAll(visit(ctx.expr(i)));
 			if (result.get(result.size() - 1).equals(
@@ -189,8 +184,12 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 
 			result.add(new Spril(OpCode.STORE, Register.A, MemAddr
 					.direct(arrBaseAddr + (i * valSize))));
-
 		}
+		result.add(new Spril(OpCode.CONST, "Base addr for (anon) array "
+				+ ctx.hashCode(), new Int(arrBaseAddr), Register.A));
+		result.add(new Spril(OpCode.STORE, Register.A, MemAddr
+				.direct(ptrOffset)));
+		result.add(new Spril(OpCode.PUSH, Register.A));
 
 		return result;
 	}

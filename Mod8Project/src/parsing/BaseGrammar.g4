@@ -72,13 +72,13 @@ expr
 	| EXCLAMATION expr # negBoolExpr
 	| AMP expr # refExpr
 	| TIMES expr # derefExpr
+	| expr boolOp expr # boolOpExpr
+	| expr comp expr # compExpr
 	| expr TIMES expr # multExpr
 	| expr DIV expr # divExpr
 	| expr MINUS expr # minExpr
 	| expr PLUS expr # plusExpr
 	| expr MOD expr # modExpr
-	| expr boolOp expr # boolOpExpr
-	| expr comp expr # compExpr
 	| LBRACE expr RBRACE # parExpr
 	| call # callExpr
 	| ID LSQUARE NUMBER RSQUARE # constArrayExpr

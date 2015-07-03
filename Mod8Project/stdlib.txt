@@ -1,5 +1,5 @@
 def int[] intToStr(int i) {
-	if (i >= 0 AND i < 10) {
+	if ((i >= 0) AND (i < 10)) {
 		return [i];
 	}
 	int[] res = int[10];
@@ -23,7 +23,7 @@ def int[] intToStr(int i) {
 }
 
 def void printInt(int i) {
-	if (i >= 0 AND i < 10) {
+	if ((i >= 0) AND (i < 10)) {
 		out(i);
 		return;
 	}
@@ -89,4 +89,28 @@ def bool arraysEqual(int[] x, int[] y, int len) {
 		}
 	}
 	return true;
+}
+
+def void printArray(int[] arr, int len) {
+	out(43); /* '[' */
+	for (int i = 0; i < len - 1; i = i + 1) {
+		printInt(arr[i]);
+		out(-4); /* ',' */
+		out(-16); /* ' ' */
+	}
+	out(arr[len - 1]);
+	out(45); /* ']' */
+	return;
+}
+
+def void printArray(bool[] arr, int len) {
+	out(43); /* '[' */
+	for (int i = 0; i < len - 1; i = i + 1) {
+		printBool(arr[i]);
+		out(-4); /* ',' */
+		out(-16); /* ' ' */
+	}
+	out(arr[len - 1]);
+	out(45); /* ']' */
+	return;
 }

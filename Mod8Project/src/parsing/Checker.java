@@ -318,7 +318,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		visit(ctx.expr());
 		checkType(ctx, Primitive.INT, ctx.expr());
 
-		types.put(ctx, arrType);
+		types.put(ctx, ((Array) arrType).getContainedType());
 		result.getOffsets().put(ctx, scope.getOffset(arrId));
 		shared.put(ctx, scope.isShared(arrId));
 
