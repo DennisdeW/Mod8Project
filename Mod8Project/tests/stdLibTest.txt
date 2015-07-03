@@ -38,14 +38,40 @@ def bool testIntToStr() {
 	int i1 = 1234;
 	int arr1 = [1,2,3,4];
 	if (!arraysEqual(arr1, intToStr(i1), 4)) {
-		printArray(arr1, 4);
-		printArray(intToStr(i1), 4);
 		return false;
 	}
 	int i2 = 0;
 	int arr2 = [0];
 	if (!arraysEqual(arr2, intToStr(i2), 1)) {
-		out(0);
+		return false;
+	}
+	
+	int i3 = 9876;
+	int[] arr3 = [9,8,7,6];
+	if (!arraysEqual(arr3, intToStr(i3), 4)) {
+		return false;
+	}
+	
+	int i4 = -10;
+	int[] arr4 = [-3, 1, 0];
+	if (!arraysEqual(arr4, intToStr(i4), 3)) {
+		return false;
+	}
+	return true;
+}
+
+def bool testMirrorArray() {
+	int[] x = [4,3,2,1];
+	int[] y = [1,2,3,4];
+	bool[] a = [true, false, true];
+	bool[] b = [true, false, true];
+	flipArray(x, 4);
+	flipArray(a, 3);
+	if (!arraysEqual(x, y, 4)) {
+		return false;
+	}
+
+	if (!arraysEqual(a, b, 3)) {
 		return false;
 	}
 	return true;
@@ -57,6 +83,9 @@ def int[] intToStr(int i) {
 	}
 	int[] res = int[10];
 	bool neg = i < 0;
+	if (neg) {
+		i = -i;
+	}
 	int q = 0;
 	int r = 0;
 	int pos = 9;
@@ -72,6 +101,21 @@ def int[] intToStr(int i) {
 	if (neg) {
 		res[pos] = -3;
 	}
+	return shiftArray(res);
+}
+
+def int[] shiftArray(int[] arr) {
+	int[] res = int[10];
+	int i = 0;
+	int j = 0;
+	while ((i < 9) AND (arr[i] == 0)) {
+		i = i + 1;
+		j = j + 1;
+	}
+	while (i < 10) {
+		res[i-j] = arr[i];
+		i = i + 1;
+	}
 	return res;
 }
 
@@ -82,6 +126,9 @@ def void printInt(int i) {
 	}
 	int[] res = int[10];
 	bool neg = i < 0;
+	if (neg) {
+		i = -i;
+	}
 	int q = 0;
 	int r = 0;
 	int pos = 9;
@@ -144,6 +191,15 @@ def bool arraysEqual(int[] x, int[] y, int len) {
 	return true;
 }
 
+def bool arraysEqual(bool[] x, bool[] y, int len) {
+	for (int i = 0; i < len; i = i + 1) {
+		if (x[i] != y[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
 def void printArray(int[] arr, int len) {
 	out(43); /* '[' */
 	for (int i = 0; i < (len - 1); i = i + 1) {
@@ -166,4 +222,28 @@ def void printArray(bool[] arr, int len) {
 	out(arr[len - 1]);
 	out(45); /* ']' */
 	return;
+}
+
+def void flipArray(int[] arr, int len) {
+	int i = 0;
+	int j = len - 1;
+	while (i < j) {
+		int t = arr[j];
+		arr[j] = arr[i];
+		arr[i] = t;
+		i = i + 1;
+		j = j - 1;
+	}
+}
+
+def void flipArray(bool[] arr, int len) {
+	int i = 0;
+	int j = len - 1;
+	while (i < j) {
+		bool t = arr[j];
+		arr[j] = arr[i];
+		arr[i] = t;
+		i = i + 1;
+		j = j - 1;
+	}
 }

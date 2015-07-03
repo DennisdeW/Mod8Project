@@ -1,0 +1,31 @@
+program binarySearch;
+
+def int main() {
+	int[] arr = [1,3,4,5,8,9];
+	int len = 5;
+	for (int i = 0; i < 10; i = i + 1) {
+		out(indexOf(arr, len, i));
+		out(-38);
+	}
+	return 0;
+}
+
+def int indexOf(int[] list, int len, int val) {
+	int min = 0;
+	int max = len;
+	while (max > min) {
+		int mid = min + ((max - min) / 2);
+		out(mid);
+		int currval = list[mid];
+		if (currval < val) {
+			min = mid + 1;
+		} else {
+			max = mid;
+		}
+	}
+	out(-39);
+	if (max == min AND list[min] == val) {
+		return min;
+	}
+	return -1;
+}

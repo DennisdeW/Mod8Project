@@ -33,8 +33,7 @@ import write.ProgramRunner;
 
 public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 
-	public static final Func	MAIN_FUNC_SIG	= new Func("main",
-														Primitive.INT);
+	public static final Func MAIN_FUNC_SIG = new Func("main", Primitive.INT);
 
 	public static void main(String[] args) {
 		String prog = "program sharedTest(50);shared int val = 0; shared int addc = 0; shared int subc = 0;def int main() {int tmp = 1;LOCK(val_lock){for (int i = 0; i < 3; i = i + 1) {add();}}tmp = 3;LOCK(val_lock){for (int j = 0; j < 3; j = j + 1) {sub();}}return val;}def void add() {val = val + 1; addc = addc+1;return;}def void sub() {val = val - 1;subc = subc + 1;return;}";
@@ -53,13 +52,13 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		ProgramRunner.runAndRemove(list);
 	}
 
-	private CheckResult						cres;
-	private Program							prog;
-	private Map<FuncContext, List<Spril>>	functions;
-	private Map<FuncContext, Integer>		functionAddrs;
-	private int								heapPtr, sharedPtr;
+	private CheckResult cres;
+	private Program prog;
+	private Map<FuncContext, List<Spril>> functions;
+	private Map<FuncContext, Integer> functionAddrs;
+	private int heapPtr, sharedPtr;
 
-	private Map<FuncContext, List<Spril>>	calls;
+	private Map<FuncContext, List<Spril>> calls;
 
 	public Program compile(ProgramContext ctx, CheckResult cres) {
 		this.cres = cres;
@@ -170,7 +169,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 
 		Type valType = getType(ctx.expr(0));
 		int ptrOffset = cres.getOffsets().get(ctx);
-		int arrBaseAddr =  heapPtr + 1;
+		int arrBaseAddr = heapPtr + 1;
 		int valSize = valType.getSize();
 		heapPtr += valSize * ctx.expr().size();
 
@@ -231,14 +230,11 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 				&& cres.getShared().get(ctx);
 
 		/*
-		if (shared) {
-			result.add(new Spril(OpCode.READ, MemAddr.deref(Register.A)));
-			result.add(new Spril(OpCode.RECEIVE, Register.D));
-		} else {
-			result.add(new Spril(OpCode.LOAD, MemAddr.deref(Register.A),
-					Register.D));
-		}
-		*/
+		 * if (shared) { result.add(new Spril(OpCode.READ,
+		 * MemAddr.deref(Register.A))); result.add(new Spril(OpCode.RECEIVE,
+		 * Register.D)); } else { result.add(new Spril(OpCode.LOAD,
+		 * MemAddr.deref(Register.A), Register.D)); }
+		 */
 		result.add(new Spril(OpCode.COMPUTE, Operator.ADD, Register.E,
 				Register.A, Register.D));
 		if (shared) {
@@ -403,9 +399,9 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 						.direct(ptrOffset)));
 
 			if (shared) {
-				heapPtr += totalSize;
-			} else {
 				sharedPtr += totalSize;
+			} else {
+				heapPtr += totalSize;
 			}
 
 			OpCode op = shared ? OpCode.WRITE : OpCode.STORE;
@@ -702,13 +698,13 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 				result.add(new Spril(OpCode.POP, Register.A));
 		}
 		/*
-				if (cres.getTypes().get(ctx) == Primitive.BOOL) {
-					result.add(new Spril(OpCode.COMPUTE, Operator.LTE, Register.A, Register.ZERO, Register.B));
-					result.add(new Spril(OpCode.BRANCH, Register.B, Target.relative(2)));
-					result.add(new Spril(OpCode.COMPUTE, "Convert to bool",
-							Operator.SUB, Register.ZERO, Register.A, Register.A));
-				}
-		*/
+		 * if (cres.getTypes().get(ctx) == Primitive.BOOL) { result.add(new
+		 * Spril(OpCode.COMPUTE, Operator.LTE, Register.A, Register.ZERO,
+		 * Register.B)); result.add(new Spril(OpCode.BRANCH, Register.B,
+		 * Target.relative(2))); result.add(new Spril(OpCode.COMPUTE,
+		 * "Convert to bool", Operator.SUB, Register.ZERO, Register.A,
+		 * Register.A)); }
+		 */
 		result.add(new Spril(OpCode.POP, "Get Result addr", Register.B));
 		result.add(new Spril(OpCode.POP, "Get Return addr", Register.C));
 
@@ -834,7 +830,10 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		// body.add(new Spril(OpCode.NOP));
 
 		result.addAll(cond);
-		invertComputation(result.get(result.size() - 2));
+		Spril pred = result.get(result.size() - 2);
+
+		invertComputation(pred);
+
 		if (result.get(result.size() - 1).equals(
 				new Spril(OpCode.PUSH, Register.A)))
 			result.remove(result.size() - 1);

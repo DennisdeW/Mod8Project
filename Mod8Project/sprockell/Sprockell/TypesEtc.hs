@@ -64,7 +64,7 @@ data Operator = Add  | Sub | Mul  | Div | Mod
               -- comparision operations
               |  Equal | NEq | Gt | Lt | GtE | LtE
               -- logical/binary operations
-              | And | Or | Xor | LShift | RShift
+              | And | Or | Xor | LShift | RShift | Nand | Nor | Nxor
               -- Internal
               | Decr | Incr
               deriving (Eq,Show,Read)

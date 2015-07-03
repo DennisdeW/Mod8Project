@@ -167,6 +167,9 @@ boolOp
 	AND
 	| OR
 	| XOR
+	| NAND
+	| NOR
+	| NXOR
 ;
 
 prefix

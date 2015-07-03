@@ -4,6 +4,9 @@ def int[] intToStr(int i) {
 	}
 	int[] res = int[10];
 	bool neg = i < 0;
+	if (neg) {
+		i = -i;
+	}
 	int q = 0;
 	int r = 0;
 	int pos = 9;
@@ -19,6 +22,21 @@ def int[] intToStr(int i) {
 	if (neg) {
 		res[pos] = -3;
 	}
+	return shiftArray(res);
+}
+
+def int[] shiftArray(int[] arr) {
+	int[] res = int[10];
+	int i = 0;
+	int j = 0;
+	while ((i < 9) AND (arr[i] == 0)) {
+		i = i + 1;
+		j = j + 1;
+	}
+	while (i < 10) {
+		res[i-j] = arr[i];
+		i = i + 1;
+	}
 	return res;
 }
 
@@ -29,6 +47,9 @@ def void printInt(int i) {
 	}
 	int[] res = int[10];
 	bool neg = i < 0;
+	if (neg) {
+		i = -i;
+	}
 	int q = 0;
 	int r = 0;
 	int pos = 9;
@@ -91,9 +112,18 @@ def bool arraysEqual(int[] x, int[] y, int len) {
 	return true;
 }
 
+def bool arraysEqual(bool[] x, bool[] y, int len) {
+	for (int i = 0; i < len; i = i + 1) {
+		if (x[i] != y[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
 def void printArray(int[] arr, int len) {
 	out(43); /* '[' */
-	for (int i = 0; i < len - 1; i = i + 1) {
+	for (int i = 0; i < (len - 1); i = i + 1) {
 		printInt(arr[i]);
 		out(-4); /* ',' */
 		out(-16); /* ' ' */
@@ -105,7 +135,7 @@ def void printArray(int[] arr, int len) {
 
 def void printArray(bool[] arr, int len) {
 	out(43); /* '[' */
-	for (int i = 0; i < len - 1; i = i + 1) {
+	for (int i = 0; i < (len - 1); i = i + 1) {
 		printBool(arr[i]);
 		out(-4); /* ',' */
 		out(-16); /* ' ' */
@@ -113,4 +143,28 @@ def void printArray(bool[] arr, int len) {
 	out(arr[len - 1]);
 	out(45); /* ']' */
 	return;
+}
+
+def void flipArray(int[] arr, int len) {
+	int i = 0;
+	int j = len - 1;
+	while (i < j) {
+		int t = arr[j];
+		arr[j] = arr[i];
+		arr[i] = t;
+		i = i + 1;
+		j = j - 1;
+	}
+}
+
+def void flipArray(bool[] arr, int len) {
+	int i = 0;
+	int j = len - 1;
+	while (i < j) {
+		bool t = arr[j];
+		arr[j] = arr[i];
+		arr[i] = t;
+		i = i + 1;
+		j = j - 1;
+	}
 }

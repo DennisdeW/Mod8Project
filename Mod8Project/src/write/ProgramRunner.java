@@ -147,9 +147,9 @@ public final class ProgramRunner {
 				}
 			}).start();
 			run.waitFor();
-			//int result = Integer.parseInt(output.toString());
-			//System.out.println("Done: " + result);
-			return true;//result == 0;
+			int result = Integer.parseInt(output.toString());
+			System.out.println("Done: " + result);
+			return result == 0;
 		} catch (IOException | InterruptedException | NumberFormatException e1) {
 			e1.printStackTrace();
 			return false;

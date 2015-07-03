@@ -135,10 +135,18 @@ alu opCode x y = case opCode of
         LShift -> shiftL x (fromIntegral y)
         RShift -> shiftR x (fromIntegral y)
         Xor    -> x `xor` y
+        Nand   -> intBool $ not $ boolInt (x .&. y)
+        Nor    -> intBool $ not $ boolInt (x .|. y)
+        Nxor   -> intBool $ not $ boolInt (x `xor` y)
 
 intBool :: Bool -> Value
 intBool True  = 1
 intBool False = 0
+
+boolInt :: Value -> Bool
+boolInt 0 = False
+boolInt 1 = True
+boolInt _ = error "Invalid bool"
 
 -- ============================
 agu :: AguCode -> Address -> Value -> Address

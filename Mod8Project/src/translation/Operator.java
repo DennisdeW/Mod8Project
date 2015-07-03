@@ -1,5 +1,7 @@
 package translation;
 
+import java.util.Arrays;
+
 /**
  * A representation of Spril operators.
  * 
@@ -7,7 +9,7 @@ package translation;
  */
 public enum Operator implements Operand {
 	ADD, SUB, MUL, DIV, MOD, EQ("Equal"), NEQ("NEq"), GT, GTE("GtE"), LT, LTE(
-			"LtE"), AND, OR, XOR, LSHIFT("LShift"), RSHIFT("RShift");
+			"LtE"), AND, OR, XOR, NAND, NOR, NXOR, LSHIFT("LShift"), RSHIFT("RShift");
 
 	// Instance variables
 	private String name;
@@ -59,6 +61,12 @@ public enum Operator implements Operand {
 			return OR;
 		case "XOR":
 			return XOR;
+		case "NAND":
+			return NAND;
+		case "NOR":
+			return NOR;
+		case "NXOR":
+			return NXOR;
 		default:
 			throw new Error("Impossible BoolOp");
 		}
@@ -109,8 +117,32 @@ public enum Operator implements Operand {
 			return GT;
 		case NEQ:
 			return EQ;
+		case AND:
+			return NAND;
+		case OR:
+			return NOR;
+		case XOR:
+			return NXOR;
+		case NAND:
+			return AND;
+		case NOR:
+			return OR;
+		case NXOR:
+			return XOR;
 		default:
 			throw new RuntimeException("Can only invert comparators.");
 		}
+	}
+	
+	public boolean isArithmetic() {
+		return Arrays.asList(ADD, SUB, MUL, DIV, MOD, LSHIFT, RSHIFT).contains(this);
+	}
+	
+	public boolean isBoolean() {
+		return Arrays.asList(AND, OR, XOR, NAND, NOR, NXOR).contains(this);
+	}
+	
+	public boolean isComparator() {
+		return Arrays.asList(EQ, NEQ, GT, GTE, LT, LTE).contains(this);
 	}
 }
