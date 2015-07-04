@@ -155,6 +155,18 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitBlock(@NotNull BaseGrammarParser.BlockContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code enumExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterEnumExpr(@NotNull BaseGrammarParser.EnumExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code enumExpr}
+	 * labeled alternative in {@link BaseGrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitEnumExpr(@NotNull BaseGrammarParser.EnumExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code divExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree
@@ -326,6 +338,16 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFalseVal(@NotNull BaseGrammarParser.FalseValContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BaseGrammarParser#enumDecl}.
+	 * @param ctx the parse tree
+	 */
+	void enterEnumDecl(@NotNull BaseGrammarParser.EnumDeclContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BaseGrammarParser#enumDecl}.
+	 * @param ctx the parse tree
+	 */
+	void exitEnumDecl(@NotNull BaseGrammarParser.EnumDeclContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code trueExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.

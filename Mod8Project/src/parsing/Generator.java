@@ -15,10 +15,9 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import parsing.BaseGrammarParser.*;
-import parsing.BaseGrammarParser.ArrayLiteralExprContext;
-import parsing.BaseGrammarParser.SpidValContext;
 import parsing.Checker.CheckResult;
 import parsing.Type.Array;
+import parsing.Type.Enum;
 import parsing.Type.Pointer;
 import translation.Int;
 import translation.MemAddr;
@@ -152,8 +151,10 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 			});
 		});
 
-		for (int i = 0; i < 50; i++)
+		/*
+		for (int i = 0; i < 10; i++)
 			instrs.add(new Spril(OpCode.NOP));
+		*/
 
 		instrs.add(new Spril(OpCode.END_PROG));
 
@@ -207,10 +208,31 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		return visit(ctx.assign());
 	}
 
+	public List<Spril> visitEnumExpr(EnumExprContext ctx) {
+		List<Spril> result = new ArrayList<>();
+
+		String name = ctx.TYPE(0).getText();
+		Enum type = cres.getEnums().stream()
+				.filter(e -> e.getName().equalsIgnoreCase(name)).findAny()
+				.orElse(null);
+		if (type == null)
+			throw new RuntimeException(
+					"Unkown enum type, should have been caught by checker.");
+		String value = ctx.TYPE(1).getText();
+		if (!type.getValues().contains(value)) {
+			throw new RuntimeException(
+					"Unkown enum constant, should have been caught by checker.");
+		}
+		int ordinal = type.ordinal(value);
+		result.add(new Spril(OpCode.CONST, new Int(ordinal), Register.A));
+		result.add(new Spril(OpCode.PUSH, Register.A));
+		return result;
+	}
+
 	public List<Spril> visitExprArrayExpr(ExprArrayExprContext ctx) {
 		List<Spril> result = new ArrayList<>();
 		int baseOffset = cres.getOffsets().get(ctx);
-		
+
 		if (cres.getShared().get(ctx)) {
 			result.add(new Spril(OpCode.READ, MemAddr.direct(baseOffset)));
 			result.add(new Spril(OpCode.RECEIVE, Register.E));
@@ -885,7 +907,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 					&& cres.getShared().get(ctx);
 			offset = cres.getOffsets().get(id);
 			result.add(new Spril(OpCode.CONST, new Int(offset), Register.D));
-		
+
 			if (shared) {
 				result.add(new Spril(OpCode.READ, "Get base addr for array "
 						+ id.getText(), MemAddr.deref(Register.D)));

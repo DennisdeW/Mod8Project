@@ -33,6 +33,7 @@ import parsing.BaseGrammarParser.FuncContext;
 import parsing.BaseGrammarParser.TypedparamsContext;
 import parsing.Type.Pointer;
 import parsing.Type.Array;
+import parsing.Type.Enum;
 import parsing.BaseGrammarParser.*;
 import translation.Operator;
 import translation.Spril;
@@ -52,6 +53,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		private List<String>				errors;
 		private ParseTreeProperty<Boolean>	shared;
 		private Map<String, Integer>		locks;
+		private Set<Enum>					enums;
 
 		public CheckResult() {
 			this.types = new ParseTreeProperty<>();
@@ -60,12 +62,13 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			this.errors = new ArrayList<>();
 			this.shared = new ParseTreeProperty<>();
 			this.locks = new HashMap<>();
+			this.enums = new HashSet<>();
 		}
 
 		public CheckResult(ParseTreeProperty<Type> types,
 				Map<ParseTree, Integer> offsets, Set<FuncContext> functions,
 				List<String> errors, ParseTreeProperty<Boolean> shared,
-				Map<String, Integer> locks) {
+				Map<String, Integer> locks, Set<Enum> enums) {
 			super();
 			this.types = types;
 			this.offsets = offsets;
@@ -73,6 +76,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			this.errors = errors;
 			this.shared = shared;
 			this.locks = locks;
+			this.enums = enums;
 		}
 
 		public List<String> getErrors() {
@@ -178,6 +182,14 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 				throw new RuntimeException("Could not get type of "
 						+ ctx.getText());
 			return res;
+		}
+
+		public Set<Enum> getEnums() {
+			return enums;
+		}
+
+		public void setEnums(Set<Enum> enums) {
+			this.enums = enums;
 		}
 	}
 
@@ -335,7 +347,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 				return null;
 			visit(ctx.expr());
 			while (target.startsWith("*")) {
-				targetType = new Type.Pointer(targetType);
+				targetType = ((Pointer) targetType).getWrappedType();
 				target = target.substring(1);
 			}
 			Type sourceType = getType(ctx.expr());
@@ -497,6 +509,40 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
+	public Void visitEnumDecl(EnumDeclContext ctx) {
+		List<String> values = new ArrayList<>();
+		for (int i = 1; i < ctx.TYPE().size(); i++)
+			values.add(ctx.TYPE(i).getText());
+		String name = ctx.TYPE(0).getText();
+		if (result.getEnums().stream()
+				.anyMatch(en -> en.getName().equalsIgnoreCase(name))) {
+			error(ctx, "Duplicate enum declaration (%s).", name);
+		} else {
+			Enum en = new Enum(name, values);
+			result.getEnums().add(en);
+			types.put(ctx, en);
+		}
+		return null;
+	}
+
+	public Void visitEnumExpr(EnumExprContext ctx) {
+		String name = ctx.TYPE(0).getText();
+		Enum type = result.getEnums().stream()
+				.filter(e -> e.getName().equalsIgnoreCase(name)).findAny()
+				.orElseGet(null);
+		if (type == null)
+			error(ctx, "Undeclared enum type: %s", name);
+		else {
+			String value = ctx.TYPE(1).getText();
+			if (!type.getValues().contains(value)) {
+				error(ctx, "Enum %s has no constant '%s'.", name, value);
+			} else {
+				types.put(ctx, type);
+			}
+		}
+		return null;
+	}
+
 	public Void visitExprArrayExpr(ExprArrayExprContext ctx) {
 		visit(ctx.arrayVal());
 		types.put(ctx, getType(ctx.arrayVal()));
@@ -641,6 +687,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		}
 
 		ctx.decl().forEach(decl -> visit(decl));
+		ctx.enumDecl().forEach(edecl -> visit(edecl));
 		ctx.func().forEach(func -> visit(func));
 		Func main = functions
 				.values()
@@ -947,7 +994,23 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 	private Type typeForName(ParseTree tree, String typeName) {
 		try {
-			return Type.forName(typeName);
+			Type t = Type.forName(typeName);
+			if (t == Enum.DUMMY) {
+				String baseName = typeName.replaceAll("[\\[\\]\\*]", "");
+				Type type = result.getEnums().stream()
+						.filter(e -> e.getName().equalsIgnoreCase(baseName))
+						.findAny().orElseThrow(RuntimeException::new);
+				if (typeName.endsWith("[]")) {
+					type = new Array(type);
+					typeName = typeName.replaceAll("\\[\\]", "");
+				}
+				while (typeName.endsWith("*")) {
+					type = new Pointer(type);
+					typeName = typeName.replaceFirst("\\*", "");
+				}
+				return type;
+			}
+			return t;
 		} catch (IllegalArgumentException e) {
 			error(tree, e.getMessage());
 		}
