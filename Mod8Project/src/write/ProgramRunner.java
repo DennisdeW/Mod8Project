@@ -147,10 +147,14 @@ public final class ProgramRunner {
 				}
 			}).start();
 			run.waitFor();
+			if (output.toString().equals("")) {
+				System.out.println("No response.");
+				return false;
+			}
 			int result = Integer.parseInt(output.toString());
 			System.out.println("Done: " + result);
 			return result == 0;
-		} catch (IOException | InterruptedException | NumberFormatException e1) {
+		} catch (IOException | InterruptedException e1) {
 			e1.printStackTrace();
 			return false;
 		}

@@ -34,6 +34,7 @@ import parsing.BaseGrammarParser.TypedparamsContext;
 import parsing.Type.Pointer;
 import parsing.Type.Array;
 import parsing.BaseGrammarParser.*;
+import translation.Operator;
 import translation.Spril;
 
 /**
@@ -402,8 +403,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		ExprContext snd = ctx.expr(1);
 		visit(fst);
 		visit(snd);
-		checkType(ctx, Primitive.INT, fst);
-		checkType(ctx, Primitive.INT, snd);
+		Operator comp = Operator.comparator(ctx.comp().getText());
+		if (!(comp == Operator.EQ || comp == Operator.NEQ)) {
+			checkType(ctx, Primitive.INT, fst);
+			checkType(ctx, Primitive.INT, snd);
+		}
 		types.put(ctx, Primitive.BOOL);
 		return null;
 	}
@@ -706,7 +710,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		types.put(ctx, Primitive.INT);
 		return null;
 	}
-	
+
 	public Void visitTopLevelBlock(TopLevelBlockContext ctx) {
 		scope.openScope();
 		visit(params.get(currentFunc));
@@ -898,6 +902,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			res += node.getSymbol().getLine() + ":"
 					+ node.getSymbol().getCharPositionInLine();
 		}
+		res += "(" + tree.getClass().getSimpleName() + ")";
 		res += " - " + String.format(format, args);
 		errors.add(res);
 		result.getErrors().add(res);

@@ -11,7 +11,7 @@ def int[] intToStr(int i) {
 	int r = 0;
 	int pos = 9;
 	bool first = true;
-	while (first OR i != 0) {
+	while (first OR (i != 0)) {
 		first = false;
 		q = i / 10;
 		r = i - (q * 10);
@@ -54,7 +54,7 @@ def void printInt(int i) {
 	int r = 0;
 	int pos = 9;
 	bool first = true;
-	while (first OR i != 0) {
+	while (first OR (i != 0)) {
 		first = false;
 		q = i / 10;
 		r = i - (q * 10);

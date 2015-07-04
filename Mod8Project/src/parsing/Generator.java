@@ -152,7 +152,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 			});
 		});
 
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 50; i++)
 			instrs.add(new Spril(OpCode.NOP));
 
 		instrs.add(new Spril(OpCode.END_PROG));
@@ -210,13 +210,12 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 	public List<Spril> visitExprArrayExpr(ExprArrayExprContext ctx) {
 		List<Spril> result = new ArrayList<>();
 		int baseOffset = cres.getOffsets().get(ctx);
-		result.add(new Spril(OpCode.CONST, new Int(baseOffset), Register.E));
-
+		
 		if (cres.getShared().get(ctx)) {
-			result.add(new Spril(OpCode.READ, MemAddr.deref(Register.E)));
+			result.add(new Spril(OpCode.READ, MemAddr.direct(baseOffset)));
 			result.add(new Spril(OpCode.RECEIVE, Register.E));
 		} else {
-			result.add(new Spril(OpCode.LOAD, MemAddr.deref(Register.E),
+			result.add(new Spril(OpCode.LOAD, MemAddr.direct(baseOffset),
 					Register.E));
 		}
 

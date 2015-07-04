@@ -25,16 +25,29 @@ import org.junit.Test;
 
 public class TestRunner {
 
+	private boolean failed = false;
+	
 	@Test
-	public void runTests() {
-		File testDir = new File("tests");
+	public void runGoodTests() {
+		File testDir = new File("tests/good");
 		for (File f : testDir.listFiles())
-			test(f);
+			test(f, true);
+		assertFalse(failed);
 	}
 
-	private void test(File file) {
+	@Test
+	public void runBadTests() {
+		File testDir = new File("tests/bad");
+		for (File f : testDir.listFiles())
+			test(f, false);
+		assertFalse(failed);
+	}
+
+	
+	private void test(File file, boolean shouldSucceed) {
 		ProgramContext ctx;
 		try {
+			System.out.println("Parsing " + file.getName());
 			BufferedReader reader = new BufferedReader(new FileReader(file));
 			String base = reader.lines().collect(Collectors.joining("\n"));
 			BufferedReader stdreader = new BufferedReader(new FileReader(
@@ -52,7 +65,32 @@ public class TestRunner {
 			return;
 		}
 		CheckResult cres = new Checker().check(ctx);
-		Program prog = new Generator().compile(ctx, cres);
-		assertTrue(ProgramRunner.runTest(prog));
+		if (!cres.getErrors().isEmpty()) {
+			System.out.flush();
+			System.err.println("Checker has reported errors:");
+			for (String error : cres.getErrors())
+				System.err.println(error);
+			System.err.flush();
+			if (shouldSucceed)
+				failed = true;
+		} else {
+			Program prog = new Generator().compile(ctx, cres);
+			try {
+				if (ProgramRunner.runTest(prog)) {
+					System.out.println("Testing of " + file.getName()
+							+ " successful.");
+					if (!shouldSucceed) {
+						failed = true;
+					}
+				} else {
+					System.out.println("Invalid response code, test failed.");
+					if (shouldSucceed)
+						failed = true;
+				}
+			} catch (Exception e) {
+				System.out.println("Error occurred while compiling or running: " + e);
+			}
+		}
+		System.out.println();
 	}
 }
