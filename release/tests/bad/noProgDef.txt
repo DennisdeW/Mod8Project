@@ -1,0 +1,4 @@
+def int main() {
+	bool b = True;
+	return boolToInt(b XOR b);
+}

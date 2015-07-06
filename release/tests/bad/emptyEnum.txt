@@ -1,0 +1,7 @@
+program emptyEnum;
+
+enum Empty:;
+
+def int main() {
+	return 0;
+}

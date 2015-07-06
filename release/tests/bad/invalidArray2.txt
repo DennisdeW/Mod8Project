@@ -1,0 +1,6 @@
+program invalidArray2;
+
+def int main() {
+	int[] negativeSizeArray = int[-3];
+	return 0;
+}

@@ -1,0 +1,12 @@
+program undeclaredVar2;
+
+def int main() {
+	int i = 5;
+	doOp();
+	return i;
+}
+
+def void doOp() {
+	i = i + 1;
+	return;
+}

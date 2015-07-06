@@ -1,0 +1,10 @@
+program typeMismatch4;
+
+def int main() {
+	int eq = equals(5, 4);
+	return eq;
+}
+
+def bool equals(int x, int y) {
+	return x == y;
+}

@@ -1,0 +1,8 @@
+program undeclaredEnumConst;
+
+enum TestResult: SUCCESS, FAILURE;
+
+def int main() {
+	TestResult res = TestResult.ERROR;
+	return 0;
+}

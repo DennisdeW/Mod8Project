@@ -1,0 +1,9 @@
+program invalidLoop1;
+
+def int main() {
+	int i = 3;
+	while (i) {
+		out(i);
+	}
+	return 0;
+}

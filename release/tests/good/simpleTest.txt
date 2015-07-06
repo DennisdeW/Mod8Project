@@ -1,0 +1,25 @@
+program simpleTest;
+
+def int main() {
+	int result = 0;
+	if (!testAddition()) {
+		result = 1;
+	}
+	if (!testMultiply()) {
+		result = 2;
+	}
+	out(result);
+	return result;
+}
+
+def bool testAddition() {
+	int x = 4;
+	int y = 5;
+	return (x + y) == 9;
+}
+
+def bool testMultiply() {
+	int x = 3;
+	int y = 3;
+	return (x * y)  == 9;
+}

@@ -1,0 +1,29 @@
+program bankV2(10);
+
+shared int[] accounts =      [1000,2000,3000,4000,5000,6000,7000,8000,9000,10000];
+shared int doneCount = 0;
+
+def int main() {
+	for (int i = 0; i < 10; i = i + 1) {
+		if ($SPID != i) {
+			lock(acc_lock) {
+				accounts[$SPID] = accounts[$SPID] - 20;
+				accounts[i] = accounts[i] + 20;
+			}
+		}
+	}
+	lock(done_lock) {
+		doneCount = doneCount + 1;
+	}
+	if ($SPID == 0) {
+		while (doneCount < 10) {}
+		bool success = true;
+		for (int i = 0; i < 10; i = i + 1) {
+			if (((i+1) * 1000) != accounts[i]) {
+				success = false;
+			}
+		}
+		out(!success);
+	}
+	return 0;
+}

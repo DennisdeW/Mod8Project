@@ -1,0 +1,5 @@
+program undeclaredVar1;
+
+def int main() {
+	return i;
+}

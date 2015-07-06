@@ -1,0 +1,5 @@
+program undeclaredFunc;
+
+def int main() {
+	return func();
+}

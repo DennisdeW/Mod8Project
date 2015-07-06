@@ -1,0 +1,6 @@
+program invalidArray3;
+
+def int main() {
+	bool[] arr = [true, true, false];
+	return arr[1];
+}

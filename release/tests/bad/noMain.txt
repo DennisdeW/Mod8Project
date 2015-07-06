@@ -1,0 +1,5 @@
+program noMain;
+
+def void doSomething() {
+	return;
+}

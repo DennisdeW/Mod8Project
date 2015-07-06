@@ -1,0 +1,80 @@
+program stdLibTest;
+
+def int main() {
+	int result = 0;
+	if (!testArraysEqual()) {
+		result = 1;
+	}
+	if (!testIntToStr()) {
+		result = 2;
+	}
+	out(result);
+	return 0;
+}
+
+def bool testArraysEqual() {
+	int[] a = [1,2,3];
+	int[] b = [1,2,3];
+	int[] c = [0,0];
+	int[] d = int[2];
+	if (!arraysEqual(a, a, 3)) {
+		return false;
+	}if (!arraysEqual(a, b, 3)) {
+		return false;
+	}
+	if (!arraysEqual(b, a, 3)) {
+		return false;
+	}
+	if (arraysEqual(a, c, 2)) {
+		return false;
+	}
+	if (!arraysEqual(c, d, 2)) {
+		return false;
+	}
+	return true;
+}
+
+def bool testIntToStr() {
+	int i1 = 1234;
+	int[] arr1 = [1,2,3,4];
+	if (!arraysEqual(arr1, intToStr(i1), 4)) {
+		return false;
+	}
+	
+	int i2 = 0;
+	int[] arr2 = [0];
+	if (!arraysEqual(arr2, intToStr(i2), 1)) {
+		return false;
+	}
+	
+	int i3 = 9876;
+	int[] arr3 = [9,8,7,6];
+	if (!arraysEqual(arr3, intToStr(i3), 4)) {
+		return false;
+	}
+	
+	int i4 = -10;
+	int[] arr4 = [-3, 1, 0];
+	if (!arraysEqual(arr4, intToStr(i4), 3)) {
+		return false;
+	}
+	
+	return true;
+}
+
+def bool testMirrorArray() {
+	int[] x = [4,3,2,1];
+	int[] y = [1,2,3,4];
+	bool[] a = [true, false, true];
+	bool[] b = [true, false, true];
+	flipArray(x, 4);
+	flipArray(a, 3);
+	if (!arraysEqual(x, y, 4)) {
+		return false;
+	}
+
+	if (!arraysEqual(a, b, 3)) {
+		return false;
+	}
+	return true;
+}
