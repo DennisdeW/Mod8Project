@@ -1,8 +1,10 @@
 package tests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
+
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.stream.Collectors;
@@ -12,6 +14,7 @@ import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.junit.Test;
 
 import parsing.BaseGrammarLexer;
 import parsing.BaseGrammarParser;
@@ -21,14 +24,20 @@ import parsing.Checker.CheckResult;
 import parsing.Generator;
 import translation.Program;
 import write.ProgramRunner;
-import static org.junit.Assert.*;
 
-import org.junit.Test;
-
+/**
+ * Runs all the test inside the test package.
+ * 
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
+ */
 public class TestRunner {
 
+	// Instance variables
 	private boolean failed = false;
-	
+
+	/**
+	 * Runs all the tests in package good.
+	 */
 	@Test
 	public void runGoodTests() {
 		File testDir = new File("tests/good");
@@ -37,6 +46,9 @@ public class TestRunner {
 		assertFalse(failed);
 	}
 
+	/**
+	 * Runs all the tests in package bad.
+	 */
 	@Test
 	public void runBadTests() {
 		File testDir = new File("tests/bad");
@@ -45,20 +57,25 @@ public class TestRunner {
 		assertFalse(failed);
 	}
 
-	
+	/**
+	 * Auxiliary method to test a program.
+	 * 
+	 * @param file
+	 *            The file.
+	 * @param shouldSucceed
+	 *            Whether the test should succeed or not.
+	 */
 	private void test(File file, boolean shouldSucceed) {
 		ProgramContext ctx;
 		try {
 			System.out.println("Parsing " + file.getName());
 			BufferedReader reader = new BufferedReader(new FileReader(file));
 			String base = reader.lines().collect(Collectors.joining("\n"));
-			BufferedReader stdreader = new BufferedReader(new FileReader(
-					new File("stdlib.txt")));
+			BufferedReader stdreader = new BufferedReader(new FileReader(new File("stdlib.txt")));
 			String std = stdreader.lines().collect(Collectors.joining("\n"));
 
-			BaseGrammarParser parser = new BaseGrammarParser(new CommonTokenStream(
-					new BaseGrammarLexer(new ANTLRInputStream(base + "\n\n\n"
-							+ std))));
+			BaseGrammarParser parser = new BaseGrammarParser(
+					new CommonTokenStream(new BaseGrammarLexer(new ANTLRInputStream(base + "\n\n\n" + std))));
 			parser.setErrorHandler(new BailErrorStrategy());
 			ctx = parser.program();
 			reader.close();
@@ -88,8 +105,7 @@ public class TestRunner {
 			Program prog = new Generator().compile(ctx, cres);
 			try {
 				if (ProgramRunner.runTest(prog)) {
-					System.out.println("Testing of " + file.getName()
-							+ " successful.");
+					System.out.println("Testing of " + file.getName() + " successful.");
 					if (!shouldSucceed) {
 						failed = true;
 					}

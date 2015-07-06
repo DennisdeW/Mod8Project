@@ -79,7 +79,8 @@ import translation.Operator;
 public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorListener {
 
 	/**
-	 * Inner class Check Result ?
+	 * Inner class CheckResult saves information of the Checker so that
+	 * Generator can use it.
 	 *
 	 * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
 	 */
@@ -258,8 +259,10 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		}
 
 		/**
+		 * buildLocks adds locks to the list with all the locks.
 		 * 
 		 * @param locks
+		 *            The locks that need to be added to the list with locks.
 		 */
 		void buildLocks(Set<String> locks) {
 			int addr = sharedStaticMemSize() + 1;
@@ -269,13 +272,23 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		}
 
 		/**
+		 * Counts the amount of functions.
 		 * 
-		 * @return
+		 * @return The amount of functions.
 		 */
 		int funcCount() {
 			return this.functions.size();
 		}
 
+		/**
+		 * Returns the function definition of a certain name and arguments.
+		 * 
+		 * @param name
+		 *            The name of the function that needs to be found.
+		 * @param types
+		 *            The arguments of the function.
+		 * @return The function definition.
+		 */
 		FuncContext getMatchingFunc(String name, List<Type> types) {
 			return this.functions.stream()
 					.filter(func -> func.typedparams().type().stream().map(t -> typeForName(func, t.getText()))
@@ -283,10 +296,22 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 					.findAny().orElse(null);
 		}
 
+		/**
+		 * Returns the size of the local memory.
+		 * 
+		 * @return The size of the local memory.
+		 */
 		int localStaticMemSize() {
 			return maxOffset(false) + funcCount();
 		}
 
+		/**
+		 * Returns the highest address which is in use.
+		 * 
+		 * @param shared
+		 *            Whether a boolean is shared or not.
+		 * @return The maximum offset.
+		 */
 		int maxOffset(boolean shared) {
 			return this.offsets.entrySet().stream()
 					.filter(e -> !(this.shared == null && shared)
@@ -294,6 +319,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 					.mapToInt(i -> i.getValue()).max().orElse(0);
 		}
 
+		/**
+		 * Returns the static memory size.
+		 * 
+		 * @return The size of the static memory.
+		 */
 		int sharedStaticMemSize() {
 			return maxOffset(true) + locks.size();
 		}
@@ -319,7 +349,6 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 	}
 
 	// Instance variables
-
 	private static final List<String> INVALID_NAMES = Arrays.asList("int", "bool", "void", "if", "else", "while", "for",
 			"return", "and", "or", "xor", "true", "false", "def", "break", "not", "string");
 	private Scope scope;
@@ -432,6 +461,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		dirty = true;
 	}
 
+	/**
+	 * Handles an array value.
+	 */
 	public Void visitArrayVal(ArrayValContext ctx) {
 		String arrId = ctx.ID().getText();
 		Type arrType = getType(ctx, arrId);
@@ -450,6 +482,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles an assign statement.
+	 */
 	public Void visitAssign(AssignContext ctx) {
 		if (ctx.derefID() != null) {
 			String target = ctx.derefID().getText();
@@ -492,6 +527,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles a block in a program.
+	 */
 	public Void visitBlock(BlockContext ctx) {
 		scope.openScope();
 		ctx.stat().forEach(s -> visit(s));
@@ -499,6 +537,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles a boolean operator expression.
+	 */
 	public Void visitBoolOpExpr(BoolOpExprContext ctx) {
 		ExprContext fst = ctx.expr(0);
 		ExprContext snd = ctx.expr(1);
@@ -510,17 +551,26 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles a call expression.
+	 */
 	public Void visitCallExpr(CallExprContext ctx) {
 		Func function = call(ctx.call(), null);
 		types.put(ctx, function != null ? function.getReturnType() : Primitive.ERR_TYPE);
 		return null;
 	}
 
+	/**
+	 * Handles a call statement.
+	 */
 	public Void visitCallStat(CallStatContext ctx) {
 		call(ctx.call(), null);
 		return null;
 	}
 
+	/**
+	 * Handles a compare expression.
+	 */
 	public Void visitCompExpr(CompExprContext ctx) {
 		ExprContext fst = ctx.expr(0);
 		ExprContext snd = ctx.expr(1);
@@ -535,6 +585,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles an array expression with a constant value as index.
+	 */
 	public Void visitConstArrayExpr(ConstArrayExprContext ctx) {
 		visit(ctx.ID());
 		types.put(ctx, getType(ctx, ctx.ID().getText()));
@@ -543,6 +596,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles a declaration.
+	 */
 	public Void visitDecl(DeclContext ctx) {
 		String varId = ctx.ID().getText().replaceAll("[\\[\\]\\*]", "");
 		if (!checkName(ctx, varId))
@@ -579,11 +635,24 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles a array literal expression.
+	 */
 	public Void visitArrayLiteralExpr(ArrayLiteralExprContext ctx) {
 		makeArray(ctx, "<arr_" + ctx.hashCode() + ">", false);
 		return null;
 	}
 
+	/**
+	 * Creates an array.
+	 * 
+	 * @param ctx
+	 *            ArrayLiteralExprContext.
+	 * @param id
+	 *            The identifier (name) of the array.
+	 * @param shared
+	 *            Whether the array is shared or not.
+	 */
 	private void makeArray(ArrayLiteralExprContext ctx, String id, boolean shared) {
 		ctx.expr().forEach(e -> visit(e));
 		Type type = getType(ctx.expr(0));
@@ -599,6 +668,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		result.getOffsets().put(ctx, scope.getOffset(id));
 	}
 
+	/**
+	 * Handles a dereference expression.
+	 */
 	public Void visitDerefExpr(DerefExprContext ctx) {
 		visit(ctx.expr());
 		Type ptr = types.get(ctx.expr());
@@ -611,11 +683,17 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles a division expression.
+	 */
 	public Void visitDivExpr(DivExprContext ctx) {
 		arithmeticExpr(ctx, ctx.expr(0), ctx.expr(1));
 		return null;
 	}
 
+	/**
+	 * Handles an enum declaration.
+	 */
 	public Void visitEnumDecl(EnumDeclContext ctx) {
 		List<String> values = new ArrayList<>();
 		for (int i = 1; i < ctx.TYPE().size(); i++)
@@ -631,6 +709,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles an enum expression.
+	 */
 	public Void visitEnumExpr(EnumExprContext ctx) {
 		String name = ctx.TYPE(0).getText();
 		Enum type = result.getEnums().stream().filter(e -> e.getName().equalsIgnoreCase(name)).findAny()
@@ -648,6 +729,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles an  array expression with the value of an expression.
+	 */
 	public Void visitExprArrayExpr(ExprArrayExprContext ctx) {
 		visit(ctx.arrayVal());
 		types.put(ctx, getType(ctx.arrayVal()));
@@ -656,11 +740,17 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles a false expression.
+	 */
 	public Void visitFalseExpr(FalseExprContext ctx) {
 		types.put(ctx, Primitive.BOOL);
 		return null;
 	}
 
+	/**
+	 * Handles a for statement.
+	 */
 	public Void visitForStat(ForStatContext ctx) {
 		if (!checkType(ctx, Primitive.INT, typeForName(ctx, ctx.decl().type(0).getText()))) {
 			return null;
@@ -675,6 +765,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles a function.
+	 */
 	public Void visitFunc(FuncContext ctx) {
 		Type retType = Type.forName(ctx.type().getText());
 		types.put(ctx, retType);
@@ -699,6 +792,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles an id expression.
+	 */
 	public Void visitIdExpr(IdExprContext ctx) {
 		if (!scope.isDeclared(ctx.ID().getText())) {
 			error(ctx, "Variable %s was not declared in this scope.", ctx.ID().getText());
@@ -710,6 +806,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles an if statement.
+	 */
 	public Void visitIfStat(IfStatContext ctx) {
 		for (int i = 0; i < ctx.expr().size(); i++) {
 			visit(ctx.expr(i));
@@ -719,11 +818,17 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles an in statement.
+	 */
 	public Void visitInStat(InStatContext ctx) {
 		visit(ctx.ID());
 		return null;
 	}
 
+	/**
+	 * Handles a lock statement.
+	 */
 	public Void visitLockStat(LockStatContext ctx) {
 		locks.add(ctx.ID().getText());
 		if (ctx.block().toString().matches("\\breturn\\b")) {
@@ -734,21 +839,33 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles a subtraction expression.
+	 */
 	public Void visitMinExpr(MinExprContext ctx) {
 		arithmeticExpr(ctx, ctx.expr(0), ctx.expr(1));
 		return null;
 	}
 
+	/**
+	 * Handles a modulo expression.
+	 */
 	public Void visitModExpr(ModExprContext ctx) {
 		arithmeticExpr(ctx, ctx.expr(0), ctx.expr(1));
 		return null;
 	}
 
+	/**
+	 * Handles an multiplication expression.
+	 */
 	public Void visitMultExpr(MultExprContext ctx) {
 		arithmeticExpr(ctx, ctx.expr(0), ctx.expr(1));
 		return null;
 	}
 
+	/**
+	 * Handels the negation of a boolean.
+	 */
 	public Void visitNegBoolExpr(NegBoolExprContext ctx) {
 		visit(ctx.expr());
 		if (checkType(ctx, Primitive.BOOL, ctx.expr()))
@@ -758,6 +875,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles the negation of a number.
+	 */
 	public Void visitNegNumExpr(NegNumExprContext ctx) {
 		visit(ctx.expr());
 		if (checkType(ctx, Primitive.INT, ctx.expr()))
@@ -767,27 +887,42 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles numbers.
+	 */
 	public Void visitNumExpr(NumExprContext ctx) {
 		types.put(ctx, Primitive.INT);
 		return null;
 	}
 
+	/**
+	 * Handles an out statement.
+	 */
 	public Void visitOutStat(OutStatContext ctx) {
 		visit(ctx.expr());
 		return null;
 	}
 
+	/**
+	 * Handels a par expression (with brackets).
+	 */
 	public Void visitParExpr(ParExprContext ctx) {
 		visit(ctx.expr());
 		types.put(ctx, getType(ctx.expr()));
 		return null;
 	}
 
+	/**
+	 * Handles a addition expression.
+	 */
 	public Void visitPlusExpr(PlusExprContext ctx) {
 		arithmeticExpr(ctx, ctx.expr(0), ctx.expr(1));
 		return null;
 	}
 
+	/**
+	 * Handels a program.
+	 */
 	public Void visitProgram(ProgramContext ctx) {
 
 		TerminalNode sprockellCount = ctx.progdef().NUMBER();
@@ -818,12 +953,18 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles a reference expression.
+	 */
 	public Void visitRefExpr(RefExprContext ctx) {
 		visit(ctx.expr());
 		types.put(ctx, new Type.Pointer(types.get(ctx.expr())));
 		return null;
 	}
 
+	/**
+	 * Handles a return statement.
+	 */
 	public Void visitReturnStat(ReturnStatContext ctx) {
 		Type expected = currentFunc.getReturnType();
 		if (ctx.expr() != null) {
@@ -845,11 +986,17 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles a Sprockell ID expression.
+	 */
 	public Void visitSpidExpr(SpidExprContext ctx) {
 		types.put(ctx, Primitive.INT);
 		return null;
 	}
 
+	/**
+	 * Handles a top level block.
+	 */
 	public Void visitTopLevelBlock(TopLevelBlockContext ctx) {
 		scope.openScope();
 		visit(params.get(currentFunc));
@@ -858,11 +1005,17 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles a true expression.
+	 */
 	public Void visitTrueExpr(TrueExprContext ctx) {
 		types.put(ctx, Primitive.BOOL);
 		return null;
 	}
 
+	/**
+	 * Handles typed parameters.
+	 */
 	public Void visitTypedparams(TypedparamsContext ctx) {
 		for (int i = 0; i < ctx.type().size(); i++) {
 			String name = ctx.ID(i).getText();
@@ -877,6 +1030,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles a while statement.
+	 */
 	public Void visitWhileStat(WhileStatContext ctx) {
 		visit(ctx.expr());
 		checkType(ctx, Primitive.BOOL, getType(ctx.expr()));
@@ -884,6 +1040,16 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return null;
 	}
 
+	/**
+	 * Handles a arithmetic expression.
+	 * 
+	 * @param ctx
+	 *            The operator.
+	 * @param fst
+	 *            The left hand side of an arithmetic expression.
+	 * @param snd
+	 *            The right hand side of an arithmetic expression.
+	 */
 	private void arithmeticExpr(ExprContext ctx, ExprContext fst, ExprContext snd) {
 		visit(fst);
 		visit(snd);
@@ -892,6 +1058,15 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		types.put(ctx, Primitive.INT);
 	}
 
+	/**
+	 * Handles the call of a function.
+	 * 
+	 * @param ctx
+	 *            The content of the call.
+	 * @param expectedReturn
+	 *            The Type of the expected return.
+	 * @return The function.
+	 */
 	private Func call(CallContext ctx, Type expectedReturn) {
 		List<Type> args = new ArrayList<>();
 		ctx.params().expr().stream().forEachOrdered(val -> {
@@ -950,6 +1125,15 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		}
 	}
 
+	/**
+	 * Checks whether a name is a reserved keyword or not.
+	 * 
+	 * @param tree
+	 *            The ParseTree on which this method is run.
+	 * @param name
+	 *            The word that needs to be checked.
+	 * @return Whether a name is reserverd or not.
+	 */
 	private boolean checkName(ParseTree tree, String name) {
 		if (INVALID_NAMES.stream().anyMatch(inv -> name.equalsIgnoreCase(inv))) {
 			error(tree, "Invalid name: '%s' is a reserved word.", name);
@@ -958,10 +1142,32 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return true;
 	}
 
+	/**
+	 * Check the type of rule.
+	 * 
+	 * @param tree
+	 *            The parse tree on which this function is run.
+	 * @param expected
+	 *            The expected type.
+	 * @param ctx
+	 *            The context.
+	 * @return Whether the type is correct or not.
+	 */
 	private boolean checkType(ParseTree tree, Type expected, ParserRuleContext ctx) {
 		return checkType(tree, expected, getType(ctx));
 	}
 
+	/**
+	 * Check whether two types are the same.
+	 * 
+	 * @param tree
+	 *            The parse tree on which this function is run.
+	 * @param expected
+	 *            The expected type.
+	 * @param actual
+	 *            The actual type.
+	 * @return Whether the expected and actual type are the same.
+	 */
 	private boolean checkType(ParseTree tree, Type expected, Type actual) {
 		if (!expected.equals(actual)) {
 			if (actual == Primitive.ERR_TYPE)
@@ -973,6 +1179,16 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return true;
 	}
 
+	/**
+	 * Saves errors
+	 * 
+	 * @param tree
+	 *            The parse tree on which this function is run.
+	 * @param format
+	 *            Contains variables.
+	 * @param args
+	 *            Contains values.
+	 */
 	private void error(ParseTree tree, String format, Object... args) {
 		String res = "Parse Error ";
 		if (tree instanceof ParserRuleContext) {
@@ -988,6 +1204,13 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		result.getErrors().add(res);
 	}
 
+	/**
+	 * Returns a TerminalNode.
+	 * 
+	 * @param ctx
+	 *            The dereference id context.
+	 * @return A TerminalNode.
+	 */
 	private TerminalNode getID(DerefIDContext ctx) {
 		if (ctx.ID() != null)
 			return ctx.ID();
@@ -995,6 +1218,13 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 			return getID(ctx.derefID());
 	}
 
+	/**
+	 * The type of a ParserRuleContext.
+	 * 
+	 * @param ctx
+	 *            The ParserRuleContext.
+	 * @return The type of a ParserRuleContext.
+	 */
 	private Type getType(ParserRuleContext ctx) {
 		if (ctx instanceof NumExprContext)
 			return Primitive.INT;
@@ -1006,6 +1236,15 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return type;
 	}
 
+	/**
+	 * Returns the type of a variable in a ParseTree.
+	 * 
+	 * @param tree
+	 *            The ParseTree.
+	 * @param varId
+	 *            The name of the variable.
+	 * @return The type of a variable.
+	 */
 	private Type getType(ParseTree tree, String varId) {
 		if (varId.equalsIgnoreCase("true") || varId.equalsIgnoreCase("false"))
 			return Primitive.BOOL;
@@ -1017,6 +1256,14 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		return Primitive.ERR_TYPE;
 	}
 
+	/**
+	 * Handles a function
+	 * 
+	 * @param ctx
+	 *            The content of the function
+	 * @param func
+	 *            The function.
+	 */
 	private void processFunction(FuncContext ctx, Func func) {
 		currentFunc = func;
 		visit(ctx.topLevelBlock());
@@ -1027,6 +1274,15 @@ public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorLi
 		currentFunc = null;
 	}
 
+	/**
+	 * Returns the type of a variable with a certain name.
+	 * 
+	 * @param tree
+	 *            The ParseTree on which this function is run.
+	 * @param typeName
+	 *            The name of the variable.
+	 * @return The type of the variable.
+	 */
 	private Type typeForName(ParseTree tree, String typeName) {
 		try {
 			Type t = Type.forName(typeName);
