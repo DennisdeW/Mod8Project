@@ -22,6 +22,12 @@ import translation.Program;
 import write.Output;
 import write.OutputDebug;
 
+/**
+ * FrontEnd makes it possible to run the program on the command line. Compiles a
+ * program and runs it.
+ * 
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
+ */
 public class FrontEnd {
 
 	public static final String	USAGE	= "Usage: java -jar g1c.jar <source-file> [-debug] [-stdlib <std-lib-path>]\n"
@@ -31,9 +37,19 @@ public class FrontEnd {
 												+ " looks for stdlib.txt in the current working directory.";
 	public static final File	STDLIB	= new File("./stdlib.txt");
 
+	/**
+	 * Empty private Constructor.
+	 */
 	private FrontEnd() {
 	}
 
+	/**
+	 * Main method is the main method of the program. It takes a source file as
+	 * input containing a program in our programming language.
+	 * 
+	 * @param args
+	 *            The arguments of the main method.
+	 */
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(USAGE);
@@ -111,6 +127,15 @@ public class FrontEnd {
 		}
 	}
 
+	/**
+	 * Merge merges the given program with the standard library.
+	 * 
+	 * @param source
+	 *            The given program.
+	 * @param stdlib
+	 *            The standard library.
+	 * @return The ANTLRInputStream.
+	 */
 	private static ANTLRInputStream merge(File source, File stdlib) {
 		if (!stdlib.canRead()) {
 			System.err

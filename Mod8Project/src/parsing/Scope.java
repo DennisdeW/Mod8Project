@@ -8,9 +8,10 @@ import java.util.Set;
 /**
  * Stores declarations of variables and functions.
  * 
- * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
  */
 public class Scope {
+
 	// Instance variables
 	private Set<Func> functions;
 	private Level current;
@@ -222,8 +223,7 @@ public class Scope {
 			this.sharedOffsets = new HashMap<>();
 			this.enclosing = enclosing;
 			this.baseOffset = enclosing == null ? 0 : enclosing.getOffset();
-			this.sharedOffset = enclosing == null ? 0 : enclosing
-					.getSharedOffset();
+			this.sharedOffset = enclosing == null ? 0 : enclosing.getSharedOffset();
 			this.nextOffset = this.baseOffset;
 			this.nextShared = this.sharedOffset;
 		}
@@ -346,8 +346,7 @@ public class Scope {
 		 * @return Whether a variable was declared already or not.
 		 */
 		boolean isDeclared(String id) {
-			return vars.containsKey(id)
-					|| (!isGlobal() && enclosing.isDeclared(id));
+			return vars.containsKey(id) || (!isGlobal() && enclosing.isDeclared(id));
 		}
 
 		/**
@@ -385,8 +384,7 @@ public class Scope {
 		 */
 		boolean isShared(String id) {
 			if (!isDeclared(id)) {
-				throw new IllegalArgumentException("Var '" + id
-						+ "' was not declared.");
+				throw new IllegalArgumentException("Var '" + id + "' was not declared.");
 			}
 			if (isDeclaredLocally(id))
 				return shared.get(id);
@@ -407,8 +405,7 @@ public class Scope {
 			else if (!isGlobal())
 				return enclosing.getType(id);
 			else
-				throw new IllegalArgumentException("Var '" + id
-						+ "' was not declared.");
+				throw new IllegalArgumentException("Var '" + id + "' was not declared.");
 		}
 
 		/**
@@ -424,8 +421,7 @@ public class Scope {
 			else if (!isGlobal())
 				return enclosing.getOffset(id);
 			else
-				throw new IllegalArgumentException("Var '" + id
-						+ "' was not declared.");
+				throw new IllegalArgumentException("Var '" + id + "' was not declared.");
 		}
 
 		/**

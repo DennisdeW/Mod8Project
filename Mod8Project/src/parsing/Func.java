@@ -7,8 +7,7 @@ import java.util.List;
 /**
  * The definition of a function.
  * 
- * @author Dennis
- *
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
  */
 public class Func {
 	private final String name;
@@ -33,24 +32,21 @@ public class Func {
 	 * @param name
 	 *            The function's name.
 	 * @param types
-	 *            The first <code>Type</code> is the return type, any
-	 *            further ones are argument types.
+	 *            The first <code>Type</code> is the return type, any further
+	 *            ones are argument types.
 	 * @throws IllegalArgumentException
 	 *             If no return type is supplied. (<code>types.length</code>
 	 *             must be greater than 0)
 	 */
 	public Func(String name, Type... types) {
 		if (types.length == 0)
-			throw new IllegalArgumentException(
-					"Varargs parameters to Type.Func#<init> may not be empty.");
+			throw new IllegalArgumentException("Varargs parameters to Type.Func#<init> may not be empty.");
 		this.name = name;
 		this.ret = types[0];
 		Primitive[] args = new Primitive[types.length - 1];
 		System.arraycopy(types, 1, args, 0, types.length - 1);
 		this.args = Arrays.asList(args);
 	}
-
-	
 
 	@Override
 	public int hashCode() {
@@ -88,8 +84,7 @@ public class Func {
 
 	@Override
 	public String toString() {
-		return "Func [name=" + name + ", args=" + args + ", ret=" + ret
-				+ "]";
+		return "Func [name=" + name + ", args=" + args + ", ret=" + ret + "]";
 	}
 
 	/**
@@ -109,11 +104,21 @@ public class Func {
 	public Type getReturnType() {
 		return ret;
 	}
-	
+
+	/**
+	 * Returns the name, arguments and type of the program.
+	 * 
+	 * @return The name, arguments and type of the program.
+	 */
 	public String getReturnName() {
 		return String.format("<<retval_%s(%s):%s>>", name, args, ret);
 	}
-			
+
+	/**
+	 * Getter for the name of the program.
+	 * 
+	 * @return The value of name.
+	 */
 	public String getName() {
 		return name;
 	}

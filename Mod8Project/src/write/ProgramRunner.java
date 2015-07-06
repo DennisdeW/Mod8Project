@@ -23,7 +23,7 @@ import translation.Program;
 public final class ProgramRunner {
 
 	// Instance variables
-	private static final String	BASE_PATH	= new File("").getAbsolutePath();
+	private static final String BASE_PATH = new File("").getAbsolutePath();
 
 	/**
 	 * Empty Constructor.
@@ -47,9 +47,8 @@ public final class ProgramRunner {
 		OutputDebug.write(name + ".hs", prog.getCoreCount(), prog.print());
 		File tmpdir = new File("./tmp");
 		tmpdir.mkdir();
-		ProcessBuilder compileBuilder = new ProcessBuilder("ghc", "-i"
-				+ BASE_PATH + "\\sprockell\\Sprockell", "-outputdir ./tmp",
-				name + ".hs");
+		ProcessBuilder compileBuilder = new ProcessBuilder("ghc", "-i" + BASE_PATH + "\\sprockell\\Sprockell",
+				"-outputdir ./tmp", name + ".hs");
 		compileBuilder.inheritIO();
 		Process compile = null;
 		try {
@@ -99,6 +98,14 @@ public final class ProgramRunner {
 		run(prog, true);
 	}
 
+	/**
+	 * Creates a haskell file, compiles it to an .exe file. This file is
+	 * executed. The test returns true if the result is 0.
+	 * 
+	 * @param prog
+	 *            The program which needs to be run.
+	 * @return Whether the result of the test is 0 or not.
+	 */
 	public static boolean runTest(Program prog) {
 		String name = prog.getName();
 		if (name == null)
@@ -106,9 +113,8 @@ public final class ProgramRunner {
 		Output.write(name + ".hs", prog.getCoreCount(), prog.print());
 		File tmpdir = new File("./tmp");
 		tmpdir.mkdir();
-		ProcessBuilder compileBuilder = new ProcessBuilder("ghc", "-i"
-				+ BASE_PATH + "\\sprockell\\Sprockell", "-outputdir ./tmp",
-				name + ".hs");
+		ProcessBuilder compileBuilder = new ProcessBuilder("ghc", "-i" + BASE_PATH + "\\sprockell\\Sprockell",
+				"-outputdir ./tmp", name + ".hs");
 		Process compile = null;
 		try {
 			System.out.printf("Compiling %s...", name);
@@ -126,8 +132,7 @@ public final class ProgramRunner {
 			System.out.printf("Running %s...", name);
 			Process run = runBuilder.start();
 			new Thread(() -> {
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(run.getInputStream()));
+				BufferedReader reader = new BufferedReader(new InputStreamReader(run.getInputStream()));
 				try {
 					String line;
 					while ((line = reader.readLine()) != null)
@@ -137,11 +142,11 @@ public final class ProgramRunner {
 				}
 			}).start();
 			new Thread(() -> {
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(run.getErrorStream()));
+				BufferedReader reader = new BufferedReader(new InputStreamReader(run.getErrorStream()));
 				try {
 					String line;
-					while ((line = reader.readLine()) != null);
+					while ((line = reader.readLine()) != null)
+						;
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
