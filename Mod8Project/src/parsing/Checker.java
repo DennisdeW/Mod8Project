@@ -1,6 +1,5 @@
 package parsing;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -8,9 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ANTLRErrorListener;
@@ -27,34 +24,79 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import parsing.BaseGrammarParser.ArrayLiteralExprContext;
+import parsing.BaseGrammarParser.ArrayValContext;
+import parsing.BaseGrammarParser.AssignContext;
+import parsing.BaseGrammarParser.BlockContext;
+import parsing.BaseGrammarParser.BoolOpExprContext;
+import parsing.BaseGrammarParser.CallContext;
+import parsing.BaseGrammarParser.CallExprContext;
+import parsing.BaseGrammarParser.CallStatContext;
+import parsing.BaseGrammarParser.CompExprContext;
+import parsing.BaseGrammarParser.ConstArrayExprContext;
+import parsing.BaseGrammarParser.DeclContext;
+import parsing.BaseGrammarParser.DerefExprContext;
 import parsing.BaseGrammarParser.DerefIDContext;
+import parsing.BaseGrammarParser.DivExprContext;
+import parsing.BaseGrammarParser.EnumDeclContext;
+import parsing.BaseGrammarParser.EnumExprContext;
 import parsing.BaseGrammarParser.ExprArrayExprContext;
+import parsing.BaseGrammarParser.ExprContext;
+import parsing.BaseGrammarParser.FalseExprContext;
+import parsing.BaseGrammarParser.ForStatContext;
 import parsing.BaseGrammarParser.FuncContext;
+import parsing.BaseGrammarParser.IdExprContext;
+import parsing.BaseGrammarParser.IfStatContext;
+import parsing.BaseGrammarParser.InStatContext;
+import parsing.BaseGrammarParser.LockStatContext;
+import parsing.BaseGrammarParser.MinExprContext;
+import parsing.BaseGrammarParser.ModExprContext;
+import parsing.BaseGrammarParser.MultExprContext;
+import parsing.BaseGrammarParser.NegBoolExprContext;
+import parsing.BaseGrammarParser.NegNumExprContext;
+import parsing.BaseGrammarParser.NumExprContext;
+import parsing.BaseGrammarParser.OutStatContext;
+import parsing.BaseGrammarParser.ParExprContext;
+import parsing.BaseGrammarParser.PlusExprContext;
+import parsing.BaseGrammarParser.ProgramContext;
+import parsing.BaseGrammarParser.RefExprContext;
+import parsing.BaseGrammarParser.ReturnStatContext;
+import parsing.BaseGrammarParser.SpidExprContext;
+import parsing.BaseGrammarParser.TopLevelBlockContext;
+import parsing.BaseGrammarParser.TrueExprContext;
 import parsing.BaseGrammarParser.TypedparamsContext;
-import parsing.Type.Pointer;
+import parsing.BaseGrammarParser.WhileStatContext;
 import parsing.Type.Array;
 import parsing.Type.Enum;
-import parsing.BaseGrammarParser.*;
+import parsing.Type.Pointer;
 import translation.Operator;
-import translation.Spril;
 
 /**
- * Class Checker is used to parse a program
+ * Class Checker check whether the syntax of a program is correct according to
+ * our programming language or not.
  * 
- * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
  */
-public class Checker extends BaseGrammarBaseVisitor<Void> implements
-		ANTLRErrorListener {
+public class Checker extends BaseGrammarBaseVisitor<Void>implements ANTLRErrorListener {
 
+	/**
+	 * Inner class Check Result ?
+	 *
+	 * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321).
+	 */
 	public class CheckResult {
-		private ParseTreeProperty<Type>		types;
-		private Map<ParseTree, Integer>		offsets;
-		private Set<FuncContext>			functions;
-		private List<String>				errors;
-		private ParseTreeProperty<Boolean>	shared;
-		private Map<String, Integer>		locks;
-		private Set<Enum>					enums;
 
+		// Instance variables
+		private ParseTreeProperty<Type> types;
+		private Map<ParseTree, Integer> offsets;
+		private Set<FuncContext> functions;
+		private List<String> errors;
+		private ParseTreeProperty<Boolean> shared;
+		private Map<String, Integer> locks;
+		private Set<Enum> enums;
+
+		/**
+		 * Constructor CheckResult sets certain instance variables.
+		 */
 		public CheckResult() {
 			this.types = new ParseTreeProperty<>();
 			this.offsets = new HashMap<>();
@@ -65,10 +107,26 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			this.enums = new HashSet<>();
 		}
 
-		public CheckResult(ParseTreeProperty<Type> types,
-				Map<ParseTree, Integer> offsets, Set<FuncContext> functions,
-				List<String> errors, ParseTreeProperty<Boolean> shared,
-				Map<String, Integer> locks, Set<Enum> enums) {
+		/**
+		 * Constructor CheckResult sets certain instance variables.
+		 * 
+		 * @param types
+		 *            The new value of types.
+		 * @param offsets
+		 *            The new value of offsets.
+		 * @param functions
+		 *            The new value of functions.
+		 * @param errors
+		 *            The new value of errors.
+		 * @param shared
+		 *            The new value of shared.
+		 * @param locks
+		 *            The new value of locks.
+		 * @param enums
+		 *            The new value of enums.
+		 */
+		public CheckResult(ParseTreeProperty<Type> types, Map<ParseTree, Integer> offsets, Set<FuncContext> functions,
+				List<String> errors, ParseTreeProperty<Boolean> shared, Map<String, Integer> locks, Set<Enum> enums) {
 			super();
 			this.types = types;
 			this.offsets = offsets;
@@ -79,60 +137,130 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			this.enums = enums;
 		}
 
+		/**
+		 * Getter for errors.
+		 * 
+		 * @return The value of errors.
+		 */
 		public List<String> getErrors() {
 			return errors;
 		}
 
+		/**
+		 * Getter for functions.
+		 * 
+		 * @return The value of functions.
+		 */
 		public Set<FuncContext> getFunctions() {
 			return functions;
 		}
 
+		/**
+		 * Getter for locks.
+		 * 
+		 * @return The value of locks.
+		 */
 		public Map<String, Integer> getLocks() {
 			return locks;
 		}
 
+		/**
+		 * Getter for offsets.
+		 * 
+		 * @return The value of offsets.
+		 */
 		public Map<ParseTree, Integer> getOffsets() {
 			return offsets;
 		}
 
+		/**
+		 * Getter for shared.
+		 * 
+		 * @return The value of shared.
+		 */
 		public ParseTreeProperty<Boolean> getShared() {
 			return shared;
 		}
 
+		/**
+		 * Getter for types.
+		 * 
+		 * @return The value of types.
+		 */
 		public ParseTreeProperty<Type> getTypes() {
 			return types;
 		}
 
+		/**
+		 * Setter for errors.
+		 * 
+		 * @param errors
+		 *            The new value of errors.
+		 */
 		public void setErrors(List<String> errors) {
 			this.errors = errors;
 		}
 
+		/**
+		 * Setter for functions.
+		 * 
+		 * @param functions
+		 *            The new value of functions.
+		 */
 		public void setFunctions(Set<FuncContext> functions) {
 			this.functions = functions;
 		}
 
+		/**
+		 * Setter for locks.
+		 * 
+		 * @param locks
+		 *            The new value of locks.
+		 */
 		public void setLocks(Map<String, Integer> locks) {
 			this.locks = locks;
 		}
 
+		/**
+		 * Setter for offsets.
+		 * 
+		 * @param offsets
+		 *            The new value of offsets.
+		 */
 		public void setOffsets(Map<ParseTree, Integer> offsets) {
 			this.offsets = offsets;
 		}
 
+		/**
+		 * Setter for shared.
+		 * 
+		 * @param shared
+		 *            The new value of shared.
+		 */
 		public void setShared(ParseTreeProperty<Boolean> shared) {
 			this.shared = shared;
 		}
 
+		/**
+		 * Setter for types.
+		 * 
+		 * @param types
+		 *            The new value of types.
+		 */
 		public void setTypes(ParseTreeProperty<Type> types) {
 			this.types = types;
 		}
 
 		@Override
 		public String toString() {
-			return "CheckResult [types=" + types + ", offsets=" + offsets
-					+ ", funcAddrs=" + functions + ", errors=" + errors + "]";
+			return "CheckResult [types=" + types + ", offsets=" + offsets + ", funcAddrs=" + functions + ", errors="
+					+ errors + "]";
 		}
 
+		/**
+		 * 
+		 * @param locks
+		 */
 		void buildLocks(Set<String> locks) {
 			int addr = sharedStaticMemSize() + 1;
 			this.locks.put("<$INIT_LOCK$>", addr++);
@@ -140,18 +268,19 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 				this.locks.putIfAbsent(lock, addr++);
 		}
 
+		/**
+		 * 
+		 * @return
+		 */
 		int funcCount() {
 			return this.functions.size();
 		}
 
 		FuncContext getMatchingFunc(String name, List<Type> types) {
-			return this.functions
-					.stream()
-					.filter(func -> func.typedparams().type().stream()
-							.map(t -> typeForName(func, t.getText()))
-							.collect(Collectors.toList()).equals(types)
-							&& func.ID().getText().equals(name)).findAny()
-					.orElse(null);
+			return this.functions.stream()
+					.filter(func -> func.typedparams().type().stream().map(t -> typeForName(func, t.getText()))
+							.collect(Collectors.toList()).equals(types) && func.ID().getText().equals(name))
+					.findAny().orElse(null);
 		}
 
 		int localStaticMemSize() {
@@ -159,12 +288,9 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		}
 
 		int maxOffset(boolean shared) {
-			return this.offsets
-					.entrySet()
-					.stream()
+			return this.offsets.entrySet().stream()
 					.filter(e -> !(this.shared == null && shared)
-							&& (this.shared.get(e.getKey()) != null && this.shared
-									.get(e.getKey())))
+							&& (this.shared.get(e.getKey()) != null && this.shared.get(e.getKey())))
 					.mapToInt(i -> i.getValue()).max().orElse(0);
 		}
 
@@ -172,46 +298,43 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			return maxOffset(true) + locks.size();
 		}
 
+		/**
+		 * Getter for enums.
+		 * 
+		 * @return The value of enums.
+		 */
 		public Set<Enum> getEnums() {
 			return enums;
 		}
 
+		/**
+		 * Setter for enums.
+		 * 
+		 * @param enums
+		 *            The new value of setter.
+		 */
 		public void setEnums(Set<Enum> enums) {
 			this.enums = enums;
 		}
 	}
 
-	private static final List<String>		INVALID_NAMES	= Arrays.asList(
-																	"int",
-																	"bool",
-																	"void",
-																	"if",
-																	"else",
-																	"while",
-																	"for",
-																	"return",
-																	"and",
-																	"or",
-																	"xor",
-																	"true",
-																	"false",
-																	"def",
-																	"break",
-																	"not",
-																	"string");
-	private Scope							scope;
-	private List<String>					errors;
-	private Map<FuncContext, Func>			functions;
-	private Set<String>						locks;
-	private ParseTreeProperty<Type>			types;
-	private ParseTreeProperty<Boolean>		shared;
-	private Func							currentFunc;
-	private Map<Func, TypedparamsContext>	params;
-	private Map<Func, List<Func>>			callTree;
-	private CheckResult						result;
-	private int								arrCount;
+	// Instance variables
 
-	private boolean							dirty;
+	private static final List<String> INVALID_NAMES = Arrays.asList("int", "bool", "void", "if", "else", "while", "for",
+			"return", "and", "or", "xor", "true", "false", "def", "break", "not", "string");
+	private Scope scope;
+	private List<String> errors;
+	private Map<FuncContext, Func> functions;
+	private Set<String> locks;
+	private ParseTreeProperty<Type> types;
+	private ParseTreeProperty<Boolean> shared;
+	private Func currentFunc;
+	private Map<Func, TypedparamsContext> params;
+	private Map<Func, List<Func>> callTree;
+	private CheckResult result;
+	private int arrCount;
+
+	private boolean dirty;
 
 	/**
 	 * Check returns a checked program
@@ -224,8 +347,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		dirty = false;
 		BaseGrammarLexer lexer = new BaseGrammarLexer(stream);
 		lexer.addErrorListener(this);
-		BaseGrammarParser parser = new BaseGrammarParser(new CommonTokenStream(
-				lexer));
+		BaseGrammarParser parser = new BaseGrammarParser(new CommonTokenStream(lexer));
 		parser.addErrorListener(this);
 		ProgramContext prog = parser.program();
 		if (dirty) {
@@ -280,30 +402,33 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	@Override
-	public void reportAmbiguity(Parser arg0, DFA arg1, int arg2, int arg3,
-			boolean arg4, BitSet arg5, ATNConfigSet arg6) {
+	public void reportAmbiguity(Parser arg0, DFA arg1, int arg2, int arg3, boolean arg4, BitSet arg5,
+			ATNConfigSet arg6) {
 
 	}
 
+	/**
+	 * Returns the value of dirty.
+	 * 
+	 * @return The value of dirty.
+	 */
 	public boolean isDirty() {
 		return dirty;
 	}
 
 	@Override
-	public void reportAttemptingFullContext(Parser arg0, DFA arg1, int arg2,
-			int arg3, BitSet arg4, ATNConfigSet arg5) {
+	public void reportAttemptingFullContext(Parser arg0, DFA arg1, int arg2, int arg3, BitSet arg4, ATNConfigSet arg5) {
 
 	}
 
 	@Override
-	public void reportContextSensitivity(Parser arg0, DFA arg1, int arg2,
-			int arg3, int arg4, ATNConfigSet arg5) {
+	public void reportContextSensitivity(Parser arg0, DFA arg1, int arg2, int arg3, int arg4, ATNConfigSet arg5) {
 
 	}
 
 	@Override
-	public void syntaxError(Recognizer<?, ?> arg0, Object arg1, int arg2,
-			int arg3, String arg4, RecognitionException arg5) {
+	public void syntaxError(Recognizer<?, ?> arg0, Object arg1, int arg2, int arg3, String arg4,
+			RecognitionException arg5) {
 		dirty = true;
 	}
 
@@ -311,9 +436,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		String arrId = ctx.ID().getText();
 		Type arrType = getType(ctx, arrId);
 		if (!(arrType instanceof Array)) {
-			error(ctx,
-					"Variable %s is not an array (it's %s), but it is accessed like one.",
-					arrId, arrType);
+			error(ctx, "Variable %s is not an array (it's %s), but it is accessed like one.", arrId, arrType);
 			return null;
 		}
 
@@ -344,8 +467,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 					&& !(targetType == Primitive.INT && sourceType instanceof Pointer))
 				checkType(ctx, targetType, sourceType);
 			shared.put(id, scope.isShared(target.replaceAll("\\*", "")));
-			result.getOffsets().put(id,
-					scope.getOffset(target.replaceAll("\\*", "")));
+			result.getOffsets().put(id, scope.getOffset(target.replaceAll("\\*", "")));
 		} else if (ctx.arrayVal() != null) {
 			visit(ctx.arrayVal());
 			String target = ctx.arrayVal().ID().getText();
@@ -390,8 +512,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 	public Void visitCallExpr(CallExprContext ctx) {
 		Func function = call(ctx.call(), null);
-		types.put(ctx, function != null ? function.getReturnType()
-				: Primitive.ERR_TYPE);
+		types.put(ctx, function != null ? function.getReturnType() : Primitive.ERR_TYPE);
 		return null;
 	}
 
@@ -434,8 +555,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		}
 
 		if (ctx.expr() instanceof ArrayLiteralExprContext) {
-			makeArray((ArrayLiteralExprContext) ctx.expr(), varId,
-					ctx.SHARED() != null);
+			makeArray((ArrayLiteralExprContext) ctx.expr(), varId, ctx.SHARED() != null);
 			types.put(ctx, types.get(ctx.expr()));
 			result.getOffsets().put(ctx.ID(), scope.getOffset(varId));
 		} else if (ctx.type().size() > 1) {
@@ -464,8 +584,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
-	private void makeArray(ArrayLiteralExprContext ctx, String id,
-			boolean shared) {
+	private void makeArray(ArrayLiteralExprContext ctx, String id, boolean shared) {
 		ctx.expr().forEach(e -> visit(e));
 		Type type = getType(ctx.expr(0));
 		if (ctx.expr().stream().anyMatch(e -> !getType(e).equals(type))) {
@@ -484,9 +603,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		visit(ctx.expr());
 		Type ptr = types.get(ctx.expr());
 		if (!(ptr instanceof Type.Pointer)) {
-			error(ctx,
-					"Tried dereferencing %s (type %s), which is not a pointer.",
-					ctx.expr().getText(), ptr);
+			error(ctx, "Tried dereferencing %s (type %s), which is not a pointer.", ctx.expr().getText(), ptr);
 			types.put(ctx, Primitive.ERR_TYPE);
 			return null;
 		}
@@ -504,8 +621,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		for (int i = 1; i < ctx.TYPE().size(); i++)
 			values.add(ctx.TYPE(i).getText());
 		String name = ctx.TYPE(0).getText();
-		if (result.getEnums().stream()
-				.anyMatch(en -> en.getName().equalsIgnoreCase(name))) {
+		if (result.getEnums().stream().anyMatch(en -> en.getName().equalsIgnoreCase(name))) {
 			error(ctx, "Duplicate enum declaration (%s).", name);
 		} else {
 			Enum en = new Enum(name, values);
@@ -517,8 +633,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 	public Void visitEnumExpr(EnumExprContext ctx) {
 		String name = ctx.TYPE(0).getText();
-		Enum type = result.getEnums().stream()
-				.filter(e -> e.getName().equalsIgnoreCase(name)).findAny()
+		Enum type = result.getEnums().stream().filter(e -> e.getName().equalsIgnoreCase(name)).findAny()
 				.orElseGet(null);
 		if (type == null)
 			error(ctx, "Undeclared enum type: %s", name);
@@ -547,8 +662,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	}
 
 	public Void visitForStat(ForStatContext ctx) {
-		if (!checkType(ctx, Primitive.INT,
-				typeForName(ctx, ctx.decl().type(0).getText()))) {
+		if (!checkType(ctx, Primitive.INT, typeForName(ctx, ctx.decl().type(0).getText()))) {
 			return null;
 		}
 		scope.openScope();
@@ -569,8 +683,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		if (!checkName(ctx, name))
 			return null;
 
-		List<Type> argTypes = ctx.typedparams().type().stream()
-				.map(t -> typeForName(ctx, t.getText()))
+		List<Type> argTypes = ctx.typedparams().type().stream().map(t -> typeForName(ctx, t.getText()))
 				.collect(Collectors.toList());
 		Func func = new Func(name, retType, argTypes);
 		params.put(func, ctx.typedparams());
@@ -588,8 +701,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 	public Void visitIdExpr(IdExprContext ctx) {
 		if (!scope.isDeclared(ctx.ID().getText())) {
-			error(ctx, "Variable %s was not declared in this scope.", ctx.ID()
-					.getText());
+			error(ctx, "Variable %s was not declared in this scope.", ctx.ID().getText());
 			return null;
 		}
 		types.put(ctx, getType(ctx, ctx.ID().getText()));
@@ -615,8 +727,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	public Void visitLockStat(LockStatContext ctx) {
 		locks.add(ctx.ID().getText());
 		if (ctx.block().toString().matches("\\breturn\\b")) {
-			error(ctx,
-					"Illegal return statement in locked block %s. (Returns from locks are not allowed)",
+			error(ctx, "Illegal return statement in locked block %s. (Returns from locks are not allowed)",
 					ctx.ID().getText());
 		}
 		visit(ctx.block());
@@ -680,46 +791,29 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	public Void visitProgram(ProgramContext ctx) {
 
 		TerminalNode sprockellCount = ctx.progdef().NUMBER();
-		if (sprockellCount != null
-				&& Integer.parseInt(sprockellCount.getText()) < 1) {
-			error(ctx,
-					"Invalid Sprockell count: %d. Please supply a value >= 1.",
-					sprockellCount);
+		if (sprockellCount != null && Integer.parseInt(sprockellCount.getText()) < 1) {
+			error(ctx, "Invalid Sprockell count: %d. Please supply a value >= 1.", sprockellCount);
 		}
 
 		ctx.decl().forEach(decl -> visit(decl));
 		ctx.enumDecl().forEach(edecl -> visit(edecl));
 		ctx.func().forEach(func -> visit(func));
-		Func main = functions
-				.values()
-				.stream()
-				.filter(f -> f.equals(Generator.MAIN_FUNC_SIG))
-				.findAny()
-				.orElseGet(
-						() -> {
-							error(ctx,
-									"No main function was defined. Please define the main function as %s",
-									Generator.MAIN_FUNC_SIG);
-							return null;
-						});
-		/*if (main != null) {
-			Queue<Func> funcs = new ArrayDeque<>();
-			funcs.offer(main);
-			Func prev = null;
-			while (!funcs.isEmpty()) {
-				Func current = funcs.poll();
-				if (current.equals(prev))
-					continue;
-				FuncContext fctx = functions.entrySet().stream()
-						.filter(e -> e.getValue().equals(current)).findAny()
-						.map(e -> e.getKey()).get();
-				processFunction(fctx, current);
-				List<Func> callees;
-				if ((callees = callTree.get(current)) != null)
-					callees.forEach(callee -> funcs.offer(callee));
-				prev = current;
-			}
-		}*/
+		Func main = functions.values().stream().filter(f -> f.equals(Generator.MAIN_FUNC_SIG)).findAny()
+				.orElseGet(() -> {
+					error(ctx, "No main function was defined. Please define the main function as %s",
+							Generator.MAIN_FUNC_SIG);
+					return null;
+				});
+		/*
+		 * if (main != null) { Queue<Func> funcs = new ArrayDeque<>();
+		 * funcs.offer(main); Func prev = null; while (!funcs.isEmpty()) { Func
+		 * current = funcs.poll(); if (current.equals(prev)) continue;
+		 * FuncContext fctx = functions.entrySet().stream() .filter(e ->
+		 * e.getValue().equals(current)).findAny() .map(e -> e.getKey()).get();
+		 * processFunction(fctx, current); List<Func> callees; if ((callees =
+		 * callTree.get(current)) != null) callees.forEach(callee ->
+		 * funcs.offer(callee)); prev = current; } }
+		 */
 		functions.forEach((fctx, func) -> processFunction(fctx, func));
 		return null;
 	}
@@ -736,18 +830,15 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			visit(ctx.expr());
 			Type exprType = getType(ctx.expr());
 			if (exprType == Primitive.ERR_TYPE)
-				error(ctx,
-						"<Unable to check function return type because the expression cannot be evaluated>");
+				error(ctx, "<Unable to check function return type because the expression cannot be evaluated>");
 			else if (!exprType.equals(expected)) {
-				error(ctx,
-						"Return expression is of type '%s', but function '%s' should return '%s'.",
-						exprType, currentFunc.getName(), expected);
+				error(ctx, "Return expression is of type '%s', but function '%s' should return '%s'.", exprType,
+						currentFunc.getName(), expected);
 			}
 		} else {
 			if (expected != Primitive.VOID) {
-				error(ctx,
-						"Returning void in function '%s' with non-void return type '%s'.",
-						currentFunc.getName(), expected);
+				error(ctx, "Returning void in function '%s' with non-void return type '%s'.", currentFunc.getName(),
+						expected);
 			}
 		}
 		types.put(ctx, expected);
@@ -793,8 +884,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
-	private void arithmeticExpr(ExprContext ctx, ExprContext fst,
-			ExprContext snd) {
+	private void arithmeticExpr(ExprContext ctx, ExprContext fst, ExprContext snd) {
 		visit(fst);
 		visit(snd);
 		checkType(ctx, Primitive.INT, fst);
@@ -804,27 +894,20 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 	private Func call(CallContext ctx, Type expectedReturn) {
 		List<Type> args = new ArrayList<>();
-		ctx.params()
-				.expr()
-				.stream()
-				.forEachOrdered(
-						val -> {
-							visit(val);
-							args.add(getType(val));
-							if (val instanceof IdExprContext) {
-								shared.put(val, scope
-										.isShared(((IdExprContext) val).ID()
-												.getText()));
-							}
-						});
+		ctx.params().expr().stream().forEachOrdered(val -> {
+			visit(val);
+			args.add(getType(val));
+			if (val instanceof IdExprContext) {
+				shared.put(val, scope.isShared(((IdExprContext) val).ID().getText()));
+			}
+		});
 		if (args.stream().anyMatch(type -> type == Primitive.ERR_TYPE))
 			return null;
 		Func func = null;
 		if (expectedReturn != null) {
 			func = new Func(ctx.ID().getText(), expectedReturn, args);
 			if (!scope.isDeclared(func)) {
-				error(ctx, "Function '%s' with types '%s' does not exist.", ctx
-						.ID().getText(), args.toString());
+				error(ctx, "Function '%s' with types '%s' does not exist.", ctx.ID().getText(), args.toString());
 				return null;
 			}
 			return func;
@@ -837,20 +920,15 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			 * "Ambiguous function call: both '%s' and '%s' match.", func, res);
 			 * return null; } res = func; } }
 			 */
-			List<Func> matches = scope
-					.getFunctions()
-					.stream()
-					.filter(f -> f.getName().equals(ctx.ID().getText())
-							&& f.getArgs().equals(args))
+			List<Func> matches = scope.getFunctions().stream()
+					.filter(f -> f.getName().equals(ctx.ID().getText()) && f.getArgs().equals(args))
 					.collect(Collectors.toList());
 
 			if (matches.isEmpty()) {
-				error(ctx, "Function '%s' with types '%s' does not exist.", ctx
-						.ID().getText(), args.toString());
+				error(ctx, "Function '%s' with types '%s' does not exist.", ctx.ID().getText(), args.toString());
 				return null;
 			} else if (matches.size() > 1) {
-				error(ctx,
-						"Ambigous function call %s%s, all of the following definitions match: %s",
+				error(ctx, "Ambigous function call %s%s, all of the following definitions match: %s",
 						ctx.ID().getText(), args, matches);
 				return null;
 			} else {
@@ -858,8 +936,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			}
 
 			if (res == null) {
-				error(ctx, "Function '%s' with types '%s' does not exist.", ctx
-						.ID().getText(), args.toString());
+				error(ctx, "Function '%s' with types '%s' does not exist.", ctx.ID().getText(), args.toString());
 				return null;
 			}
 
@@ -881,8 +958,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return true;
 	}
 
-	private boolean checkType(ParseTree tree, Type expected,
-			ParserRuleContext ctx) {
+	private boolean checkType(ParseTree tree, Type expected, ParserRuleContext ctx) {
 		return checkType(tree, expected, getType(ctx));
 	}
 
@@ -891,8 +967,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			if (actual == Primitive.ERR_TYPE)
 				error(tree, "<Caused by earlier error>");
 			else
-				error(tree, "Type mismatch. Expected '%s', but saw '%s'.",
-						expected.toString(), actual.toString());
+				error(tree, "Type mismatch. Expected '%s', but saw '%s'.", expected.toString(), actual.toString());
 			return false;
 		}
 		return true;
@@ -902,12 +977,10 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		String res = "Parse Error ";
 		if (tree instanceof ParserRuleContext) {
 			ParserRuleContext ctx = (ParserRuleContext) tree;
-			res += ctx.start.getLine() + ":"
-					+ ctx.start.getCharPositionInLine();
+			res += ctx.start.getLine() + ":" + ctx.start.getCharPositionInLine();
 		} else {
 			TerminalNode node = (TerminalNode) tree;
-			res += node.getSymbol().getLine() + ":"
-					+ node.getSymbol().getCharPositionInLine();
+			res += node.getSymbol().getLine() + ":" + node.getSymbol().getCharPositionInLine();
 		}
 		res += "(" + tree.getClass().getSimpleName() + ")";
 		res += " - " + String.format(format, args);
@@ -925,8 +998,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	private Type getType(ParserRuleContext ctx) {
 		if (ctx instanceof NumExprContext)
 			return Primitive.INT;
-		else if (ctx instanceof TrueExprContext
-				|| ctx instanceof FalseExprContext)
+		else if (ctx instanceof TrueExprContext || ctx instanceof FalseExprContext)
 			return Primitive.BOOL;
 		Type type = types.get(ctx);
 		if (type == null)
@@ -949,8 +1021,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		currentFunc = func;
 		visit(ctx.topLevelBlock());
 		boolean foundReturn = false;
-		if (ctx.topLevelBlock().block().children.stream().noneMatch(
-				tree -> tree instanceof ReturnStatContext)) {
+		if (ctx.topLevelBlock().block().children.stream().noneMatch(tree -> tree instanceof ReturnStatContext)) {
 			error(ctx, "No return from function %s.", func);
 		}
 		currentFunc = null;
@@ -961,9 +1032,8 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			Type t = Type.forName(typeName);
 			if (t == Enum.DUMMY) {
 				String baseName = typeName.replaceAll("[\\[\\]\\*]", "");
-				Type type = result.getEnums().stream()
-						.filter(e -> e.getName().equalsIgnoreCase(baseName))
-						.findAny().orElseThrow(RuntimeException::new);
+				Type type = result.getEnums().stream().filter(e -> e.getName().equalsIgnoreCase(baseName)).findAny()
+						.orElseThrow(RuntimeException::new);
 				if (typeName.endsWith("[]")) {
 					type = new Array(type);
 					typeName = typeName.replaceAll("\\[\\]", "");

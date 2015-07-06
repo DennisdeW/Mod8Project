@@ -2,7 +2,6 @@ package frontend;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -22,8 +21,13 @@ import translation.Program;
 import write.Output;
 import write.OutputDebug;
 
+/**
+ * FrontEnd is used to ?
+ * @author Ruben Groot Roessink (s1468642) and Dennis de Weerdt (s1420321)
+ */
 public class FrontEnd {
 
+	// Instance variables
 	public static final String	USAGE	= "Usage: java -jar g1c.jar <source-file> [-debug] [-stdlib <std-lib-path>]\n"
 												+ "<source-file>: The absolute or relative path to the source file.\n"
 												+ "-debug (optional): Compile with debugging enabled.\n"
@@ -31,9 +35,16 @@ public class FrontEnd {
 												+ " looks for stdlib.txt in the current working directory.";
 	public static final File	STDLIB	= new File("./stdlib.txt");
 
+	/**
+	 * Empty private Constructor.
+	 */
 	private FrontEnd() {
 	}
 
+	/**
+	 * Main method ?
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println(USAGE);
@@ -111,6 +122,12 @@ public class FrontEnd {
 		}
 	}
 
+	/**
+	 * 
+	 * @param source
+	 * @param stdlib
+	 * @return
+	 */
 	private static ANTLRInputStream merge(File source, File stdlib) {
 		if (!stdlib.canRead()) {
 			System.err
