@@ -92,9 +92,9 @@ public class FrontEnd {
 		String name = prog.getName();
 		int cores = prog.getCoreCount();
 		if (debug) {
-			OutputDebug.write(name, cores, prog.print());
+			OutputDebug.write(name + ".hs", cores, prog.print());
 		} else {
-			Output.write(name, cores, prog.print());
+			Output.write(name + ".hs", cores, prog.print());
 		}
 		System.out.println("Done");
 		System.out.println("Invoking GHC...");

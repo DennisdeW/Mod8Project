@@ -1,0 +1,23 @@
+program primeTest;
+
+int[] toTest = [5,21,29,7,50];
+bool[] expected = [true, false, true, true, false];
+
+def int main() {
+	bool[] actual = [true, true, true, true, true];
+	for (int i = 0; i < 5; i = i + 1) {
+		int x = toTest[i];
+		for (int j = 2; j <= (x / 2); j = j + 1) {
+			if (divides(x, j)) {
+				actual[i] = false;
+			}
+		}
+	}
+	bool success = arraysEqual(actual, expected, 5);
+	out(!success);
+	return 0;
+}
+
+def bool divides(int x, int divisor) {
+	return (x % divisor) == 0;
+}

@@ -129,7 +129,7 @@ def void printArray(int[] arr, int len) {
 		out(-4); /* ',' */
 		out(-16); /* ' ' */
 	}
-	out(arr[len - 1]);
+	printInt(arr[len - 1]);
 	out(45); /* ']' */
 	return;
 }
