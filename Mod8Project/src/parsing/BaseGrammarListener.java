@@ -21,18 +21,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitBlockStat(@NotNull BaseGrammarParser.BlockStatContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code arrVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 */
-	void enterArrVal(@NotNull BaseGrammarParser.ArrValContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code arrVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 */
-	void exitArrVal(@NotNull BaseGrammarParser.ArrValContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code minExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree
@@ -327,18 +315,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitDerefExpr(@NotNull BaseGrammarParser.DerefExprContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code falseVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 */
-	void enterFalseVal(@NotNull BaseGrammarParser.FalseValContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code falseVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 */
-	void exitFalseVal(@NotNull BaseGrammarParser.FalseValContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link BaseGrammarParser#enumDecl}.
 	 * @param ctx the parse tree
 	 */
@@ -382,30 +358,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTypedparams(@NotNull BaseGrammarParser.TypedparamsContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code trueVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 */
-	void enterTrueVal(@NotNull BaseGrammarParser.TrueValContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code trueVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 */
-	void exitTrueVal(@NotNull BaseGrammarParser.TrueValContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code spidVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 */
-	void enterSpidVal(@NotNull BaseGrammarParser.SpidValContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code spidVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 */
-	void exitSpidVal(@NotNull BaseGrammarParser.SpidValContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code declStat}
 	 * labeled alternative in {@link BaseGrammarParser#stat}.
@@ -477,18 +429,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 */
 	void exitBoolOp(@NotNull BaseGrammarParser.BoolOpContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code numVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 */
-	void enterNumVal(@NotNull BaseGrammarParser.NumValContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code numVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 */
-	void exitNumVal(@NotNull BaseGrammarParser.NumValContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link BaseGrammarParser#progdef}.
 	 * @param ctx the parse tree
 	 */
@@ -532,18 +472,6 @@ public interface BaseGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCall(@NotNull BaseGrammarParser.CallContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code idVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 */
-	void enterIdVal(@NotNull BaseGrammarParser.IdValContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code idVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 */
-	void exitIdVal(@NotNull BaseGrammarParser.IdValContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BaseGrammarParser#func}.
 	 * @param ctx the parse tree

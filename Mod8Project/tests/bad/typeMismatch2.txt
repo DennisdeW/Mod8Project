@@ -1,0 +1,6 @@
+program typeMismatch2;
+
+def int main() {
+	int i = true;
+	return i;
+}

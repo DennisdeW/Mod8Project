@@ -1,0 +1,7 @@
+program invalidPointer1;
+
+int notAPointer = 4;
+
+def int main() {
+	return *notAPointer;
+}

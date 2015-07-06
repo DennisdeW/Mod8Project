@@ -1,0 +1,8 @@
+program noReturn1;
+
+def int main() {
+	doSomething();
+	return 0;
+}
+
+def void doSomething(){}

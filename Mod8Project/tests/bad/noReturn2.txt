@@ -1,0 +1,3 @@
+program noReturn2;
+
+def int main() {}

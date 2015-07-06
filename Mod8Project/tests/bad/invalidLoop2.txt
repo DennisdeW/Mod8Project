@@ -1,0 +1,8 @@
+program invalidLoop2;
+
+def int main() {
+	for (int i = 3; i - 3; i = i + 1) {
+		out(3);
+	}
+	return 0;
+}

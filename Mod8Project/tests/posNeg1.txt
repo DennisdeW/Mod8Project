@@ -1,0 +1,26 @@
+program posNeg1;
+
+enum PosNeg : POSITIVE, NEGATIVE, ZERO;
+
+int[] arr = [-5,5,2,0,0,1,-4];
+PosNeg[] expected = [PosNeg.NEGATIVE, PosNeg.POSITIVE, PosNeg.POSITIVE, PosNeg.ZERO, PosNeg.ZERO, PosNeg.POSITIVE, PosNeg.NEGATIVE];
+
+def int main() {
+	PosNeg[] result = [PosNeg.ZERO, PosNeg.ZERO, PosNeg.ZERO, PosNeg.ZERO, PosNeg.ZERO, PosNeg.ZERO, PosNeg.ZERO];
+	for (int i = 0; i < 7; i = i + 1) {
+		int val = arr[i];
+		calculate(val, i, &result);
+	}
+	if (arraysEqual(result, expected, 7)) {
+		printBool(true);
+		printArray(result, 7);
+	} else {
+		printBool(false);
+		flipArray(result, 7);
+		printArray(result, 7);
+	}
+	
+	printInt(arr[0]);
+	
+	return 0;
+}

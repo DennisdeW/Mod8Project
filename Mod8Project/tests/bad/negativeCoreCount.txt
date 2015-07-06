@@ -1,0 +1,5 @@
+program negativeCoreCount(-2);
+
+def int main() {
+	return 0;
+}

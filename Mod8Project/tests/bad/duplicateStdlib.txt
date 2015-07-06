@@ -1,0 +1,11 @@
+program duplicateStdlib;
+
+def int main() {
+	printInt(5);
+	return 0;
+}
+
+def void printInt(int i) {
+	out(i);
+	return;
+}

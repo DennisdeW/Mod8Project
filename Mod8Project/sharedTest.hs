@@ -5,7 +5,7 @@ import TypesEtc
 
 prog :: [Instruction]
 prog = [
-		  Const 201 RegA                {-Initial Return Addr-}
+		  Const 151 RegA                {-Initial Return Addr-}
 		, Push RegA
 		, Const (0-1) RegA              {-Initial Result Addr-}
 		, Push RegA
@@ -166,56 +166,6 @@ prog = [
 		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
 		, Branch RegD (Rel 2)
 		, Jump (Ind RegC)               {-return-}
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
 		, EndProg 
 		, EndProg
        ]

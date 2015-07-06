@@ -1,0 +1,6 @@
+program typeMismatch1;
+
+def int main() {
+	bool b = 3;
+	return boolToInt(b);
+}

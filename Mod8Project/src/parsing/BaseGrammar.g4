@@ -160,16 +160,6 @@ enumDecl
 	)*
 ;
 
-val
-:
-	NUMBER # numVal
-	| derefID # idVal
-	| TRUE # trueVal
-	| FALSE # falseVal
-	| SPID # spidVal
-	| arrayVal # arrVal
-;
-
 comp
 :
 	LT

@@ -1,0 +1,8 @@
+program invalidPointer2;
+
+def int main() {
+	int x = 4;
+	int* ptr = &x;
+	int** ptrptr = &ptr;
+	return *ptrptr;
+}

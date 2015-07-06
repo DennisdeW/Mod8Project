@@ -1,0 +1,6 @@
+program invalidArray1;
+
+def int main() {
+	int[] empty = [];
+	return 0;
+}

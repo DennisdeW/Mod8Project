@@ -172,18 +172,6 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			return maxOffset(true) + locks.size();
 		}
 
-		Type valType(ValContext ctx) {
-			if (ctx instanceof NumValContext || ctx instanceof SpidValContext)
-				return Primitive.INT;
-			if (ctx instanceof TrueValContext || ctx instanceof FalseValContext)
-				return Primitive.BOOL;
-			Type res = types.get(ctx);
-			if (res == null)
-				throw new RuntimeException("Could not get type of "
-						+ ctx.getText());
-			return res;
-		}
-
 		public Set<Enum> getEnums() {
 			return enums;
 		}
@@ -294,21 +282,22 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	@Override
 	public void reportAmbiguity(Parser arg0, DFA arg1, int arg2, int arg3,
 			boolean arg4, BitSet arg5, ATNConfigSet arg6) {
-		dirty = true;
 
+	}
+
+	public boolean isDirty() {
+		return dirty;
 	}
 
 	@Override
 	public void reportAttemptingFullContext(Parser arg0, DFA arg1, int arg2,
 			int arg3, BitSet arg4, ATNConfigSet arg5) {
-		dirty = true;
 
 	}
 
 	@Override
 	public void reportContextSensitivity(Parser arg0, DFA arg1, int arg2,
 			int arg3, int arg4, ATNConfigSet arg5) {
-		dirty = true;
 
 	}
 
@@ -376,6 +365,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			if (!(targetType instanceof Pointer && sourceType == Primitive.INT)
 					&& !(targetType == Primitive.INT && sourceType instanceof Pointer))
 				checkType(ctx, targetType, sourceType);
+			shared.put(ctx, shared.get(ctx.arrayVal()));
 		}
 		return null;
 	}
@@ -564,6 +554,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		scope.openScope();
 		visit(ctx.decl());
 		visit(ctx.expr());
+		checkType(ctx, Primitive.BOOL, ctx.expr());
 		visit(ctx.assign());
 		visit(ctx.block());
 		scope.closeScope();
@@ -583,14 +574,24 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 				.collect(Collectors.toList());
 		Func func = new Func(name, retType, argTypes);
 		params.put(func, ctx.typedparams());
+		if (scope.isDeclared(func)) {
+			error(ctx, "Duplicate declaration of function %s.", func);
+			return null;
+		}
 		scope.declare(func);
 		functions.put(ctx, func);
 		result.getFunctions().add(ctx);
 		types.put(ctx, retType);
+
 		return null;
 	}
 
 	public Void visitIdExpr(IdExprContext ctx) {
+		if (!scope.isDeclared(ctx.ID().getText())) {
+			error(ctx, "Variable %s was not declared in this scope.", ctx.ID()
+					.getText());
+			return null;
+		}
 		types.put(ctx, getType(ctx, ctx.ID().getText()));
 		shared.put(ctx.ID(), scope.isShared(ctx.ID().getText()));
 		result.getOffsets().put(ctx.ID(), scope.getOffset(ctx.ID().getText()));
@@ -785,56 +786,6 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 		return null;
 	}
 
-	public Void visitTrueVal(TrueValContext ctx) {
-		types.put(ctx, Primitive.BOOL);
-		return null;
-	}
-
-	public Void visitFalseVal(FalseValContext ctx) {
-		types.put(ctx, Primitive.BOOL);
-		return null;
-	}
-
-	public Void visitNumVal(NumValContext ctx) {
-		types.put(ctx, Primitive.INT);
-		return null;
-	}
-
-	public Void visitArrVal(ArrValContext ctx) {
-		visit(ctx.arrayVal());
-		types.put(ctx, types.get(ctx.arrayVal()));
-		result.getOffsets().put(ctx, result.getOffsets().get(ctx.arrayVal()));
-		shared.put(ctx, shared.get(ctx.arrayVal()));
-		return null;
-	}
-
-	public Void visitIdVal(IdValContext ctx) {
-		DerefIDContext deref = ctx.derefID();
-		TerminalNode id = getID(deref);
-		String text = id.getText();
-		Type base = getType(ctx, id.getText());
-		boolean shared = scope.isShared(text);
-		int depth = 0;
-		while (deref.ID() == null) {
-			depth++;
-			deref = deref.derefID();
-		}
-		deref = ctx.derefID();
-		for (int i = 0; i < depth; i++, deref = deref.derefID()) {
-			types.put(deref, Pointer.pointerChain(base, depth - i));
-			this.shared.put(deref, shared);
-		}
-		types.put(ctx, depth == 0 ? base : Pointer.pointerChain(base, depth));
-		result.getOffsets().put(id, scope.getOffset(text));
-		this.shared.put(ctx, shared);
-		return null;
-	}
-
-	public Void visitSpidVal(SpidValContext ctx) {
-		types.put(ctx, Primitive.INT);
-		return null;
-	}
-
 	public Void visitWhileStat(WhileStatContext ctx) {
 		visit(ctx.expr());
 		checkType(ctx, Primitive.BOOL, getType(ctx.expr()));
@@ -853,10 +804,19 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 
 	private Func call(CallContext ctx, Type expectedReturn) {
 		List<Type> args = new ArrayList<>();
-		ctx.params().expr().stream().forEachOrdered(val -> {
-			visit(val);
-			args.add(getType(val));
-		});
+		ctx.params()
+				.expr()
+				.stream()
+				.forEachOrdered(
+						val -> {
+							visit(val);
+							args.add(getType(val));
+							if (val instanceof IdExprContext) {
+								shared.put(val, scope
+										.isShared(((IdExprContext) val).ID()
+												.getText()));
+							}
+						});
 		if (args.stream().anyMatch(type -> type == Primitive.ERR_TYPE))
 			return null;
 		Func func = null;
@@ -970,8 +930,7 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 			return Primitive.BOOL;
 		Type type = types.get(ctx);
 		if (type == null)
-			throw new IllegalArgumentException(String.format(
-					"Node '%s' has no type.", ctx.getText()));
+			return Primitive.ERR_TYPE;
 		return type;
 	}
 
@@ -989,6 +948,11 @@ public class Checker extends BaseGrammarBaseVisitor<Void> implements
 	private void processFunction(FuncContext ctx, Func func) {
 		currentFunc = func;
 		visit(ctx.topLevelBlock());
+		boolean foundReturn = false;
+		if (ctx.topLevelBlock().block().children.stream().noneMatch(
+				tree -> tree instanceof ReturnStatContext)) {
+			error(ctx, "No return from function %s.", func);
+		}
 		currentFunc = null;
 	}
 

@@ -1,0 +1,12 @@
+program duplicateVar2;
+
+def int main() {
+	doOp(5);
+	return 0;
+}
+
+def void doOp(int i) {
+	int i = 3;
+	out(i+i);
+	return;
+}

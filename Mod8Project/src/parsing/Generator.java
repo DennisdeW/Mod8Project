@@ -3,8 +3,10 @@ package parsing;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -57,7 +59,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 	private Map<FuncContext, List<Spril>>	functions;
 	private Map<FuncContext, Integer>		functionAddrs;
 	private int								heapPtr, sharedPtr;
-
+	private boolean							sharedLiteral;
 	private Map<FuncContext, List<Spril>>	calls;
 
 	public Program compile(ProgramContext ctx, CheckResult cres) {
@@ -66,6 +68,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		this.functions = new HashMap<>();
 		this.functionAddrs = new HashMap<>();
 		this.calls = new HashMap<>();
+		this.sharedLiteral = false;
 		this.heapPtr = cres
 				.getOffsets()
 				.entrySet()
@@ -80,6 +83,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 				.filter(e -> cres.getShared().get(e.getKey()) != null
 						&& cres.getShared().get(e.getKey()))
 				.mapToInt(e -> e.getValue()).max().orElse(0);
+		this.sharedPtr += cres.getLocks().size();
 		if (ctx.progdef().NUMBER() != null)
 			prog.setCoreCount(Integer
 					.parseInt(ctx.progdef().NUMBER().getText()));
@@ -112,6 +116,8 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 
 		FuncContext mainFuncCtx = cres.getMatchingFunc(MAIN_FUNC_SIG.getName(),
 				MAIN_FUNC_SIG.getArgs());
+		if (mainFuncCtx == null)
+			System.err.println();
 		if (Primitive.forName(mainFuncCtx.type().getText()) != MAIN_FUNC_SIG
 				.getReturnType())
 			System.err.println("WARNING: Main function return type should be "
@@ -158,7 +164,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 
 		instrs.add(new Spril(OpCode.END_PROG));
 
-		instrs.get(0).getOperands()[0] = new Int(instrs.size() - 11);
+		instrs.get(0).getOperands()[0] = new Int(instrs.size() - 1);
 		jumpToMain.getOperands()[0] = Target.absolute(functionAddrs
 				.get(mainFuncCtx));
 
@@ -183,8 +189,12 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 			else
 				result.add(new Spril(OpCode.POP, Register.A));
 
-			result.add(new Spril(OpCode.STORE, Register.A, MemAddr
-					.direct(arrBaseAddr + (i * valSize))));
+			if (sharedLiteral)
+				result.add(new Spril(OpCode.WRITE, Register.A, MemAddr
+						.direct(arrBaseAddr + (i * valSize))));
+			else
+				result.add(new Spril(OpCode.STORE, Register.A, MemAddr
+						.direct(arrBaseAddr + (i * valSize))));
 		}
 		result.add(new Spril(OpCode.CONST, "Base addr for (anon) array "
 				+ ctx.hashCode(), new Int(arrBaseAddr), Register.A));
@@ -248,8 +258,7 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		else
 			result.add(new Spril(OpCode.POP, Register.A));
 
-		boolean shared = cres.getShared().get(ctx) != null
-				&& cres.getShared().get(ctx);
+		boolean shared = cres.getShared().get(ctx);
 
 		/*
 		 * if (shared) { result.add(new Spril(OpCode.READ,
@@ -517,7 +526,8 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 	public List<Spril> visitFunc(FuncContext ctx) {
 		List<Spril> result = new ArrayList<>();
 		result.addAll(visit(ctx.topLevelBlock().block()));
-		result.get(0).addComment("Function " + ctx.ID().getText());
+		if (result.size() > 0)
+			result.get(0).addComment("Function " + ctx.ID().getText());
 		return result;
 
 	}
@@ -750,105 +760,11 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 		return result;
 	}
 
-	public List<Spril> visitNumVal(NumValContext ctx) {
-		List<Spril> result = new ArrayList<>();
-		result.add(new Spril(OpCode.CONST, new Int(Integer.parseInt(ctx
-				.NUMBER().getText())), Register.A));
-		result.add(new Spril(OpCode.PUSH, Register.A));
-		return result;
-	}
-
-	public List<Spril> visitTrueVal(TrueValContext ctx) {
-		List<Spril> result = new ArrayList<>();
-		result.add(new Spril(OpCode.CONST, new Int(1), Register.A));
-		result.add(new Spril(OpCode.PUSH, Register.A));
-		return result;
-	}
-
-	public List<Spril> visitFalseVal(FalseValContext ctx) {
-		List<Spril> result = new ArrayList<>();
-		result.add(new Spril(OpCode.PUSH, Register.ZERO));
-		return result;
-	}
-
-	public List<Spril> visitIdVal(IdValContext ctx) {
-		List<Spril> result = new ArrayList<>();
-		DerefIDContext deref = ctx.derefID();
-		Type currentType = cres.getTypes().get(deref);
-		result.add(new Spril(OpCode.CONST,
-				new Int(cres.getOffsets().get(deref)), Register.D));
-		while (currentType instanceof Pointer) {
-			Pointer ptr = (Pointer) currentType;
-			currentType = ptr.getWrappedType();
-			if (currentType instanceof Pointer)
-				deref = deref.derefID();
-			else {
-			}
-			if (cres.getShared().get(ctx)) {
-				result.add(new Spril(OpCode.READ, MemAddr.deref(Register.D)));
-				result.add(new Spril(OpCode.RECEIVE, Register.D));
-			} else {
-				result.add(new Spril(OpCode.LOAD, MemAddr.deref(Register.D),
-						Register.D));
-			}
-		}
-
-		result.add(new Spril(OpCode.PUSH, Register.D));
-
-		return result;
-	}
-
 	public List<Spril> visitSpidExpr(SpidExprContext ctx) {
 		List<Spril> result = new ArrayList<>();
 		result.add(new Spril(OpCode.PUSH, Register.SPID));
 		return result;
 
-	}
-
-	public List<Spril> visitSpidVal(SpidValContext ctx) {
-		List<Spril> result = new ArrayList<>();
-		result.add(new Spril(OpCode.PUSH, Register.SPID));
-		return result;
-	}
-
-	public List<Spril> visitArrVal(ArrValContext ctx) {
-		List<Spril> result = new ArrayList<>();
-		int baseOffset = cres.getOffsets().get(ctx);
-		result.add(new Spril(OpCode.CONST, new Int(baseOffset), Register.E));
-
-		if (cres.getShared().get(ctx)) {
-			result.add(new Spril(OpCode.READ, MemAddr.deref(Register.E)));
-			result.add(new Spril(OpCode.RECEIVE, Register.E));
-		} else {
-			result.add(new Spril(OpCode.LOAD, MemAddr.deref(Register.E),
-					Register.E));
-		}
-
-		result.addAll(visit(ctx.arrayVal().expr()));
-		if (result.get(result.size() - 1).equals(
-				new Spril(OpCode.PUSH, Register.A)))
-			result.remove(result.size() - 1);
-		else
-			result.add(new Spril(OpCode.POP, Register.A));
-
-		if (cres.getShared().get(ctx)) {
-			result.add(new Spril(OpCode.READ, MemAddr.deref(Register.D)));
-			result.add(new Spril(OpCode.RECEIVE, Register.D));
-		} else {
-			result.add(new Spril(OpCode.LOAD, MemAddr.deref(Register.D),
-					Register.D));
-		}
-		result.add(new Spril(OpCode.COMPUTE, Operator.ADD, Register.E,
-				Register.D, Register.D));
-		if (cres.getShared().get(ctx)) {
-			result.add(new Spril(OpCode.READ, MemAddr.deref(Register.D)));
-			result.add(new Spril(OpCode.RECEIVE, Register.A));
-		} else {
-			result.add(new Spril(OpCode.LOAD, MemAddr.deref(Register.D),
-					Register.A));
-		}
-		result.add(new Spril(OpCode.PUSH, Register.A));
-		return result;
 	}
 
 	public List<Spril> visitWhileStat(WhileStatContext ctx) {
@@ -937,7 +853,11 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 			result.add(new Spril(OpCode.CONST, new Int(offset), Register.D));
 		}
 		result.add(new Spril(OpCode.PUSH, Register.D));
+
+		sharedLiteral = cres.getShared().get(tree) != null
+				&& cres.getShared().get(tree);
 		result.addAll(visit(expr));
+		sharedLiteral = false;
 
 		if (result.get(result.size() - 1).equals(
 				new Spril(OpCode.PUSH, Register.A)))
@@ -992,7 +912,8 @@ public class Generator extends BaseGrammarBaseVisitor<List<Spril>> {
 
 		List<ExprContext> exprs = new ArrayList<>(ctx.params().expr());
 		for (int i = 0; i < exprs.size(); i++) {
-			int offset = cres.getOffsets().get(func.typedparams().ID(i));
+			TerminalNode definition = func.typedparams().ID(i);
+			int offset = cres.getOffsets().get(definition);
 			ExprContext expr = exprs.get(i);
 
 			result.addAll(visit(expr));

@@ -19,13 +19,6 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBlockStat(@NotNull BaseGrammarParser.BlockStatContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code arrVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitArrVal(@NotNull BaseGrammarParser.ArrValContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code minExpr}
 	 * labeled alternative in {@link BaseGrammarParser#expr}.
 	 * @param ctx the parse tree
@@ -199,13 +192,6 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDerefExpr(@NotNull BaseGrammarParser.DerefExprContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code falseVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFalseVal(@NotNull BaseGrammarParser.FalseValContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link BaseGrammarParser#enumDecl}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -231,20 +217,6 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitTypedparams(@NotNull BaseGrammarParser.TypedparamsContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code trueVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTrueVal(@NotNull BaseGrammarParser.TrueValContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code spidVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSpidVal(@NotNull BaseGrammarParser.SpidValContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code declStat}
 	 * labeled alternative in {@link BaseGrammarParser#stat}.
@@ -287,13 +259,6 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBoolOp(@NotNull BaseGrammarParser.BoolOpContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code numVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNumVal(@NotNull BaseGrammarParser.NumValContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link BaseGrammarParser#progdef}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -319,13 +284,6 @@ public interface BaseGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitCall(@NotNull BaseGrammarParser.CallContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code idVal}
-	 * labeled alternative in {@link BaseGrammarParser#val}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIdVal(@NotNull BaseGrammarParser.IdValContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link BaseGrammarParser#func}.
 	 * @param ctx the parse tree

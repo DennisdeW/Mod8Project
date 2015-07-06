@@ -5,7 +5,7 @@ import TypesEtc
 
 prog :: [Instruction]
 prog = [
-		  Const 1290 RegA               {-Initial Return Addr-}
+		  Const 1270 RegA               {-Initial Return Addr-}
 		, Push RegA
 		, Const (0-1) RegA              {-Initial Result Addr-}
 		, Push RegA
@@ -18,44 +18,44 @@ prog = [
 		, Branch RegA (Rel 2)
 		, Jump (Rel (0-3))
 		, Jump (Abs 13)                 {-Jump To Main Function-}
-		, Const 42 RegD                 {-Declaration of result(=0); Function main-}
+		, Const 27 RegD                 {-Declaration of result(=0); Function main-}
 		, Push RegD
 		, Const 0 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
 		, Const 23 RegA                 {-Return addr-}
 		, Push RegA
-		, Const 43 RegA                 {-Result addr-}
+		, Const 28 RegA                 {-Result addr-}
 		, Push RegA
 		, Jump (Abs 57)                 {-Jump to function testGcd-}
-		, Load (Addr 43) RegA
+		, Load (Addr 28) RegA
 		, Const 1 RegB
 		, Compute Xor RegB RegA RegA
 		, Branch RegA (Rel 2)
 		, Jump (Rel 6)
-		, Const 42 RegD                 {-result = 1-}
+		, Const 27 RegD                 {-result = 1-}
 		, Push RegD
 		, Const 1 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
 		, Const 38 RegA                 {-Return addr-}
 		, Push RegA
-		, Const 44 RegA                 {-Result addr-}
+		, Const 29 RegA                 {-Result addr-}
 		, Push RegA
 		, Jump (Abs 174)                {-Jump to function testFac-}
-		, Load (Addr 44) RegA
+		, Load (Addr 29) RegA
 		, Const 1 RegB
 		, Compute Xor RegB RegA RegA
 		, Branch RegA (Rel 2)
 		, Jump (Rel 6)
-		, Const 42 RegD                 {-result = 2-}
+		, Const 27 RegD                 {-result = 2-}
 		, Push RegD
 		, Const 2 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 42) RegA
+		, Load (Addr 27) RegA
 		, Out RegA
-		, Load (Addr 42) RegA
+		, Load (Addr 27) RegA
 		, Pop RegB                      {-Get Result addr-}
 		, Pop RegC                      {-Get Return addr-}
 		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
@@ -63,15 +63,15 @@ prog = [
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
 		, Const 6 RegA                  {-Function testGcd-}
-		, Store RegA (Addr 48)
+		, Store RegA (Addr 17)
 		, Const 9 RegA
-		, Store RegA (Addr 49)
+		, Store RegA (Addr 18)
 		, Const 66 RegA                 {-Return addr-}
 		, Push RegA
-		, Const 1 RegA                  {-Result addr-}
+		, Const 25 RegA                 {-Result addr-}
 		, Push RegA
 		, Jump (Abs 136)                {-Jump to function gcd-}
-		, Load (Addr 1) RegA
+		, Load (Addr 25) RegA
 		, Push RegA                     {-Store Result-}
 		, Const 3 RegA
 		, Pop RegB
@@ -87,15 +87,15 @@ prog = [
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
 		, Const 100 RegA
-		, Store RegA (Addr 48)
+		, Store RegA (Addr 17)
 		, Const 20 RegA
-		, Store RegA (Addr 49)
+		, Store RegA (Addr 18)
 		, Const 90 RegA                 {-Return addr-}
 		, Push RegA
-		, Const 1 RegA                  {-Result addr-}
+		, Const 25 RegA                 {-Result addr-}
 		, Push RegA
 		, Jump (Abs 136)                {-Jump to function gcd-}
-		, Load (Addr 1) RegA
+		, Load (Addr 25) RegA
 		, Push RegA                     {-Store Result-}
 		, Const 20 RegA
 		, Pop RegB
@@ -111,15 +111,15 @@ prog = [
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
 		, Const 17 RegA
-		, Store RegA (Addr 48)
+		, Store RegA (Addr 17)
 		, Const 5 RegA
-		, Store RegA (Addr 49)
+		, Store RegA (Addr 18)
 		, Const 114 RegA                {-Return addr-}
 		, Push RegA
-		, Const 1 RegA                  {-Result addr-}
+		, Const 25 RegA                 {-Result addr-}
 		, Push RegA
 		, Jump (Abs 136)                {-Jump to function gcd-}
-		, Load (Addr 1) RegA
+		, Load (Addr 25) RegA
 		, Push RegA                     {-Store Result-}
 		, Const 1 RegA
 		, Pop RegB
@@ -141,38 +141,38 @@ prog = [
 		, Branch RegD (Rel 2)
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
-		, Const 50 RegD                 {-Declaration of t(=0); Function gcd-}
+		, Const 19 RegD                 {-Declaration of t(=0); Function gcd-}
 		, Push RegD
 		, Const 0 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 49) RegA
+		, Load (Addr 18) RegA
 		, Push RegA
 		, Const 0 RegA
 		, Pop RegB
 		, Compute Equal RegB RegA RegA  {-y NEq 0-}
 		, Branch RegA (Rel 21)
-		, Const 50 RegD                 {-t = y-}
+		, Const 19 RegD                 {-t = y-}
 		, Push RegD
-		, Load (Addr 49) RegA
+		, Load (Addr 18) RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 49 RegD                 {-y = x%y-}
+		, Const 18 RegD                 {-y = x%y-}
 		, Push RegD
-		, Load (Addr 48) RegA
+		, Load (Addr 17) RegA
 		, Push RegA
-		, Load (Addr 49) RegA
+		, Load (Addr 18) RegA
 		, Pop RegB
 		, Compute Mod RegB RegA RegA    {-x Mod y-}
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 48 RegD                 {-x = t-}
+		, Const 17 RegD                 {-x = t-}
 		, Push RegD
-		, Load (Addr 50) RegA
+		, Load (Addr 19) RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
 		, Jump (Rel (0-25))
-		, Load (Addr 48) RegA
+		, Load (Addr 17) RegA
 		, Pop RegB                      {-Get Result addr-}
 		, Pop RegC                      {-Get Return addr-}
 		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
@@ -180,13 +180,13 @@ prog = [
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
 		, Const 3 RegA                  {-Function testFac-}
-		, Store RegA (Addr 31)
+		, Store RegA (Addr 34)
 		, Const 181 RegA                {-Return addr-}
 		, Push RegA
-		, Const 0 RegA                  {-Result addr-}
+		, Const 26 RegA                 {-Result addr-}
 		, Push RegA
 		, Jump (Abs 291)                {-Jump to function fac-}
-		, Load (Addr 0) RegA
+		, Load (Addr 26) RegA
 		, Push RegA                     {-Store Result-}
 		, Const 6 RegA
 		, Pop RegB
@@ -202,13 +202,13 @@ prog = [
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
 		, Const 4 RegA
-		, Store RegA (Addr 31)
+		, Store RegA (Addr 34)
 		, Const 203 RegA                {-Return addr-}
 		, Push RegA
-		, Const 0 RegA                  {-Result addr-}
+		, Const 26 RegA                 {-Result addr-}
 		, Push RegA
 		, Jump (Abs 291)                {-Jump to function fac-}
-		, Load (Addr 0) RegA
+		, Load (Addr 26) RegA
 		, Push RegA                     {-Store Result-}
 		, Const 24 RegA
 		, Pop RegB
@@ -224,13 +224,13 @@ prog = [
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
 		, Const 5 RegA
-		, Store RegA (Addr 31)
+		, Store RegA (Addr 34)
 		, Const 225 RegA                {-Return addr-}
 		, Push RegA
-		, Const 0 RegA                  {-Result addr-}
+		, Const 26 RegA                 {-Result addr-}
 		, Push RegA
 		, Jump (Abs 291)                {-Jump to function fac-}
-		, Load (Addr 0) RegA
+		, Load (Addr 26) RegA
 		, Push RegA                     {-Store Result-}
 		, Const 120 RegA
 		, Pop RegB
@@ -246,13 +246,13 @@ prog = [
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
 		, Const 10 RegA
-		, Store RegA (Addr 31)
+		, Store RegA (Addr 34)
 		, Const 247 RegA                {-Return addr-}
 		, Push RegA
-		, Const 0 RegA                  {-Result addr-}
+		, Const 26 RegA                 {-Result addr-}
 		, Push RegA
 		, Jump (Abs 291)                {-Jump to function fac-}
-		, Load (Addr 0) RegA
+		, Load (Addr 26) RegA
 		, Push RegA                     {-Store Result-}
 		, Const 3628800 RegA
 		, Pop RegB
@@ -268,13 +268,13 @@ prog = [
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
 		, Const 0 RegA
-		, Store RegA (Addr 31)
+		, Store RegA (Addr 34)
 		, Const 269 RegA                {-Return addr-}
 		, Push RegA
-		, Const 0 RegA                  {-Result addr-}
+		, Const 26 RegA                 {-Result addr-}
 		, Push RegA
 		, Jump (Abs 291)                {-Jump to function fac-}
-		, Load (Addr 0) RegA
+		, Load (Addr 26) RegA
 		, Push RegA                     {-Store Result-}
 		, Const 1 RegA
 		, Pop RegB
@@ -296,34 +296,34 @@ prog = [
 		, Branch RegD (Rel 2)
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
-		, Const 32 RegD                 {-Declaration of res(=1); Function fac-}
+		, Const 35 RegD                 {-Declaration of res(=1); Function fac-}
 		, Push RegD
 		, Const 1 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 33 RegD                 {-Declaration of i(=1); For loop declaration-}
+		, Const 36 RegD                 {-Declaration of i(=1); For loop declaration-}
 		, Push RegD
 		, Const 1 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 33) RegA           {-For loop condition-}
+		, Load (Addr 36) RegA           {-For loop condition-}
 		, Push RegA
-		, Load (Addr 31) RegA
+		, Load (Addr 34) RegA
 		, Pop RegB
 		, Compute Gt RegB RegA RegA     {-i LtE n-}
 		, Branch RegA (Rel 20)          {-Break from for loop-}
-		, Const 32 RegD                 {-res = res*i; For loop body-}
+		, Const 35 RegD                 {-res = res*i; For loop body-}
 		, Push RegD
-		, Load (Addr 32) RegA
+		, Load (Addr 35) RegA
 		, Push RegA
-		, Load (Addr 33) RegA
+		, Load (Addr 36) RegA
 		, Pop RegB
 		, Compute Mul RegB RegA RegA    {-res Mul i-}
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 33 RegD                 {-i = i+1; For loop assignment-}
+		, Const 36 RegD                 {-i = i+1; For loop assignment-}
 		, Push RegD
-		, Load (Addr 33) RegA
+		, Load (Addr 36) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
@@ -331,20 +331,20 @@ prog = [
 		, Pop RegD
 		, Store RegA (Deref RegD)
 		, Jump (Rel (0-24))             {-Back to for loop-}
-		, Load (Addr 32) RegA
+		, Load (Addr 35) RegA
 		, Pop RegB                      {-Get Result addr-}
 		, Pop RegC                      {-Get Return addr-}
 		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
 		, Branch RegD (Rel 2)
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
-		, Load (Addr 2) RegA            {-Function intToStr-}
+		, Load (Addr 37) RegA           {-Function intToStr-}
 		, Push RegA
 		, Const 0 RegA
 		, Pop RegB
 		, Compute GtE RegB RegA RegA    {-i GtE 0-}
 		, Push RegA
-		, Load (Addr 2) RegA
+		, Load (Addr 37) RegA
 		, Push RegA
 		, Const 10 RegA
 		, Pop RegB
@@ -353,20 +353,18 @@ prog = [
 		, Compute And RegB RegA RegA    {-(i>=0) And (i<10)-}
 		, Branch RegA (Rel 2)
 		, Jump (Rel 11)
-		, Load (Addr 2) RegA
-		, Store RegA (Addr 64)
-		, Const 64 RegA                 {-Base addr for (anon) array 66233253-}
-		, Store RegA (Addr 3)
+		, Load (Addr 37) RegA
+		, Store RegA (Addr 66)
+		, Const 66 RegA                 {-Base addr for (anon) array 428089645-}
+		, Store RegA (Addr 38)
 		, Pop RegB                      {-Get Result addr-}
 		, Pop RegC                      {-Get Return addr-}
 		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
 		, Branch RegD (Rel 2)
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
-		, Const 65 RegA                 {-Base addr for array res-}
-		, Store RegA (Addr 4)
-		, Store Zero (Addr 65)
-		, Store Zero (Addr 66)
+		, Const 67 RegA                 {-Base addr for array res-}
+		, Store RegA (Addr 39)
 		, Store Zero (Addr 67)
 		, Store Zero (Addr 68)
 		, Store Zero (Addr 69)
@@ -375,49 +373,51 @@ prog = [
 		, Store Zero (Addr 72)
 		, Store Zero (Addr 73)
 		, Store Zero (Addr 74)
-		, Const 5 RegD                  {-Declaration of neg(=i<0)-}
+		, Store Zero (Addr 75)
+		, Store Zero (Addr 76)
+		, Const 40 RegD                 {-Declaration of neg(=i<0)-}
 		, Push RegD
-		, Load (Addr 2) RegA
+		, Load (Addr 37) RegA
 		, Push RegA
 		, Const 0 RegA
 		, Pop RegB
 		, Compute Lt RegB RegA RegA     {-i Lt 0-}
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 5) RegA
+		, Load (Addr 40) RegA
 		, Branch RegA (Rel 2)
 		, Jump (Rel 9)
-		, Const 2 RegD                  {-i = -i-}
+		, Const 37 RegD                 {-i = -i-}
 		, Push RegD
-		, Load (Addr 2) RegA
+		, Load (Addr 37) RegA
 		, Push RegA
 		, Pop RegA
 		, Compute Sub Zero RegA RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 6 RegD                  {-Declaration of q(=0)-}
+		, Const 41 RegD                 {-Declaration of q(=0)-}
 		, Push RegD
 		, Const 0 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 7 RegD                  {-Declaration of r(=0)-}
+		, Const 42 RegD                 {-Declaration of r(=0)-}
 		, Push RegD
 		, Const 0 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 8 RegD                  {-Declaration of pos(=9)-}
+		, Const 43 RegD                 {-Declaration of pos(=9)-}
 		, Push RegD
 		, Const 9 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 9 RegD                  {-Declaration of first(=true)-}
+		, Const 44 RegD                 {-Declaration of first(=true)-}
 		, Push RegD
 		, Const 1 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 9) RegA
+		, Load (Addr 44) RegA
 		, Push RegA
-		, Load (Addr 2) RegA
+		, Load (Addr 37) RegA
 		, Push RegA
 		, Const 0 RegA
 		, Pop RegB
@@ -425,26 +425,26 @@ prog = [
 		, Pop RegB
 		, Compute Nor RegB RegA RegA    {-first Or (i!=0)-}
 		, Branch RegA (Rel 52)
-		, Const 9 RegD                  {-first = false-}
+		, Const 44 RegD                 {-first = false-}
 		, Push RegD
 		, Push Zero
 		, Pop RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 6 RegD                  {-q = i/10-}
+		, Const 41 RegD                 {-q = i/10-}
 		, Push RegD
-		, Load (Addr 2) RegA
+		, Load (Addr 37) RegA
 		, Push RegA
 		, Const 10 RegA
 		, Pop RegB
 		, Compute Div RegB RegA RegA    {-i Div 10-}
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 7 RegD                  {-r = i-(q*10)-}
+		, Const 42 RegD                 {-r = i-(q*10)-}
 		, Push RegD
-		, Load (Addr 2) RegA
+		, Load (Addr 37) RegA
 		, Push RegA
-		, Load (Addr 6) RegA
+		, Load (Addr 41) RegA
 		, Push RegA
 		, Const 10 RegA
 		, Pop RegB
@@ -453,35 +453,35 @@ prog = [
 		, Compute Sub RegB RegA RegA    {-i Sub (q*10)-}
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 4 RegD                  {-res[pos] = r-}
+		, Const 39 RegD                 {-res[pos] = r-}
 		, Load (Deref RegD) RegD        {-Get base addr for array res-}
-		, Load (Addr 8) RegA
+		, Load (Addr 43) RegA
 		, Compute Add RegA RegD RegD    {-Compute target addr-}
 		, Push RegD
-		, Load (Addr 7) RegA
+		, Load (Addr 42) RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 8 RegD                  {-pos = pos-1-}
+		, Const 43 RegD                 {-pos = pos-1-}
 		, Push RegD
-		, Load (Addr 8) RegA
+		, Load (Addr 43) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
 		, Compute Sub RegB RegA RegA    {-pos Sub 1-}
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 2 RegD                  {-i = q-}
+		, Const 37 RegD                 {-i = q-}
 		, Push RegD
-		, Load (Addr 6) RegA
+		, Load (Addr 41) RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
 		, Jump (Rel (0-60))
-		, Load (Addr 5) RegA
+		, Load (Addr 40) RegA
 		, Branch RegA (Rel 2)
 		, Jump (Rel 12)
-		, Const 4 RegD                  {-res[pos] = -3-}
+		, Const 39 RegD                 {-res[pos] = -3-}
 		, Load (Deref RegD) RegD        {-Get base addr for array res-}
-		, Load (Addr 8) RegA
+		, Load (Addr 43) RegA
 		, Compute Add RegA RegD RegD    {-Compute target addr-}
 		, Push RegD
 		, Const 3 RegA
@@ -490,24 +490,22 @@ prog = [
 		, Compute Sub Zero RegA RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 4) RegA
-		, Store RegA (Addr 38)
+		, Load (Addr 39) RegA
+		, Store RegA (Addr 8)
 		, Const 492 RegA                {-Return addr-}
 		, Push RegA
-		, Const 10 RegA                 {-Result addr-}
+		, Const 45 RegA                 {-Result addr-}
 		, Push RegA
 		, Jump (Abs 499)                {-Jump to function shiftArray-}
-		, Load (Addr 10) RegA
+		, Load (Addr 45) RegA
 		, Pop RegB                      {-Get Result addr-}
 		, Pop RegC                      {-Get Return addr-}
 		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
 		, Branch RegD (Rel 2)
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
-		, Const 75 RegA                 {-Base addr for array res; Function shiftArray-}
-		, Store RegA (Addr 39)
-		, Store Zero (Addr 75)
-		, Store Zero (Addr 76)
+		, Const 77 RegA                 {-Base addr for array res; Function shiftArray-}
+		, Store RegA (Addr 9)
 		, Store Zero (Addr 77)
 		, Store Zero (Addr 78)
 		, Store Zero (Addr 79)
@@ -516,24 +514,26 @@ prog = [
 		, Store Zero (Addr 82)
 		, Store Zero (Addr 83)
 		, Store Zero (Addr 84)
-		, Const 40 RegD                 {-Declaration of i(=0)-}
+		, Store Zero (Addr 85)
+		, Store Zero (Addr 86)
+		, Const 10 RegD                 {-Declaration of i(=0)-}
 		, Push RegD
 		, Const 0 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 41 RegD                 {-Declaration of j(=0)-}
+		, Const 11 RegD                 {-Declaration of j(=0)-}
 		, Push RegD
 		, Const 0 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 40) RegA
+		, Load (Addr 10) RegA
 		, Push RegA
 		, Const 9 RegA
 		, Pop RegB
 		, Compute Lt RegB RegA RegA     {-i Lt 9-}
 		, Push RegA
-		, Load (Addr 38) RegE
-		, Load (Addr 40) RegA
+		, Load (Addr 8) RegE
+		, Load (Addr 10) RegA
 		, Compute Add RegE RegA RegD
 		, Load (Deref RegD) RegA
 		, Push RegA
@@ -543,18 +543,18 @@ prog = [
 		, Pop RegB
 		, Compute Nand RegB RegA RegA   {-(i<9) And (arr[i]==0)-}
 		, Branch RegA (Rel 20)
-		, Const 40 RegD                 {-i = i+1-}
+		, Const 10 RegD                 {-i = i+1-}
 		, Push RegD
-		, Load (Addr 40) RegA
+		, Load (Addr 10) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
 		, Compute Add RegB RegA RegA    {-i Add 1-}
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 41 RegD                 {-j = j+1-}
+		, Const 11 RegD                 {-j = j+1-}
 		, Push RegD
-		, Load (Addr 41) RegA
+		, Load (Addr 11) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
@@ -562,30 +562,30 @@ prog = [
 		, Pop RegD
 		, Store RegA (Deref RegD)
 		, Jump (Rel (0-35))
-		, Load (Addr 40) RegA
+		, Load (Addr 10) RegA
 		, Push RegA
 		, Const 10 RegA
 		, Pop RegB
 		, Compute GtE RegB RegA RegA    {-i Lt 10-}
 		, Branch RegA (Rel 26)
-		, Const 39 RegD                 {-res[i-j] = arr[i]-}
+		, Const 9 RegD                  {-res[i-j] = arr[i]-}
 		, Load (Deref RegD) RegD        {-Get base addr for array res-}
-		, Load (Addr 40) RegA
+		, Load (Addr 10) RegA
 		, Push RegA
-		, Load (Addr 41) RegA
+		, Load (Addr 11) RegA
 		, Pop RegB
 		, Compute Sub RegB RegA RegA    {-i Sub j-}
 		, Compute Add RegA RegD RegD    {-Compute target addr-}
 		, Push RegD
-		, Load (Addr 38) RegE
-		, Load (Addr 40) RegA
+		, Load (Addr 8) RegE
+		, Load (Addr 10) RegA
 		, Compute Add RegE RegA RegD
 		, Load (Deref RegD) RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 40 RegD                 {-i = i+1-}
+		, Const 10 RegD                 {-i = i+1-}
 		, Push RegD
-		, Load (Addr 40) RegA
+		, Load (Addr 10) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
@@ -593,20 +593,20 @@ prog = [
 		, Pop RegD
 		, Store RegA (Deref RegD)
 		, Jump (Rel (0-30))
-		, Load (Addr 39) RegA
+		, Load (Addr 9) RegA
 		, Pop RegB                      {-Get Result addr-}
 		, Pop RegC                      {-Get Return addr-}
 		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
 		, Branch RegD (Rel 2)
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
-		, Load (Addr 23) RegA           {-Function printInt-}
+		, Load (Addr 0) RegA            {-Function printInt-}
 		, Push RegA
 		, Const 0 RegA
 		, Pop RegB
 		, Compute GtE RegB RegA RegA    {-i GtE 0-}
 		, Push RegA
-		, Load (Addr 23) RegA
+		, Load (Addr 0) RegA
 		, Push RegA
 		, Const 10 RegA
 		, Pop RegB
@@ -615,17 +615,15 @@ prog = [
 		, Compute And RegB RegA RegA    {-(i>=0) And (i<10)-}
 		, Branch RegA (Rel 2)
 		, Jump (Rel 8)
-		, Load (Addr 23) RegA
+		, Load (Addr 0) RegA
 		, Out RegA
 		, Pop RegB                      {-Get Result addr-}
 		, Pop RegC                      {-Get Return addr-}
 		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
 		, Branch RegD (Rel 2)
 		, Jump (Ind RegC)               {-return-}
-		, Const 85 RegA                 {-Base addr for array res-}
-		, Store RegA (Addr 24)
-		, Store Zero (Addr 85)
-		, Store Zero (Addr 86)
+		, Const 87 RegA                 {-Base addr for array res-}
+		, Store RegA (Addr 1)
 		, Store Zero (Addr 87)
 		, Store Zero (Addr 88)
 		, Store Zero (Addr 89)
@@ -634,49 +632,51 @@ prog = [
 		, Store Zero (Addr 92)
 		, Store Zero (Addr 93)
 		, Store Zero (Addr 94)
-		, Const 25 RegD                 {-Declaration of neg(=i<0)-}
+		, Store Zero (Addr 95)
+		, Store Zero (Addr 96)
+		, Const 2 RegD                  {-Declaration of neg(=i<0)-}
 		, Push RegD
-		, Load (Addr 23) RegA
+		, Load (Addr 0) RegA
 		, Push RegA
 		, Const 0 RegA
 		, Pop RegB
 		, Compute Lt RegB RegA RegA     {-i Lt 0-}
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 25) RegA
+		, Load (Addr 2) RegA
 		, Branch RegA (Rel 2)
 		, Jump (Rel 9)
-		, Const 23 RegD                 {-i = -i-}
+		, Const 0 RegD                  {-i = -i-}
 		, Push RegD
-		, Load (Addr 23) RegA
+		, Load (Addr 0) RegA
 		, Push RegA
 		, Pop RegA
 		, Compute Sub Zero RegA RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 26 RegD                 {-Declaration of q(=0)-}
+		, Const 3 RegD                  {-Declaration of q(=0)-}
 		, Push RegD
 		, Const 0 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 27 RegD                 {-Declaration of r(=0)-}
+		, Const 4 RegD                  {-Declaration of r(=0)-}
 		, Push RegD
 		, Const 0 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 28 RegD                 {-Declaration of pos(=9)-}
+		, Const 5 RegD                  {-Declaration of pos(=9)-}
 		, Push RegD
 		, Const 9 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 29 RegD                 {-Declaration of first(=true)-}
+		, Const 6 RegD                  {-Declaration of first(=true)-}
 		, Push RegD
 		, Const 1 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 29) RegA
+		, Load (Addr 6) RegA
 		, Push RegA
-		, Load (Addr 23) RegA
+		, Load (Addr 0) RegA
 		, Push RegA
 		, Const 0 RegA
 		, Pop RegB
@@ -684,26 +684,26 @@ prog = [
 		, Pop RegB
 		, Compute Nor RegB RegA RegA    {-first Or (i!=0)-}
 		, Branch RegA (Rel 52)
-		, Const 29 RegD                 {-first = false-}
+		, Const 6 RegD                  {-first = false-}
 		, Push RegD
 		, Push Zero
 		, Pop RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 26 RegD                 {-q = i/10-}
+		, Const 3 RegD                  {-q = i/10-}
 		, Push RegD
-		, Load (Addr 23) RegA
+		, Load (Addr 0) RegA
 		, Push RegA
 		, Const 10 RegA
 		, Pop RegB
 		, Compute Div RegB RegA RegA    {-i Div 10-}
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 27 RegD                 {-r = i-(q*10)-}
+		, Const 4 RegD                  {-r = i-(q*10)-}
 		, Push RegD
-		, Load (Addr 23) RegA
+		, Load (Addr 0) RegA
 		, Push RegA
-		, Load (Addr 26) RegA
+		, Load (Addr 3) RegA
 		, Push RegA
 		, Const 10 RegA
 		, Pop RegB
@@ -712,35 +712,35 @@ prog = [
 		, Compute Sub RegB RegA RegA    {-i Sub (q*10)-}
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 24 RegD                 {-res[pos] = r-}
+		, Const 1 RegD                  {-res[pos] = r-}
 		, Load (Deref RegD) RegD        {-Get base addr for array res-}
-		, Load (Addr 28) RegA
+		, Load (Addr 5) RegA
 		, Compute Add RegA RegD RegD    {-Compute target addr-}
 		, Push RegD
-		, Load (Addr 27) RegA
+		, Load (Addr 4) RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 28 RegD                 {-pos = pos-1-}
+		, Const 5 RegD                  {-pos = pos-1-}
 		, Push RegD
-		, Load (Addr 28) RegA
+		, Load (Addr 5) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
 		, Compute Sub RegB RegA RegA    {-pos Sub 1-}
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 23 RegD                 {-i = q-}
+		, Const 0 RegD                  {-i = q-}
 		, Push RegD
-		, Load (Addr 26) RegA
+		, Load (Addr 3) RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
 		, Jump (Rel (0-60))
-		, Load (Addr 25) RegA
+		, Load (Addr 2) RegA
 		, Branch RegA (Rel 2)
 		, Jump (Rel 21)
-		, Const 24 RegD                 {-res[pos] = -3-}
+		, Const 1 RegD                  {-res[pos] = -3-}
 		, Load (Deref RegD) RegD        {-Get base addr for array res-}
-		, Load (Addr 28) RegA
+		, Load (Addr 5) RegA
 		, Compute Add RegA RegD RegD    {-Compute target addr-}
 		, Push RegD
 		, Const 3 RegA
@@ -749,34 +749,34 @@ prog = [
 		, Compute Sub Zero RegA RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 28 RegD                 {-pos = pos-1-}
+		, Const 5 RegD                  {-pos = pos-1-}
 		, Push RegD
-		, Load (Addr 28) RegA
+		, Load (Addr 5) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
 		, Compute Sub RegB RegA RegA    {-pos Sub 1-}
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 30 RegD                 {-Declaration of i(=pos); For loop declaration-}
+		, Const 7 RegD                  {-Declaration of i(=pos); For loop declaration-}
 		, Push RegD
-		, Load (Addr 28) RegA
+		, Load (Addr 5) RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 30) RegA           {-For loop condition-}
+		, Load (Addr 7) RegA            {-For loop condition-}
 		, Push RegA
 		, Const 10 RegA
 		, Pop RegB
 		, Compute GtE RegB RegA RegA    {-i Lt 10-}
 		, Branch RegA (Rel 16)          {-Break from for loop-}
-		, Load (Addr 24) RegE           {-For loop body-}
-		, Load (Addr 30) RegA
+		, Load (Addr 1) RegE            {-For loop body-}
+		, Load (Addr 7) RegA
 		, Compute Add RegE RegA RegD
 		, Load (Deref RegD) RegA
 		, Out RegA
-		, Const 30 RegD                 {-i = i+1; For loop assignment-}
+		, Const 7 RegD                  {-i = i+1; For loop assignment-}
 		, Push RegD
-		, Load (Addr 30) RegA
+		, Load (Addr 7) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
@@ -789,52 +789,52 @@ prog = [
 		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
 		, Branch RegD (Rel 2)
 		, Jump (Ind RegC)               {-return-}
-		, Load (Addr 45) RegA           {-Function printBool-}
+		, Load (Addr 59) RegA           {-Function printBool-}
 		, Branch RegA (Rel 2)
 		, Jump (Rel 13)
 		, Const 36 RegA
-		, Store RegA (Addr 95)
-		, Const 34 RegA
-		, Store RegA (Addr 96)
-		, Const 37 RegA
 		, Store RegA (Addr 97)
-		, Const 21 RegA
+		, Const 34 RegA
 		, Store RegA (Addr 98)
-		, Const 95 RegA                 {-Base addr for (anon) array 1399499405-}
-		, Store RegA (Addr 46)
+		, Const 37 RegA
+		, Store RegA (Addr 99)
+		, Const 21 RegA
+		, Store RegA (Addr 100)
+		, Const 97 RegA                 {-Base addr for (anon) array 232042179-}
+		, Store RegA (Addr 60)
 		, Out RegA
 		, Jump (Rel 14)
 		, Const 22 RegA
-		, Store RegA (Addr 99)
-		, Const 17 RegA
-		, Store RegA (Addr 100)
-		, Const 28 RegA
 		, Store RegA (Addr 101)
-		, Const 35 RegA
+		, Const 17 RegA
 		, Store RegA (Addr 102)
-		, Const 21 RegA
+		, Const 28 RegA
 		, Store RegA (Addr 103)
-		, Const 99 RegA                 {-Base addr for (anon) array 1860513229-}
-		, Store RegA (Addr 47)
+		, Const 35 RegA
+		, Store RegA (Addr 104)
+		, Const 21 RegA
+		, Store RegA (Addr 105)
+		, Const 101 RegA                {-Base addr for (anon) array 993208674-}
+		, Store RegA (Addr 61)
 		, Out RegA
 		, Pop RegB                      {-Get Result addr-}
 		, Pop RegC                      {-Get Return addr-}
 		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
 		, Branch RegD (Rel 2)
 		, Jump (Ind RegC)               {-return-}
-		, Load (Addr 60) RegA           {-Function boolToStr-}
+		, Load (Addr 20) RegA           {-Function boolToStr-}
 		, Branch RegA (Rel 2)
 		, Jump (Rel 18)
 		, Const 36 RegA
-		, Store RegA (Addr 104)
-		, Const 34 RegA
-		, Store RegA (Addr 105)
-		, Const 37 RegA
 		, Store RegA (Addr 106)
-		, Const 21 RegA
+		, Const 34 RegA
 		, Store RegA (Addr 107)
-		, Const 104 RegA                {-Base addr for (anon) array 1250391581-}
-		, Store RegA (Addr 61)
+		, Const 37 RegA
+		, Store RegA (Addr 108)
+		, Const 21 RegA
+		, Store RegA (Addr 109)
+		, Const 106 RegA                {-Base addr for (anon) array 154146418-}
+		, Store RegA (Addr 21)
 		, Pop RegB                      {-Get Result addr-}
 		, Pop RegC                      {-Get Return addr-}
 		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
@@ -843,24 +843,34 @@ prog = [
 		, Jump (Ind RegC)               {-return-}
 		, Jump (Rel 19)
 		, Const 22 RegA
-		, Store RegA (Addr 108)
-		, Const 17 RegA
-		, Store RegA (Addr 109)
-		, Const 28 RegA
 		, Store RegA (Addr 110)
-		, Const 35 RegA
+		, Const 17 RegA
 		, Store RegA (Addr 111)
-		, Const 21 RegA
+		, Const 28 RegA
 		, Store RegA (Addr 112)
-		, Const 108 RegA                {-Base addr for (anon) array 110431793-}
-		, Store RegA (Addr 62)
+		, Const 35 RegA
+		, Store RegA (Addr 113)
+		, Const 21 RegA
+		, Store RegA (Addr 114)
+		, Const 110 RegA                {-Base addr for (anon) array 1664093259-}
+		, Store RegA (Addr 22)
 		, Pop RegB                      {-Get Result addr-}
 		, Pop RegC                      {-Get Return addr-}
 		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
 		, Branch RegD (Rel 2)
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
-		, Load (Addr 63) RegA           {-Function boolToInt-}
+		, Const 0 RegA
+		, Store RegA (Addr 115)
+		, Const 115 RegA                {-Base addr for (anon) array 1719727892-}
+		, Store RegA (Addr 23)
+		, Pop RegB                      {-Get Result addr-}
+		, Pop RegC                      {-Get Return addr-}
+		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
+		, Branch RegD (Rel 2)
+		, Store RegA (Deref RegB)       {-Store Result-}
+		, Jump (Ind RegC)               {-return-}
+		, Load (Addr 12) RegA           {-Function boolToInt-}
 		, Branch RegA (Rel 2)
 		, Jump (Rel 8)
 		, Const 1 RegA
@@ -877,7 +887,7 @@ prog = [
 		, Branch RegD (Rel 2)
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
-		, Load (Addr 51) RegA           {-Function intToBool-}
+		, Load (Addr 24) RegA           {-Function intToBool-}
 		, Push RegA
 		, Const 0 RegA
 		, Pop RegB
@@ -899,24 +909,24 @@ prog = [
 		, Branch RegD (Rel 2)
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
-		, Const 37 RegD                 {-Declaration of i(=0); For loop declaration; Function arraysEqual-}
+		, Const 33 RegD                 {-Declaration of i(=0); For loop declaration; Function arraysEqual-}
 		, Push RegD
 		, Const 0 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 37) RegA           {-For loop condition-}
+		, Load (Addr 33) RegA           {-For loop condition-}
 		, Push RegA
-		, Load (Addr 36) RegA
+		, Load (Addr 32) RegA
 		, Pop RegB
 		, Compute GtE RegB RegA RegA    {-i Lt len-}
 		, Branch RegA (Rel 32)          {-Break from for loop-}
-		, Load (Addr 34) RegE           {-For loop body-}
-		, Load (Addr 37) RegA
+		, Load (Addr 30) RegE           {-For loop body-}
+		, Load (Addr 33) RegA
 		, Compute Add RegE RegA RegD
 		, Load (Deref RegD) RegA
 		, Push RegA
-		, Load (Addr 35) RegE
-		, Load (Addr 37) RegA
+		, Load (Addr 31) RegE
+		, Load (Addr 33) RegA
 		, Compute Add RegE RegA RegD
 		, Load (Deref RegD) RegA
 		, Pop RegB
@@ -931,9 +941,9 @@ prog = [
 		, Branch RegD (Rel 2)
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
-		, Const 37 RegD                 {-i = i+1; For loop assignment-}
+		, Const 33 RegD                 {-i = i+1; For loop assignment-}
 		, Push RegD
-		, Load (Addr 37) RegA
+		, Load (Addr 33) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
@@ -948,24 +958,24 @@ prog = [
 		, Branch RegD (Rel 2)
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
-		, Const 17 RegD                 {-Declaration of i(=0); For loop declaration; Function arraysEqual-}
+		, Const 16 RegD                 {-Declaration of i(=0); For loop declaration; Function arraysEqual-}
 		, Push RegD
 		, Const 0 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 17) RegA           {-For loop condition-}
+		, Load (Addr 16) RegA           {-For loop condition-}
 		, Push RegA
-		, Load (Addr 16) RegA
+		, Load (Addr 15) RegA
 		, Pop RegB
 		, Compute GtE RegB RegA RegA    {-i Lt len-}
 		, Branch RegA (Rel 32)          {-Break from for loop-}
-		, Load (Addr 14) RegE           {-For loop body-}
-		, Load (Addr 17) RegA
+		, Load (Addr 13) RegE           {-For loop body-}
+		, Load (Addr 16) RegA
 		, Compute Add RegE RegA RegD
 		, Load (Deref RegD) RegA
 		, Push RegA
-		, Load (Addr 15) RegE
-		, Load (Addr 17) RegA
+		, Load (Addr 14) RegE
+		, Load (Addr 16) RegA
 		, Compute Add RegE RegA RegD
 		, Load (Deref RegD) RegA
 		, Pop RegB
@@ -980,9 +990,9 @@ prog = [
 		, Branch RegD (Rel 2)
 		, Store RegA (Deref RegB)       {-Store Result-}
 		, Jump (Ind RegC)               {-return-}
-		, Const 17 RegD                 {-i = i+1; For loop assignment-}
+		, Const 16 RegD                 {-i = i+1; For loop assignment-}
 		, Push RegD
-		, Load (Addr 17) RegA
+		, Load (Addr 16) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
@@ -999,14 +1009,14 @@ prog = [
 		, Jump (Ind RegC)               {-return-}
 		, Const 43 RegA                 {-Function printArray-}
 		, Out RegA
-		, Const 59 RegD                 {-Declaration of i(=0); For loop declaration-}
+		, Const 64 RegD                 {-Declaration of i(=0); For loop declaration-}
 		, Push RegD
 		, Const 0 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 59) RegA           {-For loop condition-}
+		, Load (Addr 64) RegA           {-For loop condition-}
 		, Push RegA
-		, Load (Addr 58) RegA
+		, Load (Addr 63) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
@@ -1014,14 +1024,14 @@ prog = [
 		, Pop RegB
 		, Compute GtE RegB RegA RegA    {-i Lt (len-1)-}
 		, Branch RegA (Rel 31)          {-Break from for loop-}
-		, Load (Addr 57) RegE           {-For loop body-}
-		, Load (Addr 59) RegA
+		, Load (Addr 62) RegE           {-For loop body-}
+		, Load (Addr 64) RegA
 		, Compute Add RegE RegA RegD
 		, Load (Deref RegD) RegA
-		, Store RegA (Addr 23)
-		, Const 1019 RegA               {-Return addr-}
+		, Store RegA (Addr 0)
+		, Const 1029 RegA               {-Return addr-}
 		, Push RegA
-		, Const 60 RegA                 {-Result addr-}
+		, Const 65 RegA                 {-Result addr-}
 		, Push RegA
 		, Jump (Abs 595)                {-Jump to function printInt-}
 		, Const 4 RegA
@@ -1034,9 +1044,9 @@ prog = [
 		, Pop RegA
 		, Compute Sub Zero RegA RegA
 		, Out RegA
-		, Const 59 RegD                 {-i = i+1; For loop assignment-}
+		, Const 64 RegD                 {-i = i+1; For loop assignment-}
 		, Push RegD
-		, Load (Addr 59) RegA
+		, Load (Addr 64) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
@@ -1044,8 +1054,8 @@ prog = [
 		, Pop RegD
 		, Store RegA (Deref RegD)
 		, Jump (Rel (0-39))             {-Back to for loop-}
-		, Load (Addr 57) RegE
-		, Load (Addr 58) RegA
+		, Load (Addr 62) RegE
+		, Load (Addr 63) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
@@ -1062,14 +1072,14 @@ prog = [
 		, Jump (Ind RegC)               {-return-}
 		, Const 43 RegA                 {-Function printArray-}
 		, Out RegA
-		, Const 13 RegD                 {-Declaration of i(=0); For loop declaration-}
+		, Const 48 RegD                 {-Declaration of i(=0); For loop declaration-}
 		, Push RegD
 		, Const 0 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 13) RegA           {-For loop condition-}
+		, Load (Addr 48) RegA           {-For loop condition-}
 		, Push RegA
-		, Load (Addr 12) RegA
+		, Load (Addr 47) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
@@ -1077,14 +1087,14 @@ prog = [
 		, Pop RegB
 		, Compute GtE RegB RegA RegA    {-i Lt (len-1)-}
 		, Branch RegA (Rel 31)          {-Break from for loop-}
-		, Load (Addr 11) RegE           {-For loop body-}
-		, Load (Addr 13) RegA
+		, Load (Addr 46) RegE           {-For loop body-}
+		, Load (Addr 48) RegA
 		, Compute Add RegE RegA RegD
 		, Load (Deref RegD) RegA
-		, Store RegA (Addr 45)
-		, Const 1082 RegA               {-Return addr-}
+		, Store RegA (Addr 59)
+		, Const 1092 RegA               {-Return addr-}
 		, Push RegA
-		, Const 14 RegA                 {-Result addr-}
+		, Const 49 RegA                 {-Result addr-}
 		, Push RegA
 		, Jump (Abs 784)                {-Jump to function printBool-}
 		, Const 4 RegA
@@ -1097,9 +1107,9 @@ prog = [
 		, Pop RegA
 		, Compute Sub Zero RegA RegA
 		, Out RegA
-		, Const 13 RegD                 {-i = i+1; For loop assignment-}
+		, Const 48 RegD                 {-i = i+1; For loop assignment-}
 		, Push RegD
-		, Load (Addr 13) RegA
+		, Load (Addr 48) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
@@ -1107,8 +1117,8 @@ prog = [
 		, Pop RegD
 		, Store RegA (Deref RegD)
 		, Jump (Rel (0-39))             {-Back to for loop-}
-		, Load (Addr 11) RegE
-		, Load (Addr 12) RegA
+		, Load (Addr 46) RegE
+		, Load (Addr 47) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
@@ -1123,131 +1133,65 @@ prog = [
 		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
 		, Branch RegD (Rel 2)
 		, Jump (Ind RegC)               {-return-}
-		, Const 20 RegD                 {-Declaration of i(=0); Function flipArray-}
+		, Const 51 RegD                 {-Declaration of i(=0); Function flipArray-}
 		, Push RegD
 		, Const 0 RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 21 RegD                 {-Declaration of j(=len-1)-}
+		, Const 52 RegD                 {-Declaration of j(=len-1)-}
 		, Push RegD
-		, Load (Addr 19) RegA
+		, Load (Addr 50) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
 		, Compute Sub RegB RegA RegA    {-len Sub 1-}
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 20) RegA
+		, Load (Addr 51) RegA
 		, Push RegA
-		, Load (Addr 21) RegA
+		, Load (Addr 52) RegA
 		, Pop RegB
 		, Compute GtE RegB RegA RegA    {-i Lt j-}
 		, Branch RegA (Rel 47)
-		, Const 22 RegD                 {-Declaration of t(=arr[j])-}
+		, Const 53 RegD                 {-Declaration of t(=arr[j])-}
 		, Push RegD
-		, Load (Addr 18) RegE
-		, Load (Addr 21) RegA
+		, Load (Addr 49) RegE
+		, Load (Addr 52) RegA
 		, Compute Add RegE RegA RegD
 		, Load (Deref RegD) RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 18 RegD                 {-arr[j] = arr[i]-}
+		, Const 49 RegD                 {-arr[j] = arr[i]-}
 		, Load (Deref RegD) RegD        {-Get base addr for array arr-}
-		, Load (Addr 21) RegA
+		, Load (Addr 52) RegA
 		, Compute Add RegA RegD RegD    {-Compute target addr-}
 		, Push RegD
-		, Load (Addr 18) RegE
-		, Load (Addr 20) RegA
+		, Load (Addr 49) RegE
+		, Load (Addr 51) RegA
 		, Compute Add RegE RegA RegD
 		, Load (Deref RegD) RegA
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 18 RegD                 {-arr[i] = t-}
+		, Const 49 RegD                 {-arr[i] = t-}
 		, Load (Deref RegD) RegD        {-Get base addr for array arr-}
-		, Load (Addr 20) RegA
+		, Load (Addr 51) RegA
 		, Compute Add RegA RegD RegD    {-Compute target addr-}
-		, Push RegD
-		, Load (Addr 22) RegA
-		, Pop RegD
-		, Store RegA (Deref RegD)
-		, Const 20 RegD                 {-i = i+1-}
-		, Push RegD
-		, Load (Addr 20) RegA
-		, Push RegA
-		, Const 1 RegA
-		, Pop RegB
-		, Compute Add RegB RegA RegA    {-i Add 1-}
-		, Pop RegD
-		, Store RegA (Deref RegD)
-		, Const 21 RegD                 {-j = j-1-}
-		, Push RegD
-		, Load (Addr 21) RegA
-		, Push RegA
-		, Const 1 RegA
-		, Pop RegB
-		, Compute Sub RegB RegA RegA    {-j Sub 1-}
-		, Pop RegD
-		, Store RegA (Deref RegD)
-		, Jump (Rel (0-51))
-		, Const 54 RegD                 {-Declaration of i(=0); Function flipArray-}
-		, Push RegD
-		, Const 0 RegA
-		, Pop RegD
-		, Store RegA (Deref RegD)
-		, Const 55 RegD                 {-Declaration of j(=len-1)-}
 		, Push RegD
 		, Load (Addr 53) RegA
-		, Push RegA
-		, Const 1 RegA
-		, Pop RegB
-		, Compute Sub RegB RegA RegA    {-len Sub 1-}
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Load (Addr 54) RegA
-		, Push RegA
-		, Load (Addr 55) RegA
-		, Pop RegB
-		, Compute GtE RegB RegA RegA    {-i Lt j-}
-		, Branch RegA (Rel 47)
-		, Const 56 RegD                 {-Declaration of t(=arr[j])-}
+		, Const 51 RegD                 {-i = i+1-}
 		, Push RegD
-		, Load (Addr 52) RegE
-		, Load (Addr 55) RegA
-		, Compute Add RegE RegA RegD
-		, Load (Deref RegD) RegA
-		, Pop RegD
-		, Store RegA (Deref RegD)
-		, Const 52 RegD                 {-arr[j] = arr[i]-}
-		, Load (Deref RegD) RegD        {-Get base addr for array arr-}
-		, Load (Addr 55) RegA
-		, Compute Add RegA RegD RegD    {-Compute target addr-}
-		, Push RegD
-		, Load (Addr 52) RegE
-		, Load (Addr 54) RegA
-		, Compute Add RegE RegA RegD
-		, Load (Deref RegD) RegA
-		, Pop RegD
-		, Store RegA (Deref RegD)
-		, Const 52 RegD                 {-arr[i] = t-}
-		, Load (Deref RegD) RegD        {-Get base addr for array arr-}
-		, Load (Addr 54) RegA
-		, Compute Add RegA RegD RegD    {-Compute target addr-}
-		, Push RegD
-		, Load (Addr 56) RegA
-		, Pop RegD
-		, Store RegA (Deref RegD)
-		, Const 54 RegD                 {-i = i+1-}
-		, Push RegD
-		, Load (Addr 54) RegA
+		, Load (Addr 51) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
 		, Compute Add RegB RegA RegA    {-i Add 1-}
 		, Pop RegD
 		, Store RegA (Deref RegD)
-		, Const 55 RegD                 {-j = j-1-}
+		, Const 52 RegD                 {-j = j-1-}
 		, Push RegD
-		, Load (Addr 55) RegA
+		, Load (Addr 52) RegA
 		, Push RegA
 		, Const 1 RegA
 		, Pop RegB
@@ -1255,56 +1199,82 @@ prog = [
 		, Pop RegD
 		, Store RegA (Deref RegD)
 		, Jump (Rel (0-51))
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
-		, Nop 
+		, Pop RegB                      {-Get Result addr-}
+		, Pop RegC                      {-Get Return addr-}
+		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
+		, Branch RegD (Rel 2)
+		, Jump (Ind RegC)               {-return-}
+		, Const 56 RegD                 {-Declaration of i(=0); Function flipArray-}
+		, Push RegD
+		, Const 0 RegA
+		, Pop RegD
+		, Store RegA (Deref RegD)
+		, Const 57 RegD                 {-Declaration of j(=len-1)-}
+		, Push RegD
+		, Load (Addr 55) RegA
+		, Push RegA
+		, Const 1 RegA
+		, Pop RegB
+		, Compute Sub RegB RegA RegA    {-len Sub 1-}
+		, Pop RegD
+		, Store RegA (Deref RegD)
+		, Load (Addr 56) RegA
+		, Push RegA
+		, Load (Addr 57) RegA
+		, Pop RegB
+		, Compute GtE RegB RegA RegA    {-i Lt j-}
+		, Branch RegA (Rel 47)
+		, Const 58 RegD                 {-Declaration of t(=arr[j])-}
+		, Push RegD
+		, Load (Addr 54) RegE
+		, Load (Addr 57) RegA
+		, Compute Add RegE RegA RegD
+		, Load (Deref RegD) RegA
+		, Pop RegD
+		, Store RegA (Deref RegD)
+		, Const 54 RegD                 {-arr[j] = arr[i]-}
+		, Load (Deref RegD) RegD        {-Get base addr for array arr-}
+		, Load (Addr 57) RegA
+		, Compute Add RegA RegD RegD    {-Compute target addr-}
+		, Push RegD
+		, Load (Addr 54) RegE
+		, Load (Addr 56) RegA
+		, Compute Add RegE RegA RegD
+		, Load (Deref RegD) RegA
+		, Pop RegD
+		, Store RegA (Deref RegD)
+		, Const 54 RegD                 {-arr[i] = t-}
+		, Load (Deref RegD) RegD        {-Get base addr for array arr-}
+		, Load (Addr 56) RegA
+		, Compute Add RegA RegD RegD    {-Compute target addr-}
+		, Push RegD
+		, Load (Addr 58) RegA
+		, Pop RegD
+		, Store RegA (Deref RegD)
+		, Const 56 RegD                 {-i = i+1-}
+		, Push RegD
+		, Load (Addr 56) RegA
+		, Push RegA
+		, Const 1 RegA
+		, Pop RegB
+		, Compute Add RegB RegA RegA    {-i Add 1-}
+		, Pop RegD
+		, Store RegA (Deref RegD)
+		, Const 57 RegD                 {-j = j-1-}
+		, Push RegD
+		, Load (Addr 57) RegA
+		, Push RegA
+		, Const 1 RegA
+		, Pop RegB
+		, Compute Sub RegB RegA RegA    {-j Sub 1-}
+		, Pop RegD
+		, Store RegA (Deref RegD)
+		, Jump (Rel (0-51))
+		, Pop RegB                      {-Get Result addr-}
+		, Pop RegC                      {-Get Return addr-}
+		, Compute Lt RegB Zero RegD     {-Is Result addr valid?-}
+		, Branch RegD (Rel 2)
+		, Jump (Ind RegC)               {-return-}
 		, EndProg 
 		, EndProg
        ]

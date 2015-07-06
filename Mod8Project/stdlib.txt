@@ -87,6 +87,7 @@ def int[] boolToStr(bool b) {
 	} else {
 		return [22,17,28,35,21];
 	}
+	return [0];
 }
 
 def int boolToInt(bool b) {
@@ -155,6 +156,7 @@ def void flipArray(int[] arr, int len) {
 		i = i + 1;
 		j = j - 1;
 	}
+	return;
 }
 
 def void flipArray(bool[] arr, int len) {
@@ -167,4 +169,5 @@ def void flipArray(bool[] arr, int len) {
 		i = i + 1;
 		j = j - 1;
 	}
+	return;
 }

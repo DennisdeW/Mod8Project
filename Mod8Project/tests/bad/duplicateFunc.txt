@@ -1,0 +1,14 @@
+program duplicateFunc;
+
+def int main() {
+	doOp();
+	return 0;
+}
+
+def void doOp() {
+	return;
+}
+
+def void doOp() {
+	return;
+}

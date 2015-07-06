@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 import parsing.BaseGrammarLexer;
 import parsing.BaseGrammarParser;
@@ -54,23 +56,32 @@ public class TestRunner {
 					new File("stdlib.txt")));
 			String std = stdreader.lines().collect(Collectors.joining("\n"));
 
-			ctx = new BaseGrammarParser(new CommonTokenStream(
+			BaseGrammarParser parser = new BaseGrammarParser(new CommonTokenStream(
 					new BaseGrammarLexer(new ANTLRInputStream(base + "\n\n\n"
-							+ std)))).program();
+							+ std))));
+			parser.setErrorHandler(new BailErrorStrategy());
+			ctx = parser.program();
 			reader.close();
 			stdreader.close();
 		} catch (RecognitionException | IOException e) {
 			e.printStackTrace();
 			fail("An exception occured while scanning/parsing.");
 			return;
-		}
-		CheckResult cres = new Checker().check(ctx);
-		if (!cres.getErrors().isEmpty()) {
-			System.out.flush();
-			System.err.println("Checker has reported errors:");
-			for (String error : cres.getErrors())
-				System.err.println(error);
+		} catch (ParseCancellationException e) {
 			System.err.flush();
+			System.out.flush();
+			System.out.println("ANTLR reported errors, test failed.");
+			System.out.flush();
+			if (shouldSucceed)
+				failed = true;
+			return;
+		}
+		Checker checker = new Checker();
+		CheckResult cres = checker.check(ctx);
+		if (checker.hasErrors() || checker.isDirty()) {
+			System.out.println("Checker has reported errors:");
+			for (String error : checker.getErrors())
+				System.out.println(error);
 			if (shouldSucceed)
 				failed = true;
 		} else {
